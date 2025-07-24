@@ -6,7 +6,7 @@
 
 # Configuration
 CONFIG_DIR="./config"
-CONFIG_FILE="$CONFIG_DIR/ecosystem.config.js"
+
 
 # Display help information
 function show_help() {
@@ -56,6 +56,8 @@ APP_NAME_UPPER=$(echo "$APP_NAME_LOWER" | tr '[:lower:]' '[:upper:]')
 
 # Ensure config directory exists
 ensure_config_dir
+
+CONFIG_FILE="$CONFIG_DIR/$APP_NAME_LOWER.config.js"
 
 # Generate configuration file
 cat > "$CONFIG_FILE" <<EOF
@@ -107,5 +109,5 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     fi
 else
     echo "You can start later with:"
-    echo "  pm2 start $(realpath "$CONFIG_FILE")"
+    echo "  pm2 start $CONFIG_FILE"
 fi
