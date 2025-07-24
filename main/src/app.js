@@ -5,6 +5,10 @@ const { createServer } = require('http');
 const socket = require('./utils/socket');
 const userManager = require('./controllers/user_manager');
 const httpAPI = require('./utils/http_api');
+const fs = require("fs");
+const https = require("https");
+const http = require("http");
+const tools = require('utils/tools')
 
 const app = express();
 const port = 80;
@@ -23,7 +27,35 @@ app.get('/', (req, res) => {
 });
 
 // 创建 HTTP 服务器
-const server = createServer(app);
+let server
+
+let file_key = './privkey.pem';
+let file_cert = './fullchain.pem';
+
+if (tools.checkKeyFileSync(file_key))
+{
+    logger.info(file_key);
+    logger.info(file_cert);
+
+    // 配置 HTTPS 选项
+    const httpsOptions = {
+        key: fs.readFileSync(file_key),
+        cert: fs.readFileSync(file_cert),
+    };
+    server = https.createServer(httpsOptions, app);
+
+    app.use((req, res, next) => {
+        if (!req.secure) {
+            // 自动重定向 HTTP 到 HTTPS
+            return res.redirect(`https://${req.headers.host}${req.url}`);
+        }
+        next();
+    });
+}
+else
+{
+    server = http.createServer(app);
+}
 
 httpAPI.app = app;
 // 初始化 Socket.IO
