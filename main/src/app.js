@@ -34,8 +34,8 @@ let file_cert = '/etc/letsencrypt/live/v.xiaoxiong.pt/fullchain.pem';
 
 if (tools.checkKeyFileSync(file_key))
 {
-    logger.info(file_key);
-    logger.info(file_cert);
+    console.log(file_key);
+    console.log(file_cert);
 
     // 配置 HTTPS 选项
     const httpsOptions = {
