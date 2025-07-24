@@ -51,8 +51,8 @@ if (tools.checkKeyFileSync(file_key))
         }
         next();
     });
-	
-	port = 443;
+
+    port = 443;
 }
 else
 {

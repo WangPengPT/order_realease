@@ -4,7 +4,18 @@ class HttpAPI {
     app = undefined;
 
     get(cmd,fn) {
-        this.app.get( "/api/" + cmd, (req, res) => {
+
+        if (cmd.startsWith('/'))
+        {
+            cmd =  "/api" + cmd;
+        }
+        else {
+            cmd =  "/api/" + cmd;
+        }
+        console.log("get: ", cmd );
+
+        this.app.get(cmd, (req, res) => {
+            console.log("do get: ", cmd );
 
             const ret = fn(req.query)
             res.json(ret);
