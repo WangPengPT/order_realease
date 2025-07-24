@@ -11,7 +11,7 @@ const http = require("http");
 const tools = require('./utils/tools')
 
 const app = express();
-const port = 80;
+let port = 80;
 
 // 中间件
 app.use(cors());
@@ -23,7 +23,7 @@ app.use(express.static('public'));
 
 // 简单路由
 app.get('/', (req, res) => {
-    res.send('Express + Socket.IO + LevelDB Server');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // 创建 HTTP 服务器
@@ -51,6 +51,8 @@ if (tools.checkKeyFileSync(file_key))
         }
         next();
     });
+	
+	port = 443;
 }
 else
 {
