@@ -1,0 +1,7 @@
+.idea
+deploy.log
+Test
+logs/*
+node_modules
+db
+
