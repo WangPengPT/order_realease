@@ -59,13 +59,20 @@ ensure_config_dir
 
 CONFIG_FILE="$CONFIG_DIR/$APP_NAME_LOWER.config.js"
 
+
+script_dir = $(realpath "dist")
+script_file = script_dir + "/server.js"
+
+echo "script_dir: $script_dir"
+echo "script_file: $script_file"
+
 # Generate configuration file
 cat > "$CONFIG_FILE" <<EOF
 module.exports = {
   apps: [{
     name: "$APP_NAME_UPPER",
-    script: "./server.js",
-    cwd: "../dist",
+    script: "$script_file",
+    cwd: "$script_dir",
     instances: 1,
     autorestart: true,
     watch: false,
