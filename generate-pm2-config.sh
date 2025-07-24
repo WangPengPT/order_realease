@@ -60,8 +60,8 @@ ensure_config_dir
 CONFIG_FILE="$CONFIG_DIR/$APP_NAME_LOWER.config.js"
 
 
-SCRIPT_DIR = $(realpath "dist")
-SCRIPT_FILE = script_dir + "/server.js"
+SCRIPT_DIR=$(realpath "dist")
+SCRIPT_FILE="$SCRIPT_DIR/server.js"
 
 echo "script_dir: $SCRIPT_DIR"
 echo "script_file: $SCRIPT_FILE"
