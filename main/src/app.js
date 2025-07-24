@@ -29,8 +29,8 @@ app.get('/', (req, res) => {
 // 创建 HTTP 服务器
 let server
 
-let file_key = './privkey.pem';
-let file_cert = './fullchain.pem';
+let file_key = '/etc/letsencrypt/live/v.xiaoxiong.pt/privkey.pem';
+let file_cert = '/etc/letsencrypt/live/v.xiaoxiong.pt/fullchain.pem';
 
 if (tools.checkKeyFileSync(file_key))
 {
