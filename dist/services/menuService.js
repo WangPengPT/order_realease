@@ -79,12 +79,11 @@ function loadMenu() {
 
 }
 
-function getDishCategory(id)
+function getDishCategory(item)
 {
-  if (!id) return  "Caixa Aleatória";
+  if (item.category )return  item.category ;
 
-  if (id == 2) return "My BOX";
-  if (id == 1) return "Pato assado";
+  const id = item.id;
 
   let tag = appState.dishTags[id];
   if (tag && tag != "") return tag;

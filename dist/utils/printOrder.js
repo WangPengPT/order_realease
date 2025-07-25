@@ -16,7 +16,7 @@ function print_order(order) {
         let hasData = false;
         for (let i=0; i<order.items.length; i++) {
             let item = order.items[i];
-            let type  = menuService.getDishCategory(item.dishid);
+            let type  = menuService.getDishCategory(item);
             if (printer.data.menu.includes(type))
             {
                 hasData = true;
@@ -92,7 +92,7 @@ function print_orde_to_io(printer,order,every_one)
     for (let i=0; i<order.items.length; i++)
     {
         let item = order.items[i];
-        let type =menuService.getDishCategory(item.dishid);
+        let type =menuService.getDishCategory(item);
 
         if (!printer.data.menu.includes(type)) continue;
 
