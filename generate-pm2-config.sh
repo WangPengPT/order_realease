@@ -85,7 +85,7 @@ module.exports = {
       QR_ADDR: "https://v.xiaoxiong.pt:$PORT/client.html?table=",
       TABLE_NUMBER: [[1,50]],
       SAVE_ADDR: "save/$APP_NAME_LOWER",
-	  ENABLE_ROAST_DUCK: "false",
+      ENABLE_ROAST_DUCK: "false",
     }
   }]
 }
