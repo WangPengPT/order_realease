@@ -38,9 +38,21 @@ function init(io) {
 
     process.env.QR_ADDR = process.env.QR_ADDR || `http://localhost:5173?table=`;
 
+    let ENABLE_ROAST_DUCK = false
+
+    if (process.env.ENABLE_ROAST_DUCK == undefined) {
+      ENABLE_ROAST_DUCK = true;
+    }
+
+    if (process.env.ENABLE_ROAST_DUCK == "true") {
+      ENABLE_ROAST_DUCK = true;
+    }
+
+    console.log(process.env.ENABLE_ROAST_DUCK, ENABLE_ROAST_DUCK)
+
     io.emit("env", {
       QR_ADDR: process.env.QR_ADDR,
-      ENABLE_ROAST_DUCK: process.env.ENABLE_ROAST_DUCK,
+      ENABLE_ROAST_DUCK: ENABLE_ROAST_DUCK,
     });
 
     const tableSocket = new TableSocket(io)
