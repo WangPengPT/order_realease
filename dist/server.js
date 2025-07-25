@@ -142,7 +142,7 @@ function runCleanInterval() {
     if (now.getHours() == 1)
     {
       if ( needClean ) {
-        appState.clearAll();
+        //appState.clearAll();
       }
       needClean = false;
     }
