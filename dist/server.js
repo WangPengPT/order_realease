@@ -104,7 +104,7 @@ async function main() {
   socketService.init(io);
 
   const PORT = process.env.PORT || 8080;
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     logger.info(`🟢 服务器已启动，监听端口 ${PORT}`);
   });
 

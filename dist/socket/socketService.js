@@ -34,8 +34,12 @@ function init(io) {
   appState.socket_io = io;
 
   io.on("connection", (socket) => {
-    logger.info(`客户端连接: ${socket.id}`)
 
+    const ip = socket.handshake.address;
+
+    logger.info(`客户端连接: ${socket.id}`);
+    logger.info(`来源 IP: ${ip}`)
+    
     process.env.QR_ADDR = process.env.QR_ADDR || `http://localhost:5173?table=`;
 
     let ENABLE_ROAST_DUCK = false
@@ -47,8 +51,6 @@ function init(io) {
     if (process.env.ENABLE_ROAST_DUCK == "true") {
       ENABLE_ROAST_DUCK = true;
     }
-
-    console.log(process.env.ENABLE_ROAST_DUCK, ENABLE_ROAST_DUCK)
 
     io.emit("env", {
       QR_ADDR: process.env.QR_ADDR,
