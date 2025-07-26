@@ -52,6 +52,8 @@ validate_arguments "$@"
 
 PORT=$1
 APP_NAME_LOWER=$2
+AUTO_RUN="${3:-false}"
+
 APP_NAME_UPPER=$(echo "$APP_NAME_LOWER" | tr '[:lower:]' '[:upper:]')
 
 # Ensure config directory exists
@@ -99,9 +101,16 @@ echo "  - Port: $PORT"
 echo "  - Resource Path: save/$APP_NAME_LOWER"
 
 # PM2 interaction
-read -p "Start application with PM2 now? (y/n) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+if ! $AUTO_RUN; then
+	read -p "Start application with PM2 now? (y/n) " -n 1 -r
+	echo
+	
+	if [[ $REPLY =~ ^[Yy]$ ]]; then
+		AUTO_RUN=true
+	fi
+fi
+
+if $AUTO_RUN; then
     if ! command -v pm2 &> /dev/null; then
         echo "Error: PM2 not found. Install with: npm install -g pm2"
         exit 1
