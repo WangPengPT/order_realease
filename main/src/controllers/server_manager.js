@@ -2,8 +2,8 @@
 const db = require('../utils/db');
 const socket = require('../utils/socket');
 const { execFile } = require('child_process');
-
-
+const path = require('path');
+const fs = require('fs');
 
 
 class ServerManager {
@@ -39,15 +39,19 @@ class ServerManager {
         db.setValue("server_max_id", this.maxPort);
 
         try {
-            execFile(
-                'generate-pm2-config.sh',
-                [param1, name, 'true'],
-                { cwd: '..' },
-                (error, stdout, stderr) => {
-                    if (error) console.error(`执行错误: ${error}`);
-                    else console.log(`输出: ${stdout}`);
-                }
-            );
+
+            const callback = (error, stdout, stderr) => {
+                if (error) console.error(`执行错误: ${error}`);
+                else console.log(`输出: ${stdout}`);
+            };
+
+            const scriptPath = path.resolve(process.cwd(), '../generate-pm2-config.sh');
+            if (!fs.existsSync(scriptPath)) {
+                throw new Error(`can't find: ${scriptPath}`);
+            }
+
+            execFile(scriptPath, [param1, name, 'true'], { cwd: path.dirname(scriptPath) }, callback);
+
         } catch (e) {
             console.log(e)
         }
