@@ -119,6 +119,41 @@ function getMenuAndTab() {
     }
 }
 
+function updateDishRates(value){
+    try{
+        const findDish = appState.menu.find(item => item.id === value.dishId)
+        if (findDish) {
+            if(findDish.rates){ findDish.rates += 1 }
+            else{ findDish.rates = 1 }
+
+            if(findDish.likes && value.like === 1){ findDish.likes += 1 }
+            else{ findDish.likes = 1 }
+
+            if(findDish.monthRates){
+                findDish.monthRates.rates += 1
+                if(value.like === 1){
+                    findDish.monthRates.likes += 1
+                }
+            }else{
+                if(value.like === 1){
+                    findDish.monthRates = { likes: 1, rates: 1 }
+                }else{
+                    findDish.monthRates = { likes: 0, rates: 1 }
+                }
+            }
+
+            return {success: true, data: findDish }
+        }else{
+            logger.info("Dish not found")
+            return {success: false, data: "Dish not found" }
+        }
+    }catch (error){
+        console.warn("Error: ", error)
+        return { success: false, data: error.message }
+    }
+
+}
+
 module.exports = {
     loadAppState,
     saveAppState,
@@ -128,5 +163,6 @@ module.exports = {
     setFanDays,
     getFanDays,
     updadeHasDuck,
-    getMenuAndTab
+    getMenuAndTab,
+    updateDishRates,
 };
