@@ -40,7 +40,7 @@ class ServerManager {
 
         try {
             execFile(
-                '../generate-pm2-config.sh',
+                'generate-pm2-config.sh',
                 [param1, name, 'true'],
                 { cwd: '..' },
                 (error, stdout, stderr) => {
