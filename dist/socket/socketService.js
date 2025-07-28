@@ -337,7 +337,16 @@ function init(io) {
       tableService.clickMsg(id,cmd);
     });
 
-
+    socket.on("client_saveDishRates",(value) => {
+      logger.info(`客户评价菜品，ID：${value.dishId} 评价${value.like}`)
+      const result = appStateService.updateDishRates(value)
+      if(result.success){
+        logger.info("客户评价更改成功")
+      }else{
+        logger.info("客户评价更改失败：");
+      }
+      // callback(result)
+    })
 
   });
 
