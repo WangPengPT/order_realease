@@ -22,7 +22,6 @@ cd ..
 cd client
 call npm install
 call npm run build
-ren .\dist\index.html client.html
 xcopy .\dist %DST_PATH%\public /E /Y /I
 
 cd %DST_PATH%
