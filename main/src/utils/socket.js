@@ -1,7 +1,12 @@
 const { Server } = require('socket.io');
+
 const msgFuns = {}
 
 class Socket {
+
+    static checkOP = (user,cmd)  => {
+        return true;
+    }
 
     static init(server) {
         const io = new Server(server, {
@@ -51,7 +56,18 @@ class Socket {
     }
 
     static registerMessage(msg,fun) {
-        msgFuns[msg] = fun;
+        msgFuns[msg] = this.defineOPFun(msg,fun);
+    }
+
+    static defineOPFun(msg,fun) {
+        return (params,socket) => {
+
+            if (socket && this.checkOP(socket.user,msg)) {
+                return fun(params,socket);
+            }
+
+            return {result: false, message: "no operation"};
+        }
     }
 }
 

@@ -4,19 +4,31 @@ const socket = require('../utils/socket');
 const httpAPI = require('../utils/http_api');
 
 class UserManager {
+
     constructor() {
     }
 
     init() {
+        socket.checkOP = this.checkOP;
+
         socket.registerMessage("login", this.login);
-        socket.registerMessage("addUser", this.defineOPFun(this.addUser));
-        socket.registerMessage("setUser", this.defineOPFun(this.setUser));
-        socket.registerMessage("getAll", this.defineOPFun(this.getAll));
+        socket.registerMessage("addUser", this.addUser);
+        socket.registerMessage("setUser", this.setUser);
+        socket.registerMessage("getAll", this.getAll);
 
         httpAPI.get("/login", (query)=> {
             const { id, pwd } = query;
             return this.login({id: id, password: pwd});
         })
+    }
+
+    checkOP(user,cmd) {
+
+        if (cmd == "login") return true;
+
+        if (user && user.id && user.id == "admin") return true;
+
+        return false;
     }
 
     login(params,socket) {
@@ -25,7 +37,7 @@ class UserManager {
         console.log(user," - " , params)
 
         if ((!user) && params.id == "admin") {
-            db.put(db.user, params);
+            db.set(db.user, params);
             user = params;
         }
 
@@ -45,17 +57,6 @@ class UserManager {
         }
     }
 
-    defineOPFun(fun) {
-        return (params,socket) => {
-
-            if (socket && socket.user && socket.user.id && socket.user.id == "admin") {
-                return fun(params,socket);
-            }
-
-            return {result: false, message: "no operation"};
-        }
-    }
-
     addUser(params) {
         let user = db.get(db.user, params.id);
         if (user) {
@@ -69,7 +70,7 @@ class UserManager {
                 ...params
             }
 
-            db.put(db.user, user);
+            db.set(db.user, user);
             return {
                 result: true,
             }
@@ -80,7 +81,7 @@ class UserManager {
         let user = db.get(db.user, params.id);
         if (user) {
             user = {...user, ...params}
-            db.put(db.user, user);
+            db.set(db.user, user);
             return {
                 result: true,
             }
@@ -93,7 +94,7 @@ class UserManager {
     }
 
      getAll() {
-        var datas = db.getAll(db.user);
+        const datas = db.getAll(db.user);
         return {
             result: true,
             datas: datas,

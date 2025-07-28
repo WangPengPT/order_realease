@@ -3,7 +3,10 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { createServer } = require('http');
 const socket = require('./utils/socket');
+
 const userManager = require('./controllers/user_manager');
+const serverManager = require('./controllers/server_manager')
+
 const httpAPI = require('./utils/http_api');
 const fs = require("fs");
 const https = require("https");
@@ -63,6 +66,7 @@ httpAPI.app = app;
 // 初始化 Socket.IO
 socket.init(server);
 userManager.init();
+serverManager.init();
 
 // 启动服务器
 server.listen(port, () => {

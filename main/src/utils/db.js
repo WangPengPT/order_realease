@@ -28,21 +28,30 @@ class DB {
 
     // define table name of user
     static user = "user";
+    static server = "server";
 
-    static get(table,id) {
+    static get(table,id, defValue) {
+
+        let result
+
         try {
             const db_id = table + ":" + id;
             const ret = db.get(db_id);
 
-            const result = syncPromise( ret );
+            result = syncPromise( ret );
             console.log("get result:" + result);
-            return result;
         } catch (err) {
-            return null;
+
         }
+
+        if (result == undefined) {
+            return defValue;
+        }
+
+        return result;
     }
 
-    static put(table, value) {
+    static set(table, value) {
         try {
             const db_id = table + ":" + value.id;
             const ret = db.put(db_id, value);
@@ -76,6 +85,35 @@ class DB {
         } catch (err) {
             return [];
         }
+    }
+
+    static setValue(key,value) {
+        try {
+            const ret = db.put(key, value);
+            const result = syncPromise(ret);
+            console.log("put result:" + result);
+            return result;
+        } catch (err) {
+            return null;
+        }
+    }
+
+    static getValue(key,defValue) {
+        let result
+
+        try {
+            const ret = db.get(key);
+            result = syncPromise( ret );
+            console.log("get result:" + retValue);
+        } catch (err) {
+
+        }
+
+        if (result == undefined) {
+            return defValue;
+        }
+
+        return result;
     }
 
     static async getAllFun(table) {
