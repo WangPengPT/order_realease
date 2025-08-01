@@ -67,7 +67,6 @@ class Table {
       if (!(status instanceof TableStatus)) {
         throw new Error(`无效状态: ${updatedTableData.status}，有效值为: ${TableStatus.values().map(s => s.value).join(', ')}`);
       }
-
       this.status = status;
     }
 

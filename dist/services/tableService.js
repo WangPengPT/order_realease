@@ -69,7 +69,7 @@ function refreshTablePassword(io) {
 
 function updateTableWithoutOrder(tableData) {
   try {
-
+    if (tableData.status === null) throw new Error("Invalid table status")
     const id = tableData.id
 
     const oldStatus = appState.tables.getTableById(id).status.value
@@ -89,8 +89,8 @@ function updateTableWithoutOrder(tableData) {
     const table = appState.tables.getTableById(id)
     return { success: true, data: table.toJSON() }
   } catch (error) {
-    console.warn("Error: ", error)
-    return { success: false, message: error.message }
+    console.warn("Error: ", error.message)
+    return { success: false, data: error.message }
   }
 }
 
