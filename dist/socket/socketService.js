@@ -337,16 +337,27 @@ function init(io) {
       tableService.clickMsg(id,cmd);
     });
 
-    socket.on("client_saveDishRates",(value) => {
-      logger.info(`客户评价菜品，ID：${value.dishId} 评价${value.like}`)
-      const result = appStateService.updateDishRates(value)
-      if(result.success){
-        logger.info("客户评价更改成功")
-      }else{
-        logger.info("客户评价更改失败：");
+    socket.on("rate_dish", (id, like, rate) => {
+      const result = menuService.saveDishRating(id, like, rate);
+      if (result) {
+        io.emit("rating_changed", result.data.id, result.data.likes, result.data.rates);
+        logger.info(`客服端评分成功, id-${id}`)
+      } else {
+        logger.info(`客服端评分失败, id-${id}`)
+        logger.info(`失败原因: ${result.data}`)
       }
-      // callback(result)
-    })
+    });
+
+    // socket.on("client_saveDishRates",(value) => {
+    //   logger.info(`客户评价菜品，ID：${value.dishId} 评价${value.like}`)
+    //   const result = appStateService.updateDishRates(value)
+    //   if(result.success){
+    //     logger.info("客户评价更改成功")
+    //   }else{
+    //     logger.info("客户评价更改失败：");
+    //   }
+    //   // callback(result)
+    // })
 
   });
 

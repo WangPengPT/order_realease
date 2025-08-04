@@ -112,8 +112,11 @@ async function main() {
   runFandaysInterval();
 }
 
-main();
+app.get('/table', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'))
+})
 
+main();
 
 function OnQuit()
 {
