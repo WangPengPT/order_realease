@@ -4,7 +4,7 @@ const { logger } = require('../utils/logger.js')
 
 const USERS_FILENAME = "users"
 const ADMIN_PHONE = 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASS || "1015";
+const ADMIN_PASSWORD = process.env.ADMIN_PASS || "0000";
 
 function saveUserData() {
 
