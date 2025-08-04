@@ -234,7 +234,7 @@ function init(io) {
     })
 
     socket.on('admin', (value, callback) => {
-      const user = db.loadDataForce('admin', { password: "1015" });
+      const user = db.loadDataForce('admin', { password: "0000" });
       socket.is_admin = false;
       if (user.password == value) {
         orderService.sendOrder(socket)
