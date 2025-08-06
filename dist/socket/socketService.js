@@ -201,7 +201,7 @@ function init(io) {
         //logger.info(`发送给客户端服务端订单桌子信息`)
 
         io.emit("new_order", order.data);
-        socket.emit("📢 已广播新订单:", order.data);
+        logger.info("📢 已广播新订单:", order.data);
 
         // 返回确认给用户端
         socket.emit("order_confirmed", order.data.id);
@@ -390,6 +390,18 @@ function init(io) {
       }else{
         logger.info("客户评价更改失败：", result.data);
       }
+    })
+
+    // 返回 年、月，发送其年月对应的菜单评价数据
+    socket.on('manager_get_month_rates', (value,callback) => {
+      logger.info(`管理端获取${value.year}年${value.month}月的菜单评价`)
+      const result = appStateService.getMonthRatesWithDate(value.year,value.month)
+      if(result.success) {
+        logger.info("获取菜单评价成功")
+      }else{
+        logger.info(`获取菜单评价失败，原因：${result.data}`)
+      }
+      callback(result)
     })
 
   });

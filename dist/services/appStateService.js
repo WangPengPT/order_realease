@@ -141,6 +141,20 @@ function updateSpecialDishRates(dish){
     }
 }
 
+function getMonthRatesWithDate(year, month){
+    try{
+        const result = db.loadMonthRates("monthrates_"+year+"_"+month,"file not found")
+        if(result==="file not found"){
+            return { success: false, data:result }
+        }else{
+            return { success: true, data: result }
+        }
+    }catch(error){
+        console.warn("Error: ", error)
+        return { success: false, data: error.message }
+    }
+}
+
 
 module.exports = {
     loadAppState,
@@ -153,4 +167,5 @@ module.exports = {
     updadeHasDuck,
     getMenuAndTab,
     updateSpecialDishRates,
+    getMonthRatesWithDate,
 };
