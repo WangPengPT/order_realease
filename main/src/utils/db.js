@@ -10,6 +10,7 @@ class DB {
     // define table name of user
     static user = "user";
     static server = "server";
+    static keyValueTable = "key_value"
 
     static async init() {
         try {
@@ -51,12 +52,12 @@ class DB {
     }
 
     static async setValue(key,value) {
-        const collection = db.collection(table);
+        const collection = db.collection(DB.keyValueTable);
         await collection.updateOne({ id: value.id }, { $set: {id: key, value: value} }, { upsert: true });
     }
 
     static async getValue(key,defValue) {
-        const collection = db.collection("key_value");
+        const collection = db.collection(DB.keyValueTable);
         const users = await collection.find({ id: key }).toArray();
 
         if (users && users[0]) return users[0].value
