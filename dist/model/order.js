@@ -9,7 +9,7 @@ class Order {
     this.items = items.map(item => new Dish({ ...item, orderId: this.id }))
     this.key = key || table?.replace('#', '') || ''
     this.status = status || "new"
-    this.timestamp = timestamp || DateTime.now().setZone('Europe/Lisbon').toFormat('yyyy-MM-dd HH:mm:ss')
+    this.timestamp = Date.now() //timestamp || DateTime.now().setZone('Europe/Lisbon').toFormat('yyyy-MM-dd HH:mm:ss')
     this.name = name;
     this.note = note;
   }
