@@ -27,22 +27,20 @@ class Socket {
             }
 
             // 监听新消息
-            socket.on('message', (msg, params, callback) => {
+            socket.on('message', async (msg, params, callback) => {
 
-                console.log(msg,params);
+                console.log(msg, params);
 
                 try {
                     if (msgFuns[msg]) {
-                        const ret = msgFuns[msg](params, socket);
-                        callback( ret );
-                    }
-                    else
-                    {
-                        callback( {error: "invalid message"} );
+                        const ret = await Socket.callFun(socket, msg, params);
+                        callback(ret);
+                    } else {
+                        callback({error: "invalid message"});
                     }
                 } catch (err) {
                     console.error('Error saving message:', err);
-                    callback( {error: "call message exception"} );
+                    callback({error: "call message exception"});
                 }
             });
 
@@ -56,18 +54,18 @@ class Socket {
     }
 
     static registerMessage(msg,fun) {
-        msgFuns[msg] = this.defineOPFun(msg,fun);
+        msgFuns[msg] = fun;
     }
 
-    static defineOPFun(msg,fun) {
-        return (params,socket) => {
+    static async callFun(socket, msg, params) {
 
-            if (socket && this.checkOP(socket.user,msg)) {
-                return fun(params,socket);
-            }
+        const fun = msgFuns[msg]
 
-            return {result: false, message: "no operation"};
+        if (socket && this.checkOP(socket.user, msg)) {
+            const ret = await fun(params, socket);
+            return ret;
         }
+        return {result: false, message: "no operation"};
     }
 }
 

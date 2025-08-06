@@ -1,28 +1,9 @@
-const { Level } = require('level');
-const path = require('path');
 
-const dbPath = path.join(process.cwd(), 'db');
-const db = new Level(dbPath, { valueEncoding: 'json' });
+const { MongoClient } = require('mongodb');
+const uri = 'mongodb://localhost:27017';
+const client = new MongoClient(uri);
 
-
-const deasync = require('deasync');
-
-function syncPromise(promise) {
-    let done = false;
-    let result, error;
-
-    promise.then(res => {
-        result = res;
-        done = true;
-    }).catch(err => {
-        error = err;
-        done = true;
-    });
-
-    deasync.loopWhile(() => !done);
-
-    return result;
-}
+let db = undefined
 
 class DB {
 
@@ -30,102 +11,59 @@ class DB {
     static user = "user";
     static server = "server";
 
-    static get(table,id, defValue) {
-
-        let result
-
+    static async init() {
         try {
-            const db_id = table + ":" + id;
-            const ret = db.get(db_id);
+            console.log('Connected to MongoDB');
+            await client.connect();
+            db = client.db('mgserver');
 
-            result = syncPromise( ret );
-            console.log("get result:" + result);
-        } catch (err) {
-
-        }
-
-        if (result == undefined) {
-            return defValue;
-        }
-
-        return result;
-    }
-
-    static set(table, value) {
-        try {
-            const db_id = table + ":" + value.id;
-            const ret = db.put(db_id, value);
-            const result = syncPromise(ret);
-            console.log("put result:" + result);
-            return result;
-        } catch (err) {
-            return null;
+            console.log('Connected to MongoDB OK!');
+        } catch (error) {
+            console.error('Connection error:', error);
         }
     }
 
-    static del(table, id) {
-        try {
-            const db_id = table + ":" + id;
-            const ret = db.del(db_id);
-            const result = syncPromise(ret);
-            console.log("delete result:" + result);
-            return result;
-        } catch (err) {
-            return null;
-        }
+    static async get(table,id, defValue) {
+
+        const collection = db.collection(table);
+        const users = await collection.find({ id: id }).toArray();
+
+        if (users && users[0]) return users[0]
+
+        return defValue
+    }
+
+    static async set(table, value) {
+        const collection = db.collection(table);
+        await collection.updateOne({ id: value.id }, { $set:  value }, { upsert: true });
+    }
+
+    static async del(table, id) {
+        const collection = db.collection(table);
+        await collection.deleteOne({ id: id });
     }
 
 
-    static getAll(table) {
-        try {
-            const ret = DB.getAllFun(table);
-
-            const result = syncPromise( ret );
-            return result;
-        } catch (err) {
-            return [];
-        }
+    static async getAll(table) {
+        const collection = db.collection(table);
+        const users = await collection.find({}).toArray();
+        return users
     }
 
-    static setValue(key,value) {
-        try {
-            const ret = db.put(key, value);
-            const result = syncPromise(ret);
-            console.log("put result:" + result);
-            return result;
-        } catch (err) {
-            return null;
-        }
+    static async setValue(key,value) {
+        const collection = db.collection(table);
+        await collection.updateOne({ id: value.id }, { $set: {id: key, value: value} }, { upsert: true });
     }
 
-    static getValue(key,defValue) {
-        let result
+    static async getValue(key,defValue) {
+        const collection = db.collection("key_value");
+        const users = await collection.find({ id: key }).toArray();
 
-        try {
-            const ret = db.get(key);
-            result = syncPromise( ret );
-            console.log("get result:" + retValue);
-        } catch (err) {
+        if (users && users[0]) return users[0].value
 
-        }
-
-        if (result == undefined) {
-            return defValue;
-        }
-
-        return result;
+        return defValue
     }
 
-    static async getAllFun(table) {
-        const list = [];
-        for await (const [_, val] of db.iterator({
-            gte: table,
-            lte: table + '\xff'
-        })) {
-            list.push(val);
-        }
-        return list;
-    }
 }
 
 module.exports = DB;

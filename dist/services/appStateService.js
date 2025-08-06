@@ -119,40 +119,28 @@ function getMenuAndTab() {
     }
 }
 
-function updateDishRates(value){
-    try{
-        const findDish = appState.menu.find(item => item.id === value.dishId)
-        if (findDish) {
-            if(findDish.rates){ findDish.rates += 1 }
-            else{ findDish.rates = 1 }
+function updateSpecialDishRates(dish){
+    const findSpecialDish = appState.specialDishes.find( item => item.category === dish.category)
+    if(findSpecialDish) {
+        // 修改评分总数
+        findSpecialDish.rates = findSpecialDish.rates? findSpecialDish.rates+dish.rate : 1
+        // 修改点赞数
+        const like = dish.rate===0? dish.like : dish.like===1? 1:0
+        const findLikes = findSpecialDish.likes? findSpecialDish.likes : 0
+        findSpecialDish.likes = findLikes + like
+        // 修改每月评分
+        const findMonthRates = findSpecialDish.monthRates? findSpecialDish.monthRates : { rates: 0, likes: 0 }
+        findMonthRates.rates += dish.rate
+        findMonthRates.likes += like
+        findSpecialDish.monthRates = findMonthRates
 
-            if(findDish.likes && value.like === 1){ findDish.likes += 1 }
-            else{ findDish.likes = 1 }
-
-            if(findDish.monthRates){
-                findDish.monthRates.rates += 1
-                if(value.like === 1){
-                    findDish.monthRates.likes += 1
-                }
-            }else{
-                if(value.like === 1){
-                    findDish.monthRates = { likes: 1, rates: 1 }
-                }else{
-                    findDish.monthRates = { likes: 0, rates: 1 }
-                }
-            }
-
-            return {success: true, data: findDish }
-        }else{
-            logger.info("Dish not found")
-            return {success: false, data: "Dish not found" }
-        }
-    }catch (error){
-        console.warn("Error: ", error)
-        return { success: false, data: error.message }
+        return {success: true, data: appState.specialDishes}
+    }else{
+        console.log("Special Dish Not Found")
+        return { success: false, data: "Special Dish Not Found" }
     }
-
 }
+
 
 module.exports = {
     loadAppState,
@@ -164,5 +152,5 @@ module.exports = {
     getFanDays,
     updadeHasDuck,
     getMenuAndTab,
-    updateDishRates,
+    updateSpecialDishRates,
 };

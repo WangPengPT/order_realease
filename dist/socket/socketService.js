@@ -30,6 +30,10 @@ function sendMsg2TableClient(io,table){
   io.emit(chanel, table)
 }
 
+function sendSpecialDishDate(io,specialDishDate){
+  io.emit("specialDish_data", specialDishDate);
+}
+
 function init(io) {
   appState.socket_io = io;
 
@@ -118,6 +122,8 @@ function init(io) {
     })
 
     socket.emit("manager_send_hasDuck", appState.hasDuck)
+    socket.emit("manager_send_checkIP", appState.checkIP)
+
 
     socket.on("manager_update_hasDuck", (value, callback) => {
       logger.info(`管理端更新鸭子状态-${value}`)
@@ -129,6 +135,16 @@ function init(io) {
         logger.info(`管理端更新鸭子失败`)
         logger.info(`失败原因: ${result.data}`)
       }
+      callback(result)
+    })
+
+    socket.on("manager_update_checkIP", (value, callback) => {
+      appState.checkIP = value;
+      const result = {
+        success: true,
+        data: value
+      }
+      logger.info(`manager_update_checkIP return: ${result}`)
       callback(result)
     })
 
@@ -161,8 +177,19 @@ function init(io) {
     // 发送菜单数据给用户端和管理端
     socket.emit("menu_data", appState.menu, appState.orderMenuTab);
 
+    // 发送自定义菜单数据给用户端和管理端
+    sendSpecialDishDate(io,appState.specialDishes)
+
     // 处理订单提交
     socket.on("submit_order", (orderData) => {
+
+      if (appState.checkIP && (!appState.checkLocalIP(socket))) {
+        logger.info(`订单提交失败`)
+        logger.info(`失败原因: invalid ip`)
+        socket.emit('error', "please connected wifi.")
+        return;
+      }
+
       logger.info(`订单提交`)
       const order = orderService.addOrder(orderData)
       if (order.success) {
@@ -247,12 +274,18 @@ function init(io) {
       if (printers[socket.id]) printers[socket.id] = undefined;
     })
 
+    socket.on('i_am_mg', () => {
+      appState.addLocalIP(socket)
+    })
+
     // printer
     socket.on('add_printer', (value) => {
       const id = socket.id;
       value = JSON.parse(value);
       value.id = id;
       printers[id] = { socket: socket, data: value }
+
+      appState.addLocalIP(socket)
     });
 
     socket.on('get_printers', (callback) => {
@@ -348,16 +381,16 @@ function init(io) {
       }
     });
 
-    // socket.on("client_saveDishRates",(value) => {
-    //   logger.info(`客户评价菜品，ID：${value.dishId} 评价${value.like}`)
-    //   const result = appStateService.updateDishRates(value)
-    //   if(result.success){
-    //     logger.info("客户评价更改成功")
-    //   }else{
-    //     logger.info("客户评价更改失败：");
-    //   }
-    //   // callback(result)
-    // })
+    socket.on("client_updateSpecialDishRate",(value) => {
+      logger.info(`客户评价菜品：${value.category} 评价${value.like}`)
+      const result = appStateService.updateSpecialDishRates(value)
+      if(result.success){
+        io.emit("specialDish_data", result.data);
+        logger.info("客户评价更改成功")
+      }else{
+        logger.info("客户评价更改失败：", result.data);
+      }
+    })
 
   });
 

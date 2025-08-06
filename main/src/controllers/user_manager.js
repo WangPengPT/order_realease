@@ -31,10 +31,10 @@ class UserManager {
         return false;
     }
 
-    login(params,socket) {
-        let user = db.get(db.user, params.id);
+    async login(params, socket) {
+        let user = await db.get(db.user, params.id);
 
-        console.log(user," - " , params)
+        console.log(user, " - ", params)
 
         if ((!user) && params.id == "admin") {
             db.set(db.user, params);
@@ -48,8 +48,7 @@ class UserManager {
                 user: user,
                 url: user.url,
             }
-        }
-        else {
+        } else {
             return {
                 result: false,
                 message: "error password"
@@ -57,8 +56,8 @@ class UserManager {
         }
     }
 
-    addUser(params) {
-        let user = db.get(db.user, params.id);
+    async addUser(params) {
+        let user = await db.get(db.user, params.id);
         if (user) {
             return {
                 result: false,
@@ -70,18 +69,18 @@ class UserManager {
                 ...params
             }
 
-            db.set(db.user, user);
+            await db.set(db.user, user);
             return {
                 result: true,
             }
         }
     }
 
-    setUser(params) {
-        let user = db.get(db.user, params.id);
+    async setUser(params) {
+        let user = await db.get(db.user, params.id);
         if (user) {
             user = {...user, ...params}
-            db.set(db.user, user);
+            await db.set(db.user, user);
             return {
                 result: true,
             }
@@ -93,8 +92,8 @@ class UserManager {
         }
     }
 
-     getAll() {
-        const datas = db.getAll(db.user);
+    async getAll() {
+        const datas = await db.getAll(db.user);
         return {
             result: true,
             datas: datas,

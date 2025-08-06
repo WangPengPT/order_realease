@@ -5,30 +5,32 @@ const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+const BASE_PORT = 7100
 
 class ServerManager {
 
 
-    maxPort = 7000;
+    maxPort = BASE_PORT;
 
     constructor() {
 
     }
 
-    init() {
+    async init() {
         socket.registerMessage("addServer", this.addServer.bind(this));
         socket.registerMessage("getAllServer", this.getAll.bind(this));
 
-        this.maxPort = db.getValue("server_max_id", 7000);
+        this.maxPort = await db.getValue("server_max_id", BASE_PORT);
     }
 
-    addServer(params) {
+    async addServer(params) {
 
         const name = params.id;
         const param1 = this.maxPort;
 
 
-        if ( db.get(db.server,name) ) {
+        const serverData = await db.get(db.server, name);
+        if (serverData) {
             return {
                 result: false,
                 message: "has record."
@@ -36,7 +38,7 @@ class ServerManager {
         }
 
         this.maxPort = this.maxPort + 1;
-        db.setValue("server_max_id", this.maxPort);
+        await db.setValue("server_max_id", this.maxPort);
 
         try {
 
@@ -50,15 +52,15 @@ class ServerManager {
                 throw new Error(`can't find: ${scriptPath}`);
             }
 
-            execFile(scriptPath, [param1, name, 'true'], { cwd: path.dirname(scriptPath) }, callback);
+            execFile(scriptPath, [param1, name, 'true'], {cwd: path.dirname(scriptPath)}, callback);
 
         } catch (e) {
             console.log(e)
         }
 
 
-        const data = {id: name, url: `https://v.xixiaoxiong:${param1}`}
-        db.set(db.server,data);
+        const data = {id: name, url: `https://v.xiaoxiong.pt:${param1}`}
+        await db.set(db.server, data);
 
         return {
             result: true,
@@ -66,8 +68,8 @@ class ServerManager {
         };
     }
 
-    getAll() {
-        const datas = db.getAll(db.server);
+    async getAll() {
+        const datas = await db.getAll(db.server);
         return {
             result: true,
             datas: datas,
