@@ -35,7 +35,7 @@ class HttpAPI {
 
         this.app.post(cmd, async (req, res) => {
             console.log('Received Shopify Webhook:', req.body);
-            const data = JSON.parse(req.body);
+            const data = req.body
             await fn(data)
             res.status(200).json({received: true});
         });
