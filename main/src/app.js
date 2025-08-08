@@ -7,6 +7,7 @@ const db = require('./utils/db');
 
 const userManager = require('./controllers/user_manager');
 const serverManager = require('./controllers/server_manager')
+const orderManager = require('./controllers/order_manager')
 
 const httpAPI = require('./utils/http_api');
 const fs = require("fs");
@@ -73,6 +74,7 @@ async function initApp() {
 
     await userManager.init();
     await serverManager.init();
+    await orderManager.init();
 }
 
 initApp();

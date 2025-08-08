@@ -36,7 +36,12 @@ class DB {
 
     static async set(table, value) {
         const collection = db.collection(table);
-        await collection.updateOne({ id: value.id }, { $set:  value }, { upsert: true });
+        if (value.id) {
+            await collection.updateOne({ id: value.id }, { $set:  value }, { upsert: true });
+        }
+        else {
+            await collection.insertOne(value);
+        }
     }
 
     static async del(table, id) {

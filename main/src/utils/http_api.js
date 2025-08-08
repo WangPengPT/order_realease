@@ -14,11 +14,30 @@ class HttpAPI {
         }
         console.log("get: ", cmd );
 
-        this.app.get(cmd, (req, res) => {
-            console.log("do get: ", cmd );
+        this.app.get(cmd, async (req, res) => {
+            console.log("do get: ", cmd);
 
-            const ret = fn(req.query)
+            const ret = await fn(req.query)
             res.json(ret);
+        });
+    }
+
+    pos(cmd,fn) {
+
+        if (cmd.startsWith('/'))
+        {
+            cmd =  "/api" + cmd;
+        }
+        else {
+            cmd =  "/api/" + cmd;
+        }
+        console.log("post: ", cmd );
+
+        this.app.post(cmd, async (req, res) => {
+            console.log('Received Shopify Webhook:', req.body);
+            const data = JSON.parse(req.body);
+            await fn(data)
+            res.status(200).json({received: true});
         });
     }
 }
