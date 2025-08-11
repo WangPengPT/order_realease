@@ -22,7 +22,7 @@ class ServerManager {
         const datas = await db.getAll(db.server);
         for (let i = 0; i < datas.length; i++) {
             const params = datas[i]
-            this.restaurants[params.id] = params.shopify_name
+            this.setRestaurants(params)
         }
 
         socket.registerMessage("addServer", this.addServer.bind(this));
@@ -70,15 +70,22 @@ class ServerManager {
             params.url = `https://v.xiaoxiong.pt:${param1}`;
         }
 
-
         await db.set(db.server, params);
 
-        this.restaurants[params.shopify_name] = params.id
+        this.setRestaurants(params)
 
         return {
             result: true,
-            params,
+            data: params,
         };
+    }
+
+    setRestaurants(params) {
+        console.log(params)
+        if (params.shopify_name && params.shopify_name != "") {
+            console.log("map restaurant: " + params.shopify_name  + " -> " + params.id);
+            this.restaurants[params.shopify_name] = params.id
+        }
     }
 
     async getAll() {
