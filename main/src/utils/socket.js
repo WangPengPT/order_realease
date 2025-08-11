@@ -2,6 +2,8 @@ const { Server } = require('socket.io');
 
 const msgFuns = {}
 
+let io;
+
 class Socket {
 
     static checkOP = (user,cmd)  => {
@@ -9,7 +11,7 @@ class Socket {
     }
 
     static init(server) {
-        const io = new Server(server, {
+        io = new Server(server, {
             cors: {
                 origin: "*",
                 methods: ["GET", "POST"]
@@ -66,6 +68,10 @@ class Socket {
             return ret;
         }
         return {result: false, message: "no operation"};
+    }
+
+    static broadcast(msg,data) {
+        io.emit(msg,data)
     }
 }
 

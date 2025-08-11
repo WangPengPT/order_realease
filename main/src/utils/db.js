@@ -70,6 +70,31 @@ class DB {
         return defValue
     }
 
+    static async find(table, q, sort, count) {
+
+        const collection = db.collection(table);
+        let datas = []
+
+        if (count) {
+            if (sort) {
+                datas = await collection.find(q).sort(sort).limit(count).toArray();
+            }
+            else {
+                datas = await collection.find(q).limit(count).toArray();
+            }
+        }
+        else if (sort) {
+            datas = await collection.find(q).sort(sort).toArray();
+        }
+        else {
+            datas = await collection.find(q).toArray();
+        }
+
+        if (datas) return datas
+
+        return []
+    }
+
 }
 
 module.exports = DB;

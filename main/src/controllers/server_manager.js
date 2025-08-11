@@ -11,12 +11,20 @@ class ServerManager {
 
 
     maxPort = BASE_PORT;
+    restaurants = {}
 
     constructor() {
 
     }
 
     async init() {
+
+        const datas = await db.getAll(db.server);
+        for (let i = 0; i < datas.length; i++) {
+            const params = datas[i]
+            this.restaurants[params.id] = params.shopify_name
+        }
+
         socket.registerMessage("addServer", this.addServer.bind(this));
         socket.registerMessage("getAllServer", this.getAll.bind(this));
 
@@ -37,34 +45,39 @@ class ServerManager {
             }
         }
 
-        this.maxPort = this.maxPort + 1;
-        await db.setValue("server_max_id", this.maxPort);
+        if (params.url == undefined) {
+            this.maxPort = this.maxPort + 1;
+            await db.setValue("server_max_id", this.maxPort);
 
-        try {
+            try {
 
-            const callback = (error, stdout, stderr) => {
-                if (error) console.error(`执行错误: ${error}`);
-                else console.log(`输出: ${stdout}`);
-            };
+                const callback = (error, stdout, stderr) => {
+                    if (error) console.error(`执行错误: ${error}`);
+                    else console.log(`输出: ${stdout}`);
+                };
 
-            const scriptPath = path.resolve(process.cwd(), '../generate-pm2-config.sh');
-            if (!fs.existsSync(scriptPath)) {
-                throw new Error(`can't find: ${scriptPath}`);
+                const scriptPath = path.resolve(process.cwd(), '../generate-pm2-config.sh');
+                if (!fs.existsSync(scriptPath)) {
+                    throw new Error(`can't find: ${scriptPath}`);
+                }
+
+                execFile(scriptPath, [param1, name, 'true'], {cwd: path.dirname(scriptPath)}, callback);
+
+            } catch (e) {
+                console.log(e)
             }
 
-            execFile(scriptPath, [param1, name, 'true'], {cwd: path.dirname(scriptPath)}, callback);
-
-        } catch (e) {
-            console.log(e)
+            params.url = `https://v.xiaoxiong.pt:${param1}`;
         }
 
 
-        const data = {id: name, url: `https://v.xiaoxiong.pt:${param1}`}
-        await db.set(db.server, data);
+        await db.set(db.server, params);
+
+        this.restaurants[params.shopify_name] = params.id
 
         return {
             result: true,
-            data,
+            params,
         };
     }
 
