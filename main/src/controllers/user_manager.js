@@ -32,12 +32,12 @@ class UserManager {
     }
 
     async login(params, socket) {
-        let user = await db.get(db.user, params.id);
+        let user = await db.get(db.userTable, params.id);
 
         console.log(user, " - ", params)
 
         if ((!user) && params.id == "admin") {
-            db.set(db.user, params);
+            db.set(db.userTable, params);
             user = params;
         }
 
@@ -57,7 +57,7 @@ class UserManager {
     }
 
     async addUser(params) {
-        let user = await db.get(db.user, params.id);
+        let user = await db.get(db.userTable, params.id);
         if (user) {
             return {
                 result: false,
@@ -69,7 +69,7 @@ class UserManager {
                 ...params
             }
 
-            await db.set(db.user, user);
+            await db.set(db.userTable, user);
             return {
                 result: true,
             }
@@ -77,10 +77,10 @@ class UserManager {
     }
 
     async setUser(params) {
-        let user = await db.get(db.user, params.id);
+        let user = await db.get(db.userTable, params.id);
         if (user) {
             user = {...user, ...params}
-            await db.set(db.user, user);
+            await db.set(db.userTable, user);
             return {
                 result: true,
             }
@@ -93,7 +93,7 @@ class UserManager {
     }
 
     async getAll() {
-        const datas = await db.getAll(db.user);
+        const datas = await db.getAll(db.userTable);
         return {
             result: true,
             datas: datas,

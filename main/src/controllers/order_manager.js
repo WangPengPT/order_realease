@@ -13,7 +13,7 @@ class OrderManager {
 
     }
 
-    init() {
+    async init() {
 
         httpAPI.pos("/order_create", this.orderCreate.bind(this))
 
@@ -21,14 +21,12 @@ class OrderManager {
 
         httpAPI.pos("/order_updated", this.orderUpdated.bind(this))
 
-        httpAPI.pos("/order_paid",  this.orderPaid.bind(this))
+        httpAPI.pos("/order_paid", this.orderPaid.bind(this))
 
-
-
-        httpAPI.get("/order_list",  async (query) => {
+        httpAPI.get("/order_list", async (query) => {
             let {restaurant, count} = query;
             count = parseInt(count)
-            console.log(restaurant,count)
+            console.log(restaurant, count)
             const data = await this.getByRestaurant(restaurant, count)
 
             return {
@@ -54,11 +52,13 @@ class OrderManager {
         data.pickup_date = this.get_pickup_date(data)
         await db.set("order", data)
 
+        console.log(data)
+
         this.broadcast(data)
     }
 
     broadcast(data) {
-        socket.broadcast(data.restaurant,toData(data))
+        socket.broadcast(data.restaurant,this.toData(data))
     }
 
     async orderPaid(data) {

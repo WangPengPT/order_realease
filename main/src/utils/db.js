@@ -8,8 +8,8 @@ let db = undefined
 class DB {
 
     // define table name of user
-    static user = "user";
-    static server = "server";
+    static userTable = "user";
+    static serverTable = "server";
     static keyValueTable = "key_value"
 
     static async init() {
@@ -37,6 +37,7 @@ class DB {
     static async set(table, value) {
         const collection = db.collection(table);
         if (value.id) {
+            console.log("collection.updateOne")
             await collection.updateOne({ id: value.id }, { $set:  value }, { upsert: true });
         }
         else {
