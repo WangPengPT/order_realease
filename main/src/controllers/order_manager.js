@@ -50,7 +50,7 @@ class OrderManager {
     async orderUpdated(data) {
         data.restaurant = this.get_restaurant(data)
         data.pickup_date = this.get_pickup_date(data)
-        await db.set("order", data)
+        await db.set(db.orderTable, data)
 
         console.log(data)
 
@@ -75,7 +75,7 @@ class OrderManager {
             pickup_date: 1,
         }
 
-        const datas = await db.find("order", q, sort, count)
+        const datas = await db.find(db.orderTable, q, sort, count)
 
         const ret = []
         for (let i = 0; i < datas.length; i++) {

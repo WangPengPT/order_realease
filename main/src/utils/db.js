@@ -11,6 +11,7 @@ class DB {
     static userTable = "user";
     static serverTable = "server";
     static keyValueTable = "key_value"
+    static orderTable = "order"
 
     static async init() {
         try {
