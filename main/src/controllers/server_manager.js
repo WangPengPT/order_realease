@@ -27,7 +27,7 @@ class ServerManager {
 
         socket.registerMessage("addServer", this.addServer.bind(this));
         socket.registerMessage("setUser", this.setServer.bind(this));
-        socket.registerMessage("getAllServer", this.getAll.bind(this));
+        socket.registerMessage("getAllServer", this.getAllServer.bind(this));
 
         this.maxPort = await db.getValue("server_max_id", BASE_PORT);
     }
@@ -99,7 +99,7 @@ class ServerManager {
         }
     }
 
-    async getAll() {
+    async getAllServer() {
         const datas = await db.getAll(db.serverTable);
         return {
             result: true,
