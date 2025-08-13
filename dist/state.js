@@ -13,8 +13,8 @@ class AppState {
         this.printers = []
         this.maxOrderId = 0
 
-        this.isFanDays = false
-        this.hasDuck = true
+        this.hasBox = true
+        this.hasBibimbap = true
         this.checkIP = false;
 
         this.currentPageID = 1
@@ -40,8 +40,12 @@ class AppState {
 
     }
 
-    updateDuck(value) {
-        this.hasDuck = value
+    updateBibimbap(value) {
+        this.hasBibimbap = value
+    }
+
+    updateBox(value) {
+        this.hasBox = value
     }
 
     createTable(startIdx, endIdx) {
@@ -64,8 +68,8 @@ class AppState {
         }
     }
 
-    setFanDays(value) {
-        this.isFanDays = value
+    setHasBox(value) {
+        this.hasBox = value
     }
 
     addOrderTable(orderData) {
@@ -207,6 +211,20 @@ class AppState {
     recordProps(target) {
         const keys = Object.keys(target)
         target._dataKeys = keys.filter(k => !k.startsWith('_'))
+    }
+
+    incrementOrder(orderData) {
+        const items = orderData.items
+        const result = []
+        for (const item of items) {
+            const menuItem = this.menu.find(m => m.id === item.dishid)
+            menuItem.dailyOrders = (menuItem.dailyOrders | 0) + item.quantity
+            menuItem.monthlyOrders = (menuItem.monthlyOrders | 0) + item.quantity
+            menuItem.yearlyOrders = (menuItem.yearlyOrders | 0) + item.quantity
+            menuItem.orders = (menuItem.orders | 0) + item.quantity
+            result.push({id: menuItem.id, orders: menuItem.orders})
+        }
+        return result
     }
 
     toJSON() {

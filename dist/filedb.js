@@ -282,6 +282,21 @@ function removePageData(dataFilename) {
     }
 }
 
+function saveMonthRates(key,value) {
+
+    if (!value) value = datas[key];
+    datas[key] = value;
+
+    try {
+        var saveStr = JSON.stringify(value, null, 2);
+        const filePath = path.join(__dirname, dirMonthRates, key + '.json');
+        fs.writeFileSync(filePath, saveStr, 'utf8');
+        console.log("save MonthRate("+key+".json) success.");
+    } catch (err) {
+        console.log("save MonthRate("+key+".json) err:", err);
+    }
+}
+
 function loadMonthRates(key, defaultValue) {
     try {
         const filePath = path.join(__dirname, dirMonthRates, key + '.json');
@@ -316,5 +331,6 @@ module.exports = {
     removePageData,
     hasSomeFile,
     formatedPublicDir,
+    saveMonthRates,
     loadMonthRates,
 };

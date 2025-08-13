@@ -250,6 +250,23 @@ function saveDishRating(id, like, rate) {
   }
 }
 
+function incrementOrder(orderData) {
+  try {
+    if (!orderData.table) throw new Error("No table id")
+    const orders = appState.incrementOrder(orderData)
+    return {
+        success: true,
+        data: orders
+    }
+  } catch (error) {
+    console.warn("Error: ", error)
+    return {
+        success: false,
+        data: error.message
+    }     
+  }
+}
+
 // 导出函数和状态
 module.exports = {
   loadMenu,
@@ -259,5 +276,6 @@ module.exports = {
   saveOrderMenuTab,
   findDish,
   getDishCategory,
-  saveDishRating
+  saveDishRating,
+  incrementOrder
 };
