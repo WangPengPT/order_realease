@@ -35,6 +35,17 @@ class OrderManager {
             }
         })
 
+        socket.registerMessage("getAllOrder", async (query) => {
+            let count = query.count;
+            count = parseInt(count)
+            console.log(count)
+            const data = await this.getAllOrder(count)
+
+            return {
+                result: true,
+                data: data
+            }
+        })
     }
 
     async orderCreate(data) {
@@ -76,6 +87,22 @@ class OrderManager {
         }
 
         const datas = await db.find(db.orderTable, q, sort, count)
+
+        const ret = []
+        for (let i = 0; i < datas.length; i++) {
+            ret.push(this.toData(datas[i]));
+        }
+
+        return ret
+    }
+
+    async getAllOrder(count) {
+
+        const sort = {
+            pickup_date: 1,
+        }
+
+        const datas = await db.find(db.orderTable, {}, sort, count)
 
         const ret = []
         for (let i = 0; i < datas.length; i++) {
