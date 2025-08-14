@@ -20,6 +20,7 @@ class Table {
 
     this.msg_pay = false;
     this.msg_call = false;
+    this.nif_note = {nif:undefined, note:undefined}
 
     this.recordProps(this)
   }
@@ -98,16 +99,18 @@ class Table {
     this.status = TableStatus.FREE;
     this.peopleType = new PeopleType({ adults: 0, children: 0 })
     this.order = []
+    this.msg_pay = false
   }
 
   clientCmd(cmd) {
     console.log("client cmd:", cmd);
-    if (cmd == 'call') {
+    if (cmd.cmd == 'call') {
       this.msg_call = true;
     }
 
-    if (cmd == 'pay') {
+    if (cmd.cmd == 'pay') {
       this.msg_pay = true;
+      this.nif_note = {nif:cmd.nif? cmd.nif : undefined, note:cmd.note? cmd.note : undefined};
     }
 
   }

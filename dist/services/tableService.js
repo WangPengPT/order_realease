@@ -117,6 +117,7 @@ function cleanTable(id) {
     table.clearTable()
 
     const cleanedTable = appState.tables.getTableById(id)
+    // console.log(cleanedTable)
     if (cleanedTable.status !== TableStatus.FREE) throw new Error('Faild clean table')
 
     return { success: true, data: cleanedTable.toJSON() }
@@ -139,8 +140,7 @@ function getTableById(id) {
   }
 }
 
-function clientCmd(id,cmd)
-{
+function clientCmd(id,cmd) {
   try {
     // 更新服务器状态
     const table = appState.tables.getTableById(id)
