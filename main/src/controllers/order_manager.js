@@ -83,7 +83,7 @@ class OrderManager {
         }
 
         const sort = {
-            pickup_date: 1,
+            pickup_date: -1,
         }
 
         const datas = await db.find(db.orderTable, q, sort, count)
@@ -99,7 +99,7 @@ class OrderManager {
     async getAllOrder(count) {
 
         const sort = {
-            pickup_date: 1,
+            pickup_date: -1,
         }
 
         const datas = await db.find(db.orderTable, {}, sort, count)
