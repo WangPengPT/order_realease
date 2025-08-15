@@ -1,11 +1,12 @@
 class Dish {
-  constructor({ dishid, name, price, quantity, notes, orderId: orderIds }) {
+  constructor({ dishid, name, price, quantity, notes, orderId: orderIds, dishNote:dishNote }) {
     this.dishid = dishid
     this.name = name
     this.price = parseFloat(price) || 0
     this.quantity = parseInt(quantity) || 0
     this.notes = Array.isArray(notes) ? notes : [];
     this.orderIds = Array.isArray(orderIds) ? orderIds : [];
+    this.dishNote = dishNote || undefined
   }
     toJSON() {
     return {

@@ -103,7 +103,6 @@ class Table {
   }
 
   clientCmd(cmd) {
-    console.log("client cmd:", cmd);
     if (cmd.cmd == 'call') {
       this.msg_call = true;
     }
@@ -116,14 +115,13 @@ class Table {
   }
 
   clickMsg(cmd) {
-    console.log("client cmd:", cmd);
     if (cmd == 'call') {
       this.msg_call = false;
     }
 
-    if (cmd == 'pay') {
-      this.msg_pay = false;
-    }
+    // if (cmd == 'pay') {
+    //   this.msg_pay = false;
+    // }
 
   }
 

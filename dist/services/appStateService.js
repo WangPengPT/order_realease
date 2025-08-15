@@ -4,10 +4,12 @@ const db = require('../filedb.js');
 const DB = require('../db.js');
 const { logger } = require('../utils/logger.js');
 const AppStateRepository = require('../repositories/appStateRepository.js');
+const OrderQuantityRepository = require('../repositories/orderQuantityRepository.js');
 
 class AppStateService {
-    constructor(appStateRepository = new AppStateRepository(appState)) {
+    constructor(appStateRepository = new AppStateRepository(appState), orderQuantityRepository = new OrderQuantityRepository()) {
         this.appStateRepository = appStateRepository;
+        this.orderQuantityRepository = orderQuantityRepository
     }
 
     async loadAppState() {
@@ -103,9 +105,8 @@ class AppStateService {
                 day = getNumberDays(year, month);
             }
 
-            const filePath = "OrderQuantity";
             const data = { year, month, day, data: dailyOrders };
-            await DB.set(filePath, data);
+            await this.orderQuantityRepository.save(data);
         } catch (error) {
             console.warn("Error: ", error);
         }
@@ -137,9 +138,8 @@ class AppStateService {
             const month = now.getMonth() === 0 ? 12 : now.getMonth();
             const year = month === 12 ? now.getFullYear() - 1 : now.getFullYear();
 
-            const filePath = "OrderQuantity";
             const data = { year, month, day: 0, data: monthlyOrders };
-            await DB.set(filePath, data);
+            await this.orderQuantityRepository.save(data);
         } catch (error) {
             console.warn("Error: ", error);
         }
@@ -168,9 +168,8 @@ class AppStateService {
                 }
             });
             const now = new Date();
-            const filePath = "OrderQuantity";
             const data = { year: now.getFullYear() - 1, month: 0, day: 0, data: yearlyOrders };
-            await DB.set(filePath, data);
+            await this.orderQuantityRepository.save(data);
         } catch (error) {
             console.warn("Error: ", error);
         }
@@ -293,9 +292,8 @@ class AppStateService {
 
     async getOrderQuantityWithDate(date) {
         try {
-            const filePath = "OrderQuantity";
-            const result = await DB.find(filePath, date);
-            if (result.length === 0) {
+            const result = await this.orderQuantityRepository.load(date);
+            if (!result) {
                 return { success: false, data: result };
             } else {
                 return { success: true, data: result };

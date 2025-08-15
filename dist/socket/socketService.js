@@ -164,14 +164,15 @@ class SocketServices {
         }
 
         logger.info(`订单提交`)
-        const increment = menuService.incrementOrder(orderData)
-        if (increment.success) {
-          // TODO: log不出来
-          logger.info(`销售量添加成功 - ${increment.data}`)
-        }
 
         const order = orderService.addOrder(orderData)
         if (order.success) {
+          const increment = menuService.incrementOrder(orderData)
+          if (increment.success) {
+            // TODO: log不出来
+            logger.info(`销售量添加成功 - ${increment.data}`)
+          }
+
           logger.info(`订单提交成功 订单号 - ${order.data.id}`)
           logger.info(formatOrderLog(orderData))
 
