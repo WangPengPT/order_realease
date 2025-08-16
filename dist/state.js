@@ -21,7 +21,7 @@ class AppState {
 
         this.initTables()
 
-        this.recordProps(this)
+        this.recordProps(this, ['menu'])
     }
 
     initTables() {
@@ -208,9 +208,9 @@ class AppState {
         }
     }
 
-    recordProps(target) {
-        const keys = Object.keys(target)
-        target._dataKeys = keys.filter(k => !k.startsWith('_'))
+    recordProps(target, except = []) {
+        const keys = Object.keys(target);
+        target._dataKeys = keys.filter(k => !k.startsWith('_') && !except.includes(k));
     }
 
     incrementOrder(orderData) {

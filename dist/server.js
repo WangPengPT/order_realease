@@ -103,14 +103,12 @@ app.use(express.static(path.join(__dirname, "public"), {
 async function main() {
   await DB.init();
   webPageDesignService.loadPagesSafe()
-  menuController.loadMenu();
-
   socketService = new SocketServices(io)
 
   await socketService.initializeDatas()
+  menuController.loadMenu();
 
   socketService.initSocket()
-
   const PORT = process.env.PORT || 8080;
   server.listen(PORT, '0.0.0.0', () => {
     logger.info(`🟢 服务器已启动，监听端口 ${PORT}`);
@@ -219,7 +217,7 @@ function writeOrders() {
     }
 
     // 每年1月1号
-    if (now.getMonth && now.getDate() === 1) {
+    if (now.getMonth() && now.getDate() === 1) {
       if (needWriteYearlyOrders) {
         appStateService.saveYearlyOrders() // 将当月的销售量数据写入文件
         appStateService.clearYearlyOrders() // 清空当月的销售量数据

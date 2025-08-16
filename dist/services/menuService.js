@@ -43,8 +43,8 @@ function loadMenu() {
 
     appState.menu = menu;
 
-
-    appState.orderMenuTab = db.loadData('orderMenuTab', []);
+    const tabs = db.loadData('orderMenuTab', []);
+    appState.orderMenuTab = tabs
 
     const types = [];
 
@@ -81,14 +81,26 @@ function loadMenu() {
 
 function getDishCategory(item)
 {
-  if (item.category )return  item.category ;
+  if (item.category ) return  item.category ;
 
-  const id = item.id;
+  const id = item.dishid;
 
   let tag = appState.dishTags[id];
   if (tag && tag != "") return tag;
 
-  return appState.dishCategory[id];
+  let ret = appState.dishCategory[id];
+  if (ret) return ret;
+
+  const data = appState.menu.find(data => data.id == id);
+  if (data) {
+    if (data.tags && data.tags != "") {
+      return data.tags
+    } else {
+      return data.category;
+    }
+  }
+
+  return "";
 }
 
 // 获取菜单

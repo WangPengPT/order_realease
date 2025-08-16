@@ -23,9 +23,10 @@ class OrderQuantityRepository {
         try {
             const result = await DB.find(this.tableName, date);
             if (result.length === 0) {
-                logger.info(`repo: ⚠ 未能找到 Order quantity 数据 [date=${data.year}/${data.month}/${data.day}]`);
+                logger.info(`repo: ⚠ 未能找到 Order quantity 数据 [date=${date.year}/${date.month}/${date.day}]`);
                 return null;
             }
+            logger.info(`repo: ✅ 成功找到 Order quantity 数据 [date=${date.year}/${date.month}/${date.day}]`);
             return result;
         } catch (err) {
             logger.error(`❌ 读取 Order quantity 失败: ${err}`);

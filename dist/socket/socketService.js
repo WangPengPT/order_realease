@@ -176,6 +176,7 @@ class SocketServices {
           logger.info(`订单提交成功 订单号 - ${order.data.id}`)
           logger.info(formatOrderLog(orderData))
 
+          // console.log("order.data",order.data)
           print_order(order.data);
 
           //logger.info(`发送给客户端服务端订单桌子信息`)
