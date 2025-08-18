@@ -243,6 +243,15 @@ class AppStateService {
     saveMonthRates() {
         try {
             const monthRates = [];
+            this.appStateRepository.appState.specialDishes.forEach(item => {
+                monthRates.push({
+                    id: item.id,
+                    category: item.category,
+                    handle: item.category,
+                    name: item.category,
+                    monthRates: item.monthRates ? item.monthRates : { likes: 0, rates: 0 },
+                });
+            })
             this.appStateRepository.appState.menu.forEach(item => {
                 if (item.category !== "") {
                     monthRates.push({
