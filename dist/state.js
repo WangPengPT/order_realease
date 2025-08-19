@@ -85,6 +85,24 @@ class AppState {
             throw new Error(`Mesa ${order.table} não tem permissão`)
         }
 
+        // 查看限量菜
+        const totalPeople = table.peopleType.adults + table.peopleType.children
+        for (let i = 0; i < orderData.items.length; i++) {
+            if (orderData.items[i].limit) {
+                const id = orderData.items[i].dishid
+                const item = table.order.find(i => i.dishid == id)
+                let totalOrders = orderData.items[i].quantity
+                if (item) {
+                    totalOrders += item.quantity
+                }
+                // console.log(totalOrders)
+                // console.log(totalPeople * orderData.items[i].limit)
+                if (totalOrders > totalPeople * orderData.items[i].limit) {
+                    throw new Error(`Mesa ${order.table} ultrapassou o número de pedidos para ${item.dishid}`)
+                }
+            }
+        }
+
         // add order
         this.orders.set(orderId, order)
         // add order to Table
