@@ -279,6 +279,32 @@ function incrementOrder(orderData) {
   }
 }
 
+function deleteItem(data) {
+  try {
+    const index = appState.menu.findIndex(item => item.id == data);
+
+    if (index === -1) throw new Error("No item id")
+    
+    const count = appState.menu.filter(item => item.category === appState.menu[index].category).length
+    if (count === 1) {
+      appState.orderMenuTab = appState.orderMenuTab.filter(tab => tab !== appState.menu[index].category)
+    }
+
+    appState.menu.splice(index, 1);
+    
+    return {
+        success: true,
+        data: data
+    }
+  } catch (error) {
+    console.warn("Error: ", error)
+    return {
+        success: false,
+        data: error.message
+    }
+  }
+}
+
 // 导出函数和状态
 module.exports = {
   loadMenu,
@@ -289,5 +315,6 @@ module.exports = {
   findDish,
   getDishCategory,
   saveDishRating,
-  incrementOrder
+  incrementOrder,
+  deleteItem
 };

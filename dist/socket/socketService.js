@@ -37,6 +37,10 @@ class SocketServices {
     menuService.saveOrderMenuTab(data);
   }
 
+  saveOrderMenu(data, update_all) {
+    menuService.updateMenu(data, update_all);
+  }
+
   sendMsg2TableClient(io, table) {
     const chanel = 'client_table' + table.data.id
     io.emit(chanel, table)
@@ -52,6 +56,7 @@ class SocketServices {
   }
 
   async initializeDatas() {
+    await this.webPageDesignSocket.webPageDesignService.initialize()
     await this.appStateSocket.appStateService.loadAppState()
     await this.userSocket.userService.InitOrLoadUserData()
   }
@@ -63,7 +68,7 @@ class SocketServices {
   initSocket() {
     this.appStateSocket.appStateService.appStateRepository.appState.socket_io = this.io
 
-    this.io.on("connection", (socket) => {
+    this.io.on("connection", async (socket) => {
 
       const ip = socket.handshake.address;
 
@@ -82,18 +87,18 @@ class SocketServices {
         ENABLE_ROAST_DUCK = true;
       }
 
-      this.io.emit("env", {
+      socket.emit("env", {
         QR_ADDR: process.env.QR_ADDR,
         ENABLE_ROAST_DUCK: ENABLE_ROAST_DUCK,
-        TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT
+        TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT,
+        shopType: appState.shopType
       });
-
 
       this.tableSocket.registerHandlers(socket)
 
       this.orderSocket.registerHandlers(socket)
 
-      this.webPageDesignSocket.registerHandlers(socket)
+      await this.webPageDesignSocket.registerHandlers(socket)
 
       this.appStateSocket.registerHandlers(socket)
 
@@ -108,9 +113,6 @@ class SocketServices {
         const result = this.appStateSocket.appStateService.getTableTotalAmout(tableId)
         cb(result)
       })
-
-      socket.emit("clent_send_hasBibimbap", appState.hasBibimbap)
-      socket.emit("clent_send_hasBox", appState.hasBox)
 
       socket.on("manager_delete_order", ({ order: ordername, tableId: tableId }, cb) => {
         logger.info(`管理端请求删除盲盒, 桌号-${tableId}`)
@@ -130,10 +132,6 @@ class SocketServices {
 
         cb(result)
       })
-
-    socket.emit("manager_send_hasBibimbap", appState.hasBibimbap)
-    socket.emit("manager_send_hasBox", appState.hasBox)
-    socket.emit("manager_send_checkIP", appState.checkIP)
 
     socket.on("manager_update_checkIP", (value, callback) => {
       appState.checkIP = value;
@@ -157,7 +155,7 @@ class SocketServices {
       // 处理订单提交
       socket.on("submit_order", (orderData) => {
 
-        if (appState.checkIP && (!appState.checkLocalIP(socket))) {
+        if (appState.settings.checkIP && (!appState.checkLocalIP(socket))) {
           logger.info(`订单提交失败`)
           logger.info(`失败原因: invalid ip`)
           socket.emit('error', "please connected wifi.")
@@ -212,6 +210,9 @@ class SocketServices {
         // socket.emit('client_table', result)
         this.sendMsg2TableClient(this.io, result)
         socket.emit("table_id", value);
+
+        const price = this.appStateSocket.appStateService.getCurrentPrice()
+        socket.emit('client_currentPrice', price)
       });
 
       socket.on('admin', (value, callback) => {
@@ -273,12 +274,17 @@ class SocketServices {
         }
       });
 
-      socket.on('updateMenuIndex', data => {
+      socket.on('updateMenuIndex', (menuTab, dish) => {
 
-        if (!data) return;
-        if (data.length == 0) return;
+        if (!menuTab) return;
+        if (menuTab.length == 0) return;
 
-        this.saveOrderMenuTab(data);
+        this.saveOrderMenuTab(menuTab);
+
+        if (!dish) return;
+        if (dish.length == 0) return;
+
+        this.saveOrderMenu(dish, true);
       });
 
       socket.on("disconnect", (reason) => {
@@ -291,8 +297,10 @@ class SocketServices {
         let id = item.id;
         if (item.org_id) id = item.org_id;
 
+        const handle = item.handle;
+
         for (let i = 0; i < appState.menu.length; i++) {
-          if (appState.menu[i].id == id) {
+          if (appState.menu[i].handle == handle && appState.menu[i].id == id) {
             appState.menu[i] = { ...appState.menu[i], ...item };
             logger.debug(appState.menu[i]);
             this.io.emit("menu_item_changed", item);
@@ -303,6 +311,9 @@ class SocketServices {
 
         if (!found) {
           appState.menu.push(item);
+          if (!appState.orderMenuTab.includes(item.category)) {
+            appState.orderMenuTab.push(item.category)
+          }
           this.io.emit("menu_item_changed", item);
         }
 
@@ -310,7 +321,6 @@ class SocketServices {
           appState.dishTags[id] = item.tags;
         }
       });
-
 
       socket.on("client_cmd", (id, cmd) => {
         tableService.clientCmd(id, cmd);
@@ -362,6 +372,17 @@ class SocketServices {
           logger.info("获取菜品销售量成功")
         } else {
           logger.info(`获取菜品销售量失败，原因：${result.data}`)
+        }
+        callback(result)
+      })
+
+      socket.on('manager_delete_item', (data, callback) => {
+        logger.info(`管理端删除-ID: ${data}`)
+        const result = menuService.deleteItem(data)
+        if (result.success) {
+          logger.info(`管理端删除${result.data}成功`)
+        } else {
+          logger.info(`管理端删除失败，原因：${result.data}`)
         }
         callback(result)
       })

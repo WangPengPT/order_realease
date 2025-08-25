@@ -1,5 +1,5 @@
 const { AppState, appState } = require('../state.js');
-const { tablesPassword } = require('../model/tableManager.js');
+const { getCurentPeoplePrice } = require('../utils/timePrice.js')
 const db = require('../filedb.js');
 const DB = require('../db.js');
 const { logger } = require('../utils/logger.js');
@@ -24,25 +24,15 @@ class AppStateService {
             }
             // tablesPassword.init(appState.tables);
         } catch (error) {
-            console.warn("Error: ", error);
+            console.warn("错误: ", error);
         }
     }
 
-    updateHasBibimbap(value) {
+    updateSettings(key, value){
         try {
-            appState.updateBibimbap(value)
-            if (appState.hasBibimbap === value) return {success: true, data: value}
-            else throw new Error("Faild upadte has Bibimbap")
-        } catch (error) {
-            return {success: false, data: error.message}
-        }
-    }
-
-    updateHasBox(value) {
-        try {
-            appState.updateBox(value)
-            if (appState.hasBox === value) return {success: true, data: value}
-            else throw new Error("Faild upadte has Bibimbap")
+            appState.updateSettings(key, value)
+            if (appState.settings[key] === value) return {success: true, data: value}
+            else throw new Error(key+"更新失败")
         } catch (error) {
             return {success: false, data: error.message}
         }
@@ -153,6 +143,21 @@ class AppStateService {
         }
     }
 
+    getCurrentPrice() {
+        try {
+            const appState = this.appStateRepository.appState
+            const price = appState.weekPrice.getCurrentPrice()
+            const res = {
+                success: true,
+                data: price
+            }
+            return res
+        } catch (error) {
+            console.warn("Error: ", error)
+            return { success: false, data: error.message }
+        }
+    }
+
     async saveYearlyOrders() {
         try {
             const yearlyOrders = [];
@@ -183,10 +188,10 @@ class AppStateService {
         }
     }
 
-    updatePrice(lunchPrice, dinnerPrice) {
+    updateWeekPrice(price) {
         try {
-            const newAppState = this.appStateRepository.appState.updatePrice(lunchPrice, dinnerPrice);
-            return { success: true, data: { lunchPrice: newAppState.lunchPrice, dinnerPrice: newAppState.dinnerPrice } };
+            const newPrices = this.appStateRepository.appState.weekPrice.setAllPrices(price);
+            return { success: true, data: newPrices };
         } catch (error) {
             console.warn("Error: ", error);
             return { success: false, data: error.message };
