@@ -92,10 +92,13 @@ class AppState {
     }
 
     // 所有 Update 函数
-
-
     updateSettings(key, value) {
         this.settings[key] = value
+    }
+
+    updateChildrenPricePercentage(percentage){
+        this.childrenWeekPrice = percentage
+        return this.childrenWeekPrice
     }
 
     createTable(startIdx, endIdx) {
@@ -294,7 +297,10 @@ class AppState {
         const table = this.tables.getTableById(tableId)
         if (table == null) throw new Error('Not found the table')
         const tableOrdersAmount = parseFloat(table.getTableOrdersTotalAmount())
-        const tablePeoplesAmount = parseFloat(table.getTablePeopleTotalAmount(this.weekPrice.getCurrentPrice(), this.childrenPricePercentage))
+        const adultPrice = this.weekPrice.getCurrentPrice()
+        const childrenPrice = this.settings.useChildrenDiscount?
+            (adultPrice * this.childrenPricePercentage / 100 ) : this.childrenWeekPrice.getCurrentPrice()
+        const tablePeoplesAmount = parseFloat(table.getTablePeopleTotalAmount(adultPrice, childrenPrice))
         console.log("tablePeoplesAmount",tablePeoplesAmount)
         return {
             total: (tableOrdersAmount + tablePeoplesAmount).toFixed(2)

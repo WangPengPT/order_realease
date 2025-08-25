@@ -188,14 +188,26 @@ class AppStateService {
         }
     }
 
-    updateWeekPrice(price) {
+    updateWeekPrice(key,price) {
         try {
-            const newPrices = this.appStateRepository.appState.weekPrice.setAllPrices(price);
+            console.log("updateWeekPrice", key, price);
+            const newPrices = this.appStateRepository.appState[key].setAllPrices(price);
             return { success: true, data: newPrices };
         } catch (error) {
             console.warn("Error: ", error);
             return { success: false, data: error.message };
         }
+    }
+
+    updataChildrenPricePercentage(percentage){
+        try{
+            const newPercentage = this.appStateRepository.appState.updateChildrenPricePercentage(percentage)
+            return {success: true, data: newPercentage};
+        }catch (error) {
+            console.error("Error: ", error);
+            return { success: false, data: error.message };
+        }
+
     }
 
     getTableTotalAmout(tableId) {

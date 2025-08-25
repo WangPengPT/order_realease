@@ -22,9 +22,9 @@ class AppStateSocket {
 
 
     管理端更新价格
-    updateWeekPrice(value, callback) {
+    updatePriceData(key, value, callback) {
         logger.info(`管理端更改价格`)
-        const res = this.appStateService.updateWeekPrice(value)
+        let res = this.appStateService.updateWeekPrice(key,value)
         if (res.success) {
             logger.info(`管理端更改价格成功`)
         } else {
@@ -44,10 +44,10 @@ class AppStateSocket {
             case "weekPrice":
                 result = this.appStateService.appStateRepository.appState.getWeekPrice()
                 break
-            case "children_week_price":
+            case "childrenWeekPrice":
                 result = this.appStateService.appStateRepository.appState.getChildrenWeekPrice()
                 break
-            case "children_price_percentage":
+            case "childrenPricePercentage":
                 result = this.appStateService.appStateRepository.appState.getChildrenPricePercentage()
                 break
             default:
@@ -62,10 +62,11 @@ class AppStateSocket {
             case "settings":
                 this.updateSettings(value, callback)
                 break
-            case "week_price":
-                this.updateWeekPrice(value, callback)
+            case "weekPrice":
+            case "childrenWeekPrice":
+            case "childrenPricePercentage":
+                this.updatePriceData(key, value, callback)
                 break
-
             default:
                 callback({success: false, data: "Not Found Update Key"})
         }
@@ -78,7 +79,6 @@ class AppStateSocket {
         // socket.on("manager_get_menu", (value, bc) => { bc(this.appStateService.getMenuAndTab()) })
 
         socket.on("manager_update", (key, value,callback) => {this.managerUpdateData(key, value, callback)})
-        // socket.on("manager_update_settings", (key,value,callback) => {this.updateSettings(key, value, callback)})
 
         // socket.on("update_week_price", (value, callback) => { this.updateWeekPrice(value, callback) })
 
