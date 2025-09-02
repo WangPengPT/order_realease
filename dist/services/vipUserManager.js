@@ -5,7 +5,10 @@ const db_name = "vip_user";
 
 class VIPUserManager {
 
-    constructor(io) {
+    constructor() {
+    }
+
+    init(io) {
         this.io = io
     }
 
@@ -48,23 +51,31 @@ class VIPUserManager {
         }
     }
 
+
+    check_sting(str) {
+        if (typeof str != 'string') return false
+        if (str == '') return false;
+
+        return true;
+    }
+
     async registerUser(socket, user) {
 
-        if ((typeof user.email !== 'string') || (user.email == "")) {
+        if (this.isEmail(user.email)) {
             return {
                 result: false,
                 error: "invalid email."
             }
         }
 
-        if ((typeof user.phone !== 'string') || (user.phone == "")) {
+        if (this.isPhone(user.phone)) {
             return {
                 result: false,
                 error: "invalid pone"
             }
         }
 
-        if ((typeof user.id !== 'string') || (user.id == "")) {
+        if (this.check_sting(user.id)) {
             return {
                 result: false,
                 error: "invalid id"
@@ -96,12 +107,20 @@ class VIPUserManager {
         }
     }
 
-    isPhone(email) {
-        return false;
+    isPhone(phone) {
+        if (!this.check_sting(phone)) {
+            return false;
+        }
+        const regex = /^(\+?[1-9]\d{0,2}[-.\s]?)?($\d{1,4}$[-.\s]?)?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/;
+        return regex.test(phone);
     }
 
     isEmail(email) {
-        return false
+        if (!this.check_sting(email)) {
+            return false;
+        }
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
     }
 
     getEmailQ(email) {

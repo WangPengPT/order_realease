@@ -91,9 +91,6 @@ class Table {
   getTablePeopleTotalAmount(adultPrice,childrenPrice){
     const totalAdultPrice = this.peopleType.getPriceCount("adults", adultPrice)
     const totalChildrenPrice = this.peopleType.getPriceCount("children", childrenPrice)
-    console.log("totalAdultPrice:",totalAdultPrice)
-    console.log("totalChildrenPrice:",totalChildrenPrice)
-    console.log("totalAdultPrice + totalChildrenPrice:",(totalAdultPrice + totalChildrenPrice))
     return totalAdultPrice + totalChildrenPrice
   }
 

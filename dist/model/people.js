@@ -18,7 +18,6 @@ class PeopleType {
 
   getPriceCount(key, price){
     const result = this[key] * price
-    console.log("key:",key,"=",this[key],"\tprice:",price,"\ttotal:",result)
     return result
   }
 
