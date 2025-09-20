@@ -275,7 +275,8 @@ class OrderManager {
         ret.pickupTime = data.pickupTime ? data.pickupTime : attributes["Pickup-Time"]
         ret.pickupLocation = data.pickupLocation ? data.pickupLocation : attributes["Pickup-Location-Company"]
 
-        ret.line_items = data.line_items ? data.line_items : this.get_line_items(data)
+        //ret.line_items = data.line_items ? data.line_items : this.get_line_items(data)
+        ret.line_items = this.get_line_items(data)
 
         ret.payment_gateway_names = data.payment_gateway_names
         //ret.financial_status = data.financial_status
@@ -361,6 +362,10 @@ class OrderManager {
 
     get_line_items(data) {
         let ret = []
+        if (!data.line_items) {
+            return ret;
+        }
+
         for (let i = 0; i < data.line_items.length; i++) {
             const value = data.line_items[i]
 
