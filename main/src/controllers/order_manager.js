@@ -261,7 +261,9 @@ class OrderManager {
 
         ret.name = data.name
         ret.created_at = data.created_at
-        ret.customer = data.customer ? data.customer : this.get_customer_info(data)
+        //ret.customer = data.customer ? data.customer : this.get_customer_info(data)
+        ret.customer = this.get_customer_info(data)
+
         ret.total_price = data.total_price
         ret.pay_state = data.pay_state ? data.pay_state : this.get_pay_state(data)
         ret.tags = data.tags
@@ -285,6 +287,11 @@ class OrderManager {
     }
 
     get_customer_info(data) {
+
+        if (data.customer && data.customer.name) {
+            return data.customer
+        }
+
         const name = data.billing_address.name
         const phone = data.billing_address.phone
         const email = data.email ? data.email : data.billing_address.email
