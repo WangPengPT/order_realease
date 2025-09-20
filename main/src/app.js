@@ -8,6 +8,8 @@ const db = require('./utils/db');
 const userManager = require('./controllers/user_manager');
 const serverManager = require('./controllers/server_manager')
 const orderManager = require('./controllers/order_manager')
+const reserveManager = require('./controllers/reserve_manager')
+const mapManager = require('./controllers/map_manager')
 
 const httpAPI = require('./utils/http_api');
 const fs = require("fs");
@@ -75,6 +77,19 @@ async function initApp() {
     await userManager.init();
     await serverManager.init();
     await orderManager.init();
+    await reserveManager.init();
+    await mapManager.init();
+
+    // orderManager.xxOrderCreate({
+    //     id: "123",
+    //     billing_address: {
+    //         name: "wangpeng"
+    //     },
+    //     email: "bbksoftai@gmail.com",
+    //     total_price: "$123.00",
+    //     note_attributes: [],
+    //     line_items: [],
+    // })
 }
 
 initApp();

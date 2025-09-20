@@ -12,6 +12,8 @@ class DB {
     static serverTable = "server";
     static keyValueTable = "key_value"
     static orderTable = "order"
+    static restaurantTable = "restaurant"
+    static reserveTable = "reserve"
 
     static async init() {
         try {
@@ -39,7 +41,8 @@ class DB {
         const collection = db.collection(table);
         if (value.id) {
             console.log("collection.updateOne")
-            await collection.updateOne({ id: value.id }, { $set:  value }, { upsert: true });
+            const { _id, ...updateValue } = value;
+            await collection.updateOne({ id: value.id }, { $set:  updateValue  }, { upsert: true });
         }
         else {
             await collection.insertOne(value);

@@ -26,13 +26,14 @@ class ServerManager {
         }
 
         socket.registerMessage("addServer", this.addServer.bind(this));
-        socket.registerMessage("setUser", this.setServer.bind(this));
+        socket.registerMessage("setServer", this.setServer.bind(this));
         socket.registerMessage("getAllServer", this.getAllServer.bind(this));
 
         this.maxPort = await db.getValue("server_max_id", BASE_PORT);
     }
 
     async setServer(params) {
+        console.log("params: ", params)
         await db.set(db.serverTable, params);
 
         this.setRestaurants(params)
@@ -79,6 +80,10 @@ class ServerManager {
             }
 
             params.url = `https://v.xiaoxiong.pt:${param1}`;
+        }
+
+        if (params.takeWay) {
+            params.takeWay = false
         }
 
         await db.set(db.serverTable, params);
