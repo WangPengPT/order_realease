@@ -11,6 +11,8 @@ const orderManager = require('./controllers/order_manager')
 const reserveManager = require('./controllers/reserve_manager')
 const mapManager = require('./controllers/map_manager')
 
+const redirectPage = require('./controllers/redirect_page')
+
 const httpAPI = require('./utils/http_api');
 const fs = require("fs");
 const https = require("https");
@@ -79,6 +81,8 @@ async function initApp() {
     await orderManager.init();
     await reserveManager.init();
     await mapManager.init();
+
+    await redirectPage.init(app)
 
     // orderManager.xxOrderCreate({
     //     id: "123",

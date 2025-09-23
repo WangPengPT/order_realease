@@ -94,12 +94,12 @@ class ReserveManager {
         const customerDate = data.date;
         const customerTime = data.time
 
-        const customerName = data.name
+        const customerName = data.customerName
         const customerMail = data.email
         const customerPhone = data.phone
         const customerNote = data.note
 
-        const reserveId = data.id
+        const reserveId = data.name
         const reserveTime = customerDate + " " +  customerTime
         const reserveNumberPeople = data.numberPeople
 
@@ -132,7 +132,7 @@ class ReserveManager {
                 <p><strong>Reserve Note:</strong> ${customerNote}</p>
             </div>
         
-            <a href="https://v.xiaoxiong.pt/cancel-reserve.html?id=${reserveId}" class="cancel-btn">cancel reserve</a>
+            <a href="https://v.xiaoxiong.pt/cancel-reserve.html?id=${timeId}" class="cancel-btn">cancel reserve</a>
     
             <p>Thank you for choosing us!</p>
             <p style="color: #666; font-size: 0.9em;">© 2025 Your Restaurant Name</p>
@@ -159,7 +159,13 @@ class ReserveManager {
         const reserve = await db.get(db.reserveTable, id)
         if (reserve) {
 
+            reserve.financial_status = "voided"
+            await this.reserveUpdated(reserve)
+            return {
+                result: true
+            }
 
+            /*
             let timestamp = reserve.date + " " + reserve.time
             let dateObject = new Date(timestamp);
 
@@ -179,6 +185,7 @@ class ReserveManager {
                     error: "You can't cancel reserve in 15 minutes."
                 }
             }
+            */
         }
 
         return {
@@ -189,6 +196,7 @@ class ReserveManager {
     }
 
     broadcast(data) {
+        console.log("broadcast",this.toData(data))
         socket.broadcast("reserve_" + data.restaurant,this.toData(data))
     }
 
@@ -198,7 +206,7 @@ class ReserveManager {
         }
 
         const sort = {
-            pickup_date: -1,
+            date: -1,
         }
 
         const datas = await db.find(db.reserveTable, q, sort, count)
@@ -214,7 +222,7 @@ class ReserveManager {
     async getAllreserve(count) {
 
         const sort = {
-            pickup_date: -1,
+            date: -1,
         }
 
         const datas = await db.find(db.reserveTable, {}, sort, count)
