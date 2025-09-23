@@ -132,7 +132,7 @@ class ReserveManager {
                 <p><strong>Reserve Note:</strong> ${customerNote}</p>
             </div>
         
-            <a href="https://v.xiaoxiong.pt/cancel-reserve.html?id=${reserveId}" class="cancel-btn">cancel reserve</a>
+            <a href="https://v.xiaoxiong.pt/cancel-reserve.html?id=${timeId}" class="cancel-btn">cancel reserve</a>
     
             <p>Thank you for choosing us!</p>
             <p style="color: #666; font-size: 0.9em;">© 2025 Your Restaurant Name</p>
