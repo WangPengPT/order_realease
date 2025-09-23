@@ -4,6 +4,7 @@ const socket = require('../utils/socket');
 const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const redirectPage = require('./redirect_page')
 
 const BASE_PORT = 7100
 
@@ -33,11 +34,10 @@ class ServerManager {
     }
 
     async setServer(params) {
-        console.log("params: ", params)
         await db.set(db.serverTable, params);
 
         this.setRestaurants(params)
-
+        
         return {
             result: true,
         }
@@ -102,6 +102,8 @@ class ServerManager {
             console.log("map restaurant: " + params.shopify_name  + " -> " + params.id);
             this.restaurants[params.shopify_name] = params.id
         }
+
+        redirectPage.updateStore(params)
     }
 
     async getAllServer() {

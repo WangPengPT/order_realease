@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Cancellation System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Order Cancellation System</h1>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Processing cancellation request...</p>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Automatically process cancellation when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get order ID from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('id');
+            
+            if (orderId) {
+                cancelOrder(orderId);
+            } else {
+                showResult('Please add order ID parameter to URL (e.g. ?id=123456)', false);
+            }
+        });
+
+        function cancelOrder(orderId) {
+            // Show loading animation
+            document.getElementById('loading').style.display = 'block';
+            // Hide previous result
+            document.getElementById('result').style.display = 'none';
+            
+            // Build API URL - replace with your actual cancellation endpoint
+            const apiUrl = `/api/xx_order_cancel?orderId=${orderId}`;
+            console.log(apiUrl)
+			
+            // Use Fetch API to send DELETE request (or POST if your API requires)
+            fetch(apiUrl)
+                .then(response => {
+                    // Hide loading animation
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Check response status
+                    if (!response.ok) {
+                        // Try to get error message from response
+                        return response.json().then(err => {
+                            throw new Error(err.message || `Request failed with status: ${response.status}`);
+                        }).catch(() => {
+                            throw new Error(`Request failed with status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Display success message
+					if (data.result) {
+						showResult(`Order #${orderId} has been successfully cancelled!`, true);
+					}
+					else {
+						showResult(data.error, false);
+					}                    
+                })
+                .catch(error => {
+                    // Display error message
+                    showResult(`Cancellation failed: ${error.message}`, false);
+                });
+        }
+        
+        function showResult(message, isSuccess) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = isSuccess ? 'success' : 'error';
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+        
