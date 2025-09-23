@@ -18,12 +18,18 @@ class RedirectPage {
 
         for (const data in datas) {
             let key = data.id
-            key = key.replaceAll("sc_", "sushicome")
-            key = key.replaceAll("xx_", "xiaoxiongkitchen")
+
+            if (key) {
+                key = key.replaceAll("sc_", "sushicome")
+                key = key.replaceAll("xx_", "xiaoxiongkitchen")
+            }
+
 
             if (data.qr_addr && data.qr_addr != "") {
                 key = data.qr_addr
             }
+
+            if (!key) continue;
 
             let url = data.url + "/reservePage";
 
