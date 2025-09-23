@@ -3,7 +3,7 @@ const { appState } = require('../state.js');
 const orderService = require('../services/orderService.js')
 const tableService = require('../services/tableService.js');
 const {MenuService} = require("../services/menuService.js")
-const { print_order } = require('../utils/printOrder.js');
+const { print_order, print_takeaway_order } = require('../utils/printOrder.js');
 const { printers } = require('../utils/printOrder.js');
 const { logger, formatOrderLog } = require('../utils/logger.js')
 const { TableSocket } = require('./tableSocket.js')
@@ -14,6 +14,7 @@ const { UserSocket } = require('./userSocket.js');
 const { CustomDishSocket } = require('./customDishSocket.js');
 const VIPUserManager = require("../services/vipUserManager.js")
 const centerSocket = require('./centerSocket.js');
+const { DataAnalizeSocket } = require('./dataAnalizeSocket.js');
 
 class SocketServices {
   constructor(io ,
@@ -23,7 +24,8 @@ class SocketServices {
     tableSocket = new TableSocket(io),
     webPageDesignSocket = new WebPageDesignSocket(io),
     userSocket = new UserSocket(io),
-    customDish = new CustomDishSocket()
+    customDish = new CustomDishSocket(),
+    dataAnalizeSocket = new DataAnalizeSocket(io)
   ) {
 
     this.io = io
@@ -34,6 +36,7 @@ class SocketServices {
     this.webPageDesignSocket = webPageDesignSocket
     this.userSocket = userSocket
     this.customDish = customDish
+    this.dataAnalizeSocket = dataAnalizeSocket
   }
 
   emit(...datas) {
@@ -96,8 +99,10 @@ class SocketServices {
         ADDR: process.env.ADDR,
         ENABLE_ROAST_DUCK: ENABLE_ROAST_DUCK,
         TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT,
+        pageDir: db.pageDir,
         shopType: appState.shopType,
-        restaurant: centerSocket.getRestaurant()
+        restaurant: centerSocket.getRestaurant(),
+        location: appState.pickupData.latitudeAndLongitude,
       });
 
       this.tableSocket.registerHandlers(socket)
@@ -112,6 +117,7 @@ class SocketServices {
 
       await this.customDish.registerHandlers(socket)
 
+      this.dataAnalizeSocket.registerHandlers(socket)
 
       socket.emit("menu_data", await this.menuService.getMenu(), this.appStateSocket.appStateService.appStateRepository.appState.orderMenuTab);
 
@@ -175,19 +181,11 @@ class SocketServices {
 
         const order = orderService.addOrder(orderData)
         if (order.success) {
-          const increment = this.menuService.incrementOrder(orderData)
-          if (increment.success) {
-            // TODO: log不出来
-            logger.info(`销售量添加成功 - ${increment.data}`)
-          }
 
           logger.info(`订单提交成功 订单号 - ${order.data.id}`)
           logger.info(formatOrderLog(orderData))
 
-          // console.log("order.data",order.data)
           print_order(order.data);
-
-          //logger.info(`发送给客户端服务端订单桌子信息`)
 
           this.io.emit("new_order", order.data);
           logger.info("📢 已广播新订单:", order.data);
@@ -201,7 +199,6 @@ class SocketServices {
           // 给客户端发送桌子信息
           const table = tableService.getTableById(order.data.table)
           if (table.success) {
-            // io.emit('client_table', table)
             this.sendMsg2TableClient(this.io, table)
           }
 
@@ -212,6 +209,12 @@ class SocketServices {
         }
 
       });
+
+      // 管理端打印外卖订单
+      socket.on("manager_takeaway_order", (orderData) => {
+        console.log("takeaway order",orderData)
+        print_takeaway_order(orderData);
+      })
 
       // 返回table id ，发送桌子信息，目前价格
       socket.on('get_table_id', (value) => {
@@ -268,9 +271,10 @@ class SocketServices {
             if (printer) {
               printer.data.curPrinter = value.printer;
               printer.data.menu = value.menu;
+              printer.data.print_takeaway = value.print_takeaway;
               printer.data.every_one = value.every_one;
               printer.data.fontSize = value.fontSize;
-              printer.socket.emit('select_printer', value.printer, value.menu.toString(), value.every_one, value.fontSize);
+              printer.socket.emit('select_printer', value.printer, value.menu.toString(), value.every_one, value.print_takeaway, value.fontSize);
             }
           }
         }
@@ -347,8 +351,8 @@ class SocketServices {
         tableService.clickMsg(id, cmd);
       });
 
-      socket.on("rate_dish", (id, like, rate) => {
-        const result = this.menuService.saveDishRating(id, like, rate);
+      socket.on("rate_dish", async (id, like, rate) => {
+        const result = await this.menuService.saveDishRating(id, like, rate);
         if (result) {
           this.io.emit("rating_changed", result.data.id, result.data.likes, result.data.rates);
           logger.info(`客服端评分成功, id-${id}`)
@@ -393,7 +397,23 @@ class SocketServices {
       })
 
       socket.on("get_shopify_orders", ()=> {
-        centerSocket.get_shopify_orders(socket)
+        centerSocket.get_center_datas(socket,"shopify_orders","order_list")
+      })
+
+      socket.on("get_reserves", ()=> {
+        centerSocket.get_center_datas(socket,"reserves","reserve_list")
+      })
+
+      socket.on("update_reserve_data", (value,callback) => {
+        centerSocket.updateReserveData(value,(cb)=>{
+          if(cb.success){
+            logger.info(`更新订台数据成功, value:${value}`)
+            callback(cb)
+          }else{
+            logger.info(`更新订台数据失败, Error: ${cb.data}`)
+            callback(cb)
+          }
+        })
       })
 
     })

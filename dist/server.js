@@ -11,7 +11,7 @@ const { authMiddleware } = require('./middlewares/authMiddleware.js')
 const menuController = require('./controllers/menuController.js');
 const { UploadController } = require('./controllers/uploadController.js');
 const { SocketServices } = require('./socket/socketService.js');
-const {upload, uploadMiddleware, memoryUpload} = require('./middlewares/uploadMiddleware.js');
+const {upload, memoryUpload} = require('./middlewares/uploadMiddleware.js');
 const { logger } = require('./utils/logger.js')
 const { webPageDesignService } = require("./services/webPageDesignService.js");
 const DB = require("./db.js");
@@ -79,15 +79,17 @@ const io = new Server(server, {
 const socketService = new SocketServices(io, menuService)
 const datasController = new DatasController(socketService.appStateSocket.appStateService.appStateRepository, socketService.userSocket.userService)
 const uploadController = new UploadController(socketService.webPageDesignSocket.webPageDesignService)
+const dataAnalizeService = new DataAnalizeService()
 
 // 路由只保留上传接口
 app.post('/upload', upload.any(), uploadController.handleUpload);
 app.post('/upload_image', upload.single('image'), uploadController.handleUploadImage);
-app.post('/upload_welcomeImage', 
-  uploadMiddleware.array('image', 5),
-  (req, res) => {
-    uploadController.handleUploadWelcomeImage(req, res)
-  }
+app.post('/api/upload_welcomeImage',
+  upload.fields([
+  { name: 'logo', maxCount: 1 },
+  { name: 'titleImages' },
+  { name: 'informationImages' }]),
+    uploadController.handleUploadWelcomeImage
 );
 app.post('/upload_logo', upload.single('image'),
   (req, res) => {
@@ -97,6 +99,9 @@ app.post('/upload_logo', upload.single('image'),
 
 app.get('/api/exportDatas', authMiddleware, datasController.exportDatas)
 
+app.get('/api/exportPage/:id', authMiddleware, datasController.exportPage)
+
+app.post('/api/import/page', memoryUpload.single('page'), datasController.importPage)
 
 app.post('/api/import/appState', authMiddleware, memoryUpload.single('file'), datasController.importAppState)
 
@@ -117,10 +122,8 @@ async function main() {
   await DB.init();
 
   await socketService.initializeDatas()
-
   socketService.initSocket()
   centerSocket.init()
-
   const PORT = process.env.PORT || 8080;
   server.listen(PORT, '0.0.0.0', () => {
     logger.info(`🟢 服务器已启动，监听端口 ${PORT}`);
@@ -134,6 +137,10 @@ async function main() {
 }
 
 app.get('/table', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'))
+})
+
+app.get('/takeReserve', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
@@ -165,7 +172,7 @@ function runCleanInterval() {
     if (now.getHours() == 1)
     {
       if ( needClean ) {
-        //appState.clearAll();
+        appState.clearAll();
       }
       needClean = false;
     }
@@ -175,72 +182,26 @@ function runCleanInterval() {
     }
 
     runCleanInterval();
-  }, 1000 * 600);
+  }, 1000 * 600 * 6);
 }
 
-// function runFandaysInterval(){
-//   setTimeout(() => {
-//     const now = new Date();
-//     if (now.getDate() == 11 || now.getDate() == 12 || now.getDate() == 25 || now.getDate() == 26)
-//     {
-//       if (!appState.hasBox){
-//         appState.hasBox = true;
-//         socketService.emitHasBoxStatus()
-//       }
-//     }
-//     else
-//     {
-//       if(appState.hasBox){
-//         appState.hasBox = false;
-//         socketService.emitHasBoxStatus()
-//       }
-//     }
-//
-//     runFandaysInterval();
-//   }, 1000 * 3600);
-// }
-
 let needWriteDailyOrders = true;
-let needWriteMonthlyOrders = true;
-let needWriteYearlyOrders = true;
 function writeOrders() {
-  setTimeout(() => {
+  setTimeout(async () => {
     const now = new Date();
     // 每天0点
     if (now.getHours() === 0) {
       if (needWriteDailyOrders) {
-        socketService.appStateSocket.appStateService.saveDailyOrders() // 将当天的销售量数据写入文件
-        socketService.appStateSocket.appStateService.clearDailyOrders() // 清空当天的销售量数据
+        await dataAnalizeService.saveDailyOrders()
+        await dataAnalizeService.saveMonthlyRate()
       }
       needWriteDailyOrders = false;
     } else {
       needWriteDailyOrders = true;
     }
 
-    // 每月1号
-    if (now.getDate() === 1) {
-      if (needWriteMonthlyOrders) {
-        socketService.appStateSocket.appStateService.saveMonthlyOrders() // 将当月的销售量数据写入文件
-        socketService.appStateSocket.appStateService.clearMonthlyOrders() // 清空当月的销售量数据
-      }
-      needWriteMonthlyOrders = false;
-    } else {
-      needWriteMonthlyOrders = true;
-    }
-
-    // 每年1月1号
-    if (now.getMonth() && now.getDate() === 1) {
-      if (needWriteYearlyOrders) {
-        socketService.appStateSocket.appStateService.saveYearlyOrders() // 将当月的销售量数据写入文件
-        socketService.appStateSocket.appStateService.clearYearlyOrders() // 清空当月的销售量数据
-      }
-      needWriteYearlyOrders = false;
-    } else {
-      needWriteYearlyOrders = true;
-    }
-
     writeOrders();
-  }, 1000 * 60 * 5); // 每五分钟
+  }, 1000 * 60 * 3); // 每3分钟
 }
 
 /*
