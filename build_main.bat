@@ -25,5 +25,12 @@ call npm run build
 xcopy .\dist %DST_PATH%\public /E /Y /I
 cd ..
 
+cd map
+call npm install
+call npm run build
+ren .\dist\index.html map.html
+xcopy .\dist %DST_PATH%\public /E /Y /I
+cd ..
+
 cd %DST_PATH%
 
