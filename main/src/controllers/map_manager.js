@@ -18,6 +18,7 @@ class MapManager {
         socket.registerMessage("addRestaurant", this.addRestaurant);
     }
 
+
     async addRestaurant(params) {
         const exists = await db.get(db.restaurantTable, params.name);
         console.log("mapManager.js: asdadasdasdasd",params.name)

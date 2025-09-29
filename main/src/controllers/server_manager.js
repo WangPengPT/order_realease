@@ -88,6 +88,7 @@ class ServerManager {
 
         await db.set(db.serverTable, params);
 
+        redirectPage.updateStore(params)
         this.setRestaurants(params)
 
         return {
@@ -102,8 +103,6 @@ class ServerManager {
             console.log("map restaurant: " + params.shopify_name  + " -> " + params.id);
             this.restaurants[params.shopify_name] = params.id
         }
-
-        redirectPage.updateStore(params)
     }
 
     async getAllServer() {

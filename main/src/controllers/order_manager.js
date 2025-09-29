@@ -292,15 +292,24 @@ class OrderManager {
             return data.customer
         }
 
-        const name = data.billing_address.name
-        const phone = data.billing_address.phone
-        const email = data.email ? data.email : data.billing_address.email
+        if (data.billing_address) {
+            const name = data.billing_address.name
+            const phone = data.billing_address.phone
+            const email = data.email ? data.email : data.billing_address.email
+
+            return {
+                name,
+                phone,
+                email
+            }
+        }
 
         return {
-            name,
-            phone,
-            email
+            name: "",
+            phone: "",
+            email: "",
         }
+
     }
 
     get_pay_state(data) {

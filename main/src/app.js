@@ -18,6 +18,7 @@ const fs = require("fs");
 const https = require("https");
 const http = require("http");
 const tools = require('./utils/tools')
+const path = require("path");
 
 const app = express();
 let port = 80;
@@ -32,7 +33,11 @@ app.use(express.static('public'));
 
 // 简单路由
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, '../public', 'index.html'));
+});
+
+app.get('/map', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public', 'map.html'));
 });
 
 // 创建 HTTP 服务器

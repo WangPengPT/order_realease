@@ -11,12 +11,15 @@ class RedirectPage {
 
     async updateStore(data) {
 
+        if (!this.app) return;
+
         let datas = [data]
         if (!data) {
             datas = await DB.getAll(DB.serverTable);
         }
 
-        for (const data in datas) {
+        for (let i=0; i<datas.length; i++) {
+            let data = datas[i]
             let key = data.id
 
             if (key) {
@@ -29,9 +32,14 @@ class RedirectPage {
                 key = data.qr_addr
             }
 
-            if (!key) continue;
+            if (!key) {
+                console.log("can't find store redirect:" + data);
+                continue;
+            }
 
             let url = data.url + "/reservePage";
+
+            console.log("" + key + " => " + url);
 
             this.app.get('/' + key, (req, res) => {
                 res.redirect(url);
@@ -41,5 +49,6 @@ class RedirectPage {
     }
 }
 
-module.exports =  new RedirectPage();
+const mod = new RedirectPage();
+module.exports =  mod
 

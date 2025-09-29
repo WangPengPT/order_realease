@@ -38,7 +38,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Cancellation System</title>
+    <title>Order Confirmation System</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -94,16 +94,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Order Cancellation System</h1>
+        <h1>Order Confirmation System</h1>
         <div id="loading" class="loading">
             <div class="spinner"></div>
-            <p>Processing cancellation request...</p>
+            <p>Processing confirmation request...</p>
         </div>
         <div id="result"></div>
     </div>
 
     <script>
-        // Automatically process cancellation when page loads
+        // Automatically process confirmation when page loads
         document.addEventListener('DOMContentLoaded', function() {
             // Get order ID from URL parameter
             const urlParams = new URLSearchParams(window.location.search);
@@ -111,20 +111,20 @@
             const reserveName = urlParams.get('name');
 
             if (reserveId && reserveName) {
-                cancelOrder(reserveId,reserveName);
+                confirmOrder(reserveId,reserveName);
             } else {
                 showResult('Please add order ID parameter to URL (e.g. ?id=123456)', false);
             }
         });
 
-        function cancelOrder(reserveId,reserveName) {
+        function confirmOrder(reserveId,reserveName) {
             // Show loading animation
             document.getElementById('loading').style.display = 'block';
             // Hide previous result
             document.getElementById('result').style.display = 'none';
             
-            // Build API URL - replace with your actual cancellation endpoint
-            const apiUrl = `/api/reserve_cancel?reserveId=${reserveId}`;
+            // Build API URL - replace with your actual confirmation endpoint
+            const apiUrl = `/api/reserve_confirm?reserveId=${reserveId}`;
             console.log(apiUrl)
 			
             // Use Fetch API to send DELETE request (or POST if your API requires)
@@ -147,7 +147,7 @@
                 .then(data => {
                     // Display success message
 					if (data.result) {
-						showResult(`Order #${reserveName} has been successfully cancelled!`, true);
+						showResult(`Order #${reserveName} has been successfully confirmed!`, true);
 					}
 					else {
 						showResult(data.error, false);
@@ -155,7 +155,7 @@
                 })
                 .catch(error => {
                     // Display error message
-                    showResult(`Cancellation failed: ${error.message}`, false);
+                    showResult(`Confirmation failed: ${error.message}`, false);
                 });
         }
         

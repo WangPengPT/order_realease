@@ -18,10 +18,15 @@ class ReserveManager {
 
         httpAPI.pos("/reserve_create", this.reserveCreate.bind(this))
 
+        httpAPI.get("/reserve_confirm", async (query) => {
+            let {reserveId} = query;
+            return await this.reserveConfirm(reserveId)
+        });
+
         httpAPI.get("/reserve_cancel", async (query) => {
             let {reserveId} = query;
             return await this.reserveCancel(reserveId)
-        });
+        })
 
         httpAPI.get("/reserve_list", async (query) => {
             let {restaurant, count} = query;
@@ -110,6 +115,16 @@ class ReserveManager {
             <meta charset="UTF-8">
             <title>reserve Confirmation</title>
             <style>
+                .confirm-btn {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background-color: #44ff44;
+                    color: white;
+                    text-decoration: none;
+                    breserve-radius: 4px;
+                    font-family: Arial, sans-serif;
+                }
+                
                 .cancel-btn {
                     display: inline-block;
                     padding: 10px 20px;
@@ -132,7 +147,9 @@ class ReserveManager {
                 <p><strong>Reserve Note:</strong> ${customerNote}</p>
             </div>
         
-            <a href="https://v.xiaoxiong.pt/cancel-reserve.html?id=${timeId}" class="cancel-btn">cancel reserve</a>
+            <a href="http://localhost/confirm-reserve.html?id=${timeId}&name=${reserveId}" class="confirm-btn">confirm reserve</a>
+            <a href="http://localhost/cancel-reserve.html?id=${timeId}&name=${reserveId}" class="cancel-btn">cancel reserve</a>
+<!--            <a href="https://v.xiaoxiong.pt/cancel-reserve.html?id=${timeId}" class="cancel-btn">cancel reserve</a>-->
     
             <p>Thank you for choosing us!</p>
             <p style="color: #666; font-size: 0.9em;">© 2025 Your Restaurant Name</p>
@@ -159,20 +176,16 @@ class ReserveManager {
         const reserve = await db.get(db.reserveTable, id)
         if (reserve) {
 
-            reserve.financial_status = "voided"
-            await this.reserveUpdated(reserve)
-            return {
-                result: true
-            }
-
-            /*
             let timestamp = reserve.date + " " + reserve.time
             let dateObject = new Date(timestamp);
 
             const diffMinutes = this.getMinutesDiff(dateObject,Date.now());
             console.log(diffMinutes)
 
-            if (diffMinutes >= 15)  {
+            const cancelLimitTime = 30 // min
+
+            if (diffMinutes >= cancelLimitTime)  {
+                reserve.status = "voided"
                 reserve.financial_status = "voided"
                 await this.reserveUpdated(reserve)
                 return {
@@ -182,10 +195,9 @@ class ReserveManager {
             else {
                 return {
                     result: false,
-                    error: "You can't cancel reserve in 15 minutes."
+                    error: "You can't cancel reserve in " + cancelLimitTime + " minutes."
                 }
             }
-            */
         }
 
         return {
@@ -193,6 +205,23 @@ class ReserveManager {
             error: "Invalid reserve id."
         }
 
+    }
+
+    async reserveConfirm(id){
+        const reserve = await db.get(db.reserveTable, id)
+        if(reserve) {
+            reserve.status = "confirmed"
+
+            await  this.reserveUpdated(reserve)
+            return {
+                result: true,
+            }
+        }
+
+        return {
+            result: false,
+            error: "Invalid reserve id."
+        }
     }
 
     broadcast(data) {
