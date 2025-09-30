@@ -111,7 +111,7 @@ class SocketServices {
 
       await this.webPageDesignSocket.registerHandlers(socket)
 
-      this.appStateSocket.registerHandlers(socket)
+      await this.appStateSocket.registerHandlers(socket)
 
       this.userSocket.registerHandlers(socket)
 
@@ -119,8 +119,28 @@ class SocketServices {
 
       this.dataAnalizeSocket.registerHandlers(socket)
 
-      socket.emit("menu_data", await this.menuService.getMenu(), this.appStateSocket.appStateService.appStateRepository.appState.orderMenuTab);
+      socket.emit("menu_data", await this.menuService.getMenu(), await this.menuService.getMenuOrdering());
 
+      socket.on("manager_get_menu", async (_, callback) => {
+        const data = {}
+        data.menu = await this.menuService.getMenu()
+        data.menuTab = await this.menuService.getMenuOrdering()
+        callback({
+          success: true,
+          data: data
+        })
+      })
+      
+      socket.on("get_takeaway_menu_data",  async () => {
+          let menu = await this.menuService.getMenu()
+          let data = centerSocket.get_menu_data()
+
+          if (data) {
+              console.log("get is_takeaway menu data ok!");
+              menu = data;
+          }
+        socket.emit("takeaway_menu_data", menu, this.appStateSocket.appStateService.appStateRepository.appState.orderMenuTab);
+      });
 
       // 餐桌密码验证
       //tableService.tableLogin(socket)
@@ -169,7 +189,6 @@ class SocketServices {
 
       // 处理订单提交
       socket.on("submit_order", (orderData) => {
-
         if (appState.settings.checkIP && (!appState.checkLocalIP(socket))) {
           logger.info(`订单提交失败`)
           logger.info(`失败原因: invalid ip`)
@@ -193,8 +212,8 @@ class SocketServices {
           // 返回确认给用户端
           socket.emit("order_confirmed", order.data.id);
 
-          // 更新管理端的桌子信息
-          this.io.emit("send_tables", appState.tables.toJSON())
+          // // 更新管理端的桌子信息
+          // this.io.emit("send_tables", appState.tables.toJSON())
 
           // 给客户端发送桌子信息
           const table = tableService.getTableById(order.data.table)
@@ -307,7 +326,7 @@ class SocketServices {
 
       //Old update_menu_item
       socket.on("update_menu_item", async (item) => {
-        console.log("In menu update item socket")
+        logger.info("修改菜品")
         try {
          let id = item._id;
          if (!id) id = item.id
@@ -320,10 +339,7 @@ class SocketServices {
            // Refresh appState.menu from DB
           appState.menu = await this.menuService.getMenu()
 
-          // Update orderMenuTab if needed
-          if (!appState.orderMenuTab.includes(item.category)) {
-            appState.orderMenuTab.push(item.category);
-          }
+          appState.orderMenuTab = (await this.menuService.getMenuOrdering()).map(it => it.name )
 
           // Update dishTags if present
           if (item.tags) {
@@ -331,7 +347,7 @@ class SocketServices {
           }
           // Broadcast updated item and full menu
           this.io.emit("menu_item_changed", item);
-          this.io.emit("menu_data", appState.menu, appState.orderMenuTab || "defaultTab");
+          this.io.emit("menu_data", await this.menuService.getMenu(), await this.menuService.getMenuOrdering());
 
           logger.info(`Dish updated and broadcasted: ${item.name || item.handle}`);
         } catch (err) {
@@ -340,16 +356,6 @@ class SocketServices {
         }
       });
 
-
-
-      socket.on("client_cmd", (id, cmd) => {
-        tableService.clientCmd(id, cmd);
-        this.io.emit("client_cmd", id, cmd);
-      });
-
-      socket.on("click_msg", (id, cmd) => {
-        tableService.clickMsg(id, cmd);
-      });
 
       socket.on("rate_dish", async (id, like, rate) => {
         const result = await this.menuService.saveDishRating(id, like, rate);
