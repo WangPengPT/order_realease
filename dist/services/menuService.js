@@ -6,6 +6,7 @@ const MenuRepository = require('../repositories/menuRepository.js');
 const DB = require('../db.js');
 const MenuOrderingRepository = require('../repositories/menuOrderingRepository.js');
 const centerSocket = require('../socket/centerSocket.js');
+const { logger } = require('../utils/logger.js');
 
 class MenuService {
   constructor(menuRespository = new MenuRepository(), menuOrderingRepository = new MenuOrderingRepository(), customeDishRepository = new CustomDishRepository()) {
@@ -166,6 +167,9 @@ class MenuService {
     const categoryMap = {}  // { category: [{id, subDishes}] }
 
     for (const [handle, main] of Object.entries(handleToMain)) {
+      if (handleToSubs[handle].length >= 1) {
+        handleToSubs[handle].push({id: main.id})
+      }
       const subs = handleToSubs[handle] || []
       const category = main.category
       categoryMap[category] ??= []
@@ -197,7 +201,8 @@ class MenuService {
 
   // 获取菜单
   async getMenu() {
-    const menu = await this.menuRespository.getMenu()
+    logger.info("获取菜单")
+    const menu = await this.menuRespository.getMenu() 
     appState.menu = menu;
     return menu
   }
