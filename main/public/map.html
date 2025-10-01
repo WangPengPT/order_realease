@@ -16,9 +16,14 @@
             margin: 0 auto;
             padding: 15px;
         }
+        .top_container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 8px;
+        }
         header {
-            background-color: #333;
-            color: white;
+            background-color: white;
+            color: black;
             padding: 0px 0;
             text-align: center;
         }
@@ -50,20 +55,23 @@
 		.title-icon {
 			position: absolute;
 			left: 0;
-			width: 32px; /* 设置你想要的图标大小 */
-			height: 32px;
+			width: 36px; /* 设置你想要的图标大小 */
+			height: 36px;
 			object-fit: contain; /* 保持图片比例 */
 			margin-right: 5px; /* 图标和文字之间的间距 */
 		}
 
 		.menu-button {
 			margin-left: auto;
-			background: #333;
+			background: #016450;
 			color: white;
 			border: none;
 			padding: 5px 5px;
 			border-radius: 4px;
 			cursor: pointer;
+            width: 2rem;
+            height: 2rem;
+            font-size: 1rem;
 		}
 
 		.menu-button:hover {
@@ -73,9 +81,10 @@
 </head>
 <body>
     <header>
-        <div class="container">			
+        <div style="background: #016450; height: 3px"></div>
+        <div class="top_container">
             <h3 class="title-with-icon">
-				<img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-65x65.png?v=1759266956" alt="Map Icon" class="title-icon">
+				<img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579" alt="Map Icon" class="title-icon">
 				The Liberated Map ...🗺
 				<button class="menu-button">☰</button>
 			</h3>			
