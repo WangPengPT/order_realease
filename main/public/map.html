@@ -14,12 +14,12 @@
         .container {
             max-width: 1800px;
             margin: 0 auto;
-            padding: 10px;
+            padding: 15px;
         }
         header {
             background-color: #333;
             color: white;
-            padding: 5px 0;
+            padding: 0px 0;
             text-align: center;
         }
        
@@ -42,16 +42,32 @@
 			display: flex;
 			align-items: center; /* 垂直居中 */
 			position: relative;
-			padding-left: 60px; /* 为图标留出空间 */
+			padding: 0;
+			margin: 0;
+			padding-left: 50px; /* 为图标留出空间 */
 		}
 
 		.title-icon {
 			position: absolute;
 			left: 0;
-			width: 50px; /* 设置你想要的图标大小 */
-			height: 50px;
+			width: 32px; /* 设置你想要的图标大小 */
+			height: 32px;
 			object-fit: contain; /* 保持图片比例 */
-			margin-right: 15px; /* 图标和文字之间的间距 */
+			margin-right: 5px; /* 图标和文字之间的间距 */
+		}
+
+		.menu-button {
+			margin-left: auto;
+			background: #333;
+			color: white;
+			border: none;
+			padding: 5px 5px;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+
+		.menu-button:hover {
+			background: #555;
 		}
     </style>
 </head>
@@ -61,7 +77,8 @@
             <h3 class="title-with-icon">
 				<img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-65x65.png?v=1759266956" alt="Map Icon" class="title-icon">
 				The Liberated Map ...🗺
-			</h3>
+				<button class="menu-button">☰</button>
+			</h3>			
         </div>
     </header>
     
