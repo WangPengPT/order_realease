@@ -93,36 +93,42 @@
 
         .information-bar {
             display: flex;
-            gap: 1rem;
-            /* 两个小块之间的间距 */
-            padding: 0.7rem;
-            padding-bottom: 0;
-            background: #f5f5f5;
+            gap: 1rem; /* 两个小块之间的间距 */
+            justify-content: space-between;
+            background: white;
+            border-radius: 8px; /* 四角圆角，数值可以调大/调小 */
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* 阴影 */
         }
 
         .info-box {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            padding-left: .5rem;
+            padding-right: .5rem;
             display: flex;
-            border: 1px solid gray;
-            border-radius: 6px;
             overflow: hidden;
-            /* 确保边框圆角裁剪内容 */
-            font-size: small;
+            font-size: .8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .info-box .label,
         .info-box .value {
-            padding: 0.2rem 0.4rem;
             color: gray;
         }
 
-        .info-box .label {
-            border-right: 1px solid gray;
-            /* 中间的竖线 */
-            font-weight: bold;
-            color: gray;
+        .value-border {
+            padding: 0.3rem;
+            border: 1px solid gray;
+            border-radius: 6px;
         }
 
-
+        .split-line {
+            color: gray;
+            margin-left: .5rem;
+            margin-right: .5rem;
+        }
 
         /* 翻牌动画 */
         .flip {
@@ -131,7 +137,7 @@
         }
 
         .flip.animate {
-            transform: rotateX(180deg);
+            transform: rotateX(90deg);
         }
     </style>
 </head>
@@ -149,16 +155,26 @@
         </div>
     </header>
 
-    <div class="information-bar">
+    <div style="margin-top: .6rem; margin-bottom: .1rem; margin-left: .7rem; margin-right: .7rem;">
+<div class="information-bar">
         <div class="info-box">
+            <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579" style="width: 1rem; padding-bottom: 0.2rem; padding-right: 0.2rem; object-fit: contain;" />
             <span class="label">Take Away</span>
+            <span class="split-line">|</span>
             <span class="value flip" id="takeaway">346</span>
+            <span class="value">/uni</span>
         </div>
+        
         <div class="info-box">
+            <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579" style="width: 1rem; padding-bottom: 0.1rem; padding-right: 0.2rem; object-fit: contain;" />
             <span class="label">Reserve</span>
+            <span class="split-line">|</span>
             <span class="value flip" id="reserve">154</span>
+            <span class="value">/uni</span>
         </div>
     </div>
+    </div>
+    
 
     <div class="widget-container">
         <!-- Start Stockist.co widget -->
