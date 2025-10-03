@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,30 +12,34 @@
             padding: 0;
             background-color: #f5f5f5;
         }
+
         .container {
             max-width: 1800px;
             margin: 0 auto;
             padding: 15px;
         }
+
         .top_container {
             max-width: 1800px;
             margin: 0 auto;
-            padding: 8px;
+            padding: 15px;
         }
+
         header {
             background-color: white;
             color: black;
             padding: 0px 0;
             text-align: center;
         }
-       
+
         .widget-container {
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 10px;
             margin: 10px;
         }
+
         footer {
             text-align: center;
             margin-top: 30px;
@@ -42,68 +47,195 @@
             color: #666;
             font-size: 14px;
         }
-		
-		.title-with-icon {
-			display: flex;
-			align-items: center; /* 垂直居中 */
-			position: relative;
-			padding: 0;
-			margin: 0;
-			padding-left: 50px; /* 为图标留出空间 */
-		}
 
-		.title-icon {
-			position: absolute;
-			left: 0;
-			width: 36px; /* 设置你想要的图标大小 */
-			height: 36px;
-			object-fit: contain; /* 保持图片比例 */
-			margin-right: 5px; /* 图标和文字之间的间距 */
-		}
+        .title-with-icon {
+            display: flex;
+            align-items: center;
+            /* 垂直居中 */
+            position: relative;
+            padding: 0;
+            margin: 0;
+            padding-left: 50px;
+            /* 为图标留出空间 */
+        }
 
-		.menu-button {
-			margin-left: auto;
-			background: #016450;
-			color: white;
-			border: none;
-			padding: 5px 5px;
-			border-radius: 4px;
-			cursor: pointer;
+        .title-icon {
+            position: absolute;
+            left: 0;
+            width: 36px;
+            /* 设置你想要的图标大小 */
+            height: 36px;
+            object-fit: contain;
+            /* 保持图片比例 */
+            margin-right: 5px;
+            /* 图标和文字之间的间距 */
+        }
+
+        .title-container {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+        }
+
+        .menu-button {
+            margin-left: auto;
+            background: transparent;
+            color: #016450;
+            border: none;
+            padding: 5px 5px;
+            border-radius: 4px;
+            cursor: pointer;
             width: 2rem;
             height: 2rem;
-            font-size: 1rem;
-		}
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-		.menu-button:hover {
-			background: #555;
-		}
+        .menu-button:hover {
+            /*background: #555;*/
+        }
+
+        .information-bar {
+            display: flex;
+            gap: 1rem; /* 两个小块之间的间距 */
+            justify-content: space-between;
+            background: white;
+            border-radius: 8px; /* 四角圆角，数值可以调大/调小 */
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* 阴影 */
+        }
+
+        .info-box {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            padding-left: .5rem;
+            padding-right: .5rem;
+            display: flex;
+            overflow: hidden;
+            font-size: .8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-box .label,
+        .info-box .value {
+            color: gray;
+        }
+
+        .value-border {
+            padding: 0.3rem;
+            border: 1px solid gray;
+            border-radius: 6px;
+        }
+
+        .split-line {
+            color: gray;
+            margin-left: .5rem;
+            margin-right: .5rem;
+        }
+
+        /* 翻牌动画 */
+        .flip {
+            transition: transform 0.4s ease-in-out;
+            transform-origin: bottom;
+        }
+
+        .flip.animate {
+            transform: rotateX(90deg);
+        }
     </style>
 </head>
+
 <body>
     <header>
-        <div style="background: #016450; height: 3px"></div>
+        <div style="background: #016450; height: 5px"></div>
         <div class="top_container">
             <h3 class="title-with-icon">
-				<img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579" alt="Map Icon" class="title-icon">
-				The Liberated Map ...🗺
-				<button class="menu-button">☰</button>
-			</h3>			
+                <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579"
+                    alt="Map Icon" class="title-icon">
+                    <div class="title-container">
+                        <span>
+                            The Liberated Map ...🗺
+                        </span>
+                        <span style="font-size: small; color: gray;">
+                            Authentic Flavors Around You
+                        </span>
+                    </div>
+                
+                <button class="menu-button">☰</button>
+            </h3>
         </div>
     </header>
+
+    <div style="margin-top: .6rem; margin-bottom: .1rem; margin-left: .7rem; margin-right: .7rem;">
+<div class="information-bar">
+        <div class="info-box">
+            <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579" style="width: 1rem; padding-bottom: 0.2rem; padding-right: 0.2rem; object-fit: contain;" />
+            <span class="label">Take Away</span>
+            <span class="split-line">|</span>
+            <span class="value flip" id="takeaway">346</span>
+            <span class="value">/uni</span>
+        </div>
+        
+        <div class="info-box">
+            <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579" style="width: 1rem; padding-bottom: 0.2rem; padding-right: 0.2rem; object-fit: contain;" />
+            <span class="label">Reserve</span>
+            <span class="split-line">|</span>
+            <span class="value flip" id="reserve">154</span>
+            <span class="value">/uni</span>
+        </div>
+    </div>
+    </div>
     
+
     <div class="widget-container">
-		<!-- Start Stockist.co widget -->
-		<stockist-store-locator data-stockist-widget-tag="map_93g8gzpq">
-			Loading store locator from <a href="https://stockist.co">Stockist store locator</a>...
-		</stockist-store-locator>
-		<script async src="https://stockist.co/embed/v1/widget.min.js"></script>
-		<!-- End Stockist.co widget -->
-	</div>
-    
+        <!-- Start Stockist.co widget -->
+        <stockist-store-locator data-stockist-widget-tag="map_93g8gzpq">
+            Loading store locator from <a href="https://stockist.co">Stockist store locator</a>...
+        </stockist-store-locator>
+        <script async src="https://stockist.co/embed/v1/widget.min.js"></script>
+        <!-- End Stockist.co widget -->
+    </div>
+
     <footer>
         <div class="container">
             <p>©2025 Xiaoxiong Company. Todos os direitos reservados.</p>
         </div>
     </footer>
+
+    <script>
+        function updateNumber(id, newValue) {
+            const el = document.getElementById(id);
+            el.classList.add("animate");
+
+            // 动画中间换数字
+            setTimeout(() => {
+                el.textContent = newValue;
+            }, 200);
+
+            // 动画结束移除 class
+            el.addEventListener("transitionend", () => {
+                el.classList.remove("animate");
+            }, { once: true });
+        }
+
+        // 初始值
+        let takeaway = 346;
+        let reserve = 154;
+        let direction = 1; // 1 表示加，-1 表示减
+
+        setInterval(() => {
+            takeaway += direction;
+            reserve += direction;
+            updateNumber("takeaway", takeaway);
+            updateNumber("reserve", reserve);
+
+            // 每次执行完就反向
+            direction *= -1;
+        }, 3000);
+    </script>
 </body>
+
 </html>
