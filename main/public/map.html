@@ -71,6 +71,12 @@
             /* 图标和文字之间的间距 */
         }
 
+        .title-container {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+        }
+
         .menu-button {
             margin-left: auto;
             background: transparent;
@@ -144,12 +150,20 @@
 
 <body>
     <header>
-        <div style="background: #016450; height: 3px"></div>
+        <div style="background: #016450; height: 5px"></div>
         <div class="top_container">
             <h3 class="title-with-icon">
                 <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579"
                     alt="Map Icon" class="title-icon">
-                The Liberated Map ...🗺
+                    <div class="title-container">
+                        <span>
+                            The Liberated Map ...🗺
+                        </span>
+                        <span style="font-size: small; color: gray;">
+                            Authentic Flavors Around You
+                        </span>
+                    </div>
+                
                 <button class="menu-button">☰</button>
             </h3>
         </div>
