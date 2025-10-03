@@ -14,14 +14,37 @@ class MapManager {
             return { result: true, data };
         })
 
+        httpAPI.get("/server_list", async () => {
+            const data = await db.getAll(db.serverTable);
+            return { result: true, data };
+        })
+
         socket.registerMessage("getAllRestaurants", this.getAllRestaurants);
         socket.registerMessage("addRestaurant", this.addRestaurant);
+        socket.registerMessage("setRestaurant", this.setRestaurant);
     }
 
+    async setRestaurant(params) {
+        if (!params || !params.id) {
+            return { result: false, message: "Invalid restaurant data" };
+        }
+
+        const existing = await db.get(db.restaurantTable, params.id);
+
+        if (existing) {
+            // Update the existing restaurant
+            const updated = { ...existing, ...params };
+            await db.set(db.restaurantTable, updated);
+            return { result: true, message: "Restaurant updated" };
+        } else {
+            // Add new restaurant
+            await db.set(db.restaurantTable, params);
+            return { result: true, message: "Restaurant added" };
+        }
+    }
 
     async addRestaurant(params) {
         const exists = await db.get(db.restaurantTable, params.name);
-        console.log("mapManager.js: asdadasdasdasd",params.name)
         // Checks if the restaurant exists
         if(exists) {
             return {

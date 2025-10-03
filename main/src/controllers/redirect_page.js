@@ -37,13 +37,18 @@ class RedirectPage {
                 continue;
             }
 
-            let url = data.url + "/reservePage";
+            let url = data.url + "/takereserve";
 
             console.log("" + key + " => " + url);
 
-            this.app.get('/' + key, (req, res) => {
-                res.redirect(url);
-            });
+            try {
+                this.app.get('/' + key, (req, res) => {
+                    res.redirect(url);
+                });
+            }
+            catch (error) {
+                console.log(error)
+            }
         }
 
     }

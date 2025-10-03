@@ -31,18 +31,18 @@ class Socket {
             // 监听新消息
             socket.on('message', async (msg, params, callback) => {
 
-                console.log(msg, params);
+                console.log(msg);
 
                 try {
                     if (msgFuns[msg]) {
                         const ret = await Socket.callFun(socket, msg, params);
-                        callback(ret);
+                        if (callback) callback(ret);
                     } else {
-                        callback({error: "invalid message"});
+                        if (callback) callback({error: "invalid message"});
                     }
                 } catch (err) {
                     console.error('Error saving message:', err);
-                    callback({error: "call message exception"});
+                    if (callback) callback({error: "call message exception"});
                 }
             });
 
@@ -50,6 +50,7 @@ class Socket {
             socket.on('disconnect', () => {
                 console.log('Client disconnected:', socket.id);
             });
+
         });
 
         console.log('Socket.IO server initialized');

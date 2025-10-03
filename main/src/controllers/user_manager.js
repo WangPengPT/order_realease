@@ -25,6 +25,7 @@ class UserManager {
     checkOP(user,cmd) {
 
         if (cmd == "login") return true;
+        if (cmd.startsWith("g_")) return true;
 
         if (user && user.id && user.id == "admin") return true;
 

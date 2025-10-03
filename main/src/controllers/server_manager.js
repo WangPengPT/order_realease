@@ -30,7 +30,14 @@ class ServerManager {
         socket.registerMessage("setServer", this.setServer.bind(this));
         socket.registerMessage("getAllServer", this.getAllServer.bind(this));
 
+
+        socket.registerMessage("g_set_menu", this.set_menu.bind(this));
+        socket.registerMessage("g_get_menu", this.get_menu.bind(this));
+
         this.maxPort = await db.getValue("server_max_id", BASE_PORT);
+
+        this.menu_data = {}
+
     }
 
     async setServer(params) {
@@ -112,6 +119,59 @@ class ServerManager {
             datas: datas,
         }
     }
+
+    async getAllServer() {
+        const datas = await db.getAll(db.serverTable);
+        return {
+            result: true,
+            datas: datas,
+        }
+    }
+
+    async getMenuKey(name) {
+        const data = await db.get(db.serverTable,name);
+        if (data) {
+            return data.takeaway_key;
+        }
+        return undefined;
+    }
+
+    async get_menu(name,socket) {
+
+        // console.log("get_menu:", name);
+
+        const key = await this.getMenuKey(name)
+        // console.log("get_menu key:", key);
+        if (!key) return undefined;
+
+        const data = this.menu_data[key];
+        if(data)
+        {
+            if ((!socket.menu_time) || (socket.menu_time < data.time)) {
+
+                // console.log("send menu data")
+
+                socket.menu_time = data.time
+                return data.data;
+            }
+        }
+
+        return undefined
+    }
+
+    async set_menu({key, menuData}) {
+
+        // console.log("set_menu:", {key});
+
+        this.menu_data[key] = {
+            time: Date.now(),
+            data: menuData,
+        };
+
+        return {
+        }
+    }
+
 }
 
 
