@@ -120,7 +120,7 @@ const langPopup = document.getElementById('langPopup');
 const flags = document.querySelectorAll('.lang-flag');
 const langMask = document.getElementById('langMask');
 
-let currentLang = 'zh'; // 默认语言
+let currentLang = 'en'; // 默认语言
 
 function renderLang() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
