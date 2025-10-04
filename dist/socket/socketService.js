@@ -72,6 +72,10 @@ class SocketServices {
   initSocket() {
     this.appStateSocket.appStateService.appStateRepository.appState.socket_io = this.io
 
+    process.env.QR_ADDR = process.env.QR_ADDR || `http://localhost:5173?table=`;
+    process.env.ADDR =  process.env.ADDR || `http://localhost:5173`;
+
+    
     this.io.on("connection", async (socket) => {
 
       // printer 别在这前面写异步
@@ -91,30 +95,6 @@ class SocketServices {
       logger.info(`客户端连接: ${socket.id}`);
       logger.info(`来源 IP: ${ip}`)
 
-      process.env.QR_ADDR = process.env.QR_ADDR || `http://localhost:5173?table=`;
-      process.env.ADDR =  process.env.ADDR || `http://localhost:5173`;
-
-      let ENABLE_ROAST_DUCK = false
-
-      if (process.env.ENABLE_ROAST_DUCK == undefined) {
-        ENABLE_ROAST_DUCK = true;
-      }
-
-      if (process.env.ENABLE_ROAST_DUCK == "true") {
-        ENABLE_ROAST_DUCK = true;
-      }
-
-      socket.emit("env", {
-        QR_ADDR: process.env.QR_ADDR,
-        ADDR: process.env.ADDR,
-        ENABLE_ROAST_DUCK: ENABLE_ROAST_DUCK,
-        TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT,
-        pageDir: db.pageDir,
-        shopType: appState.shopType,
-        restaurant: centerSocket.getRestaurant(),
-        location: appState.pickupData.latitudeAndLongitude,
-      });
-
       this.tableSocket.registerHandlers(socket)
 
       this.orderSocket.registerHandlers(socket)
@@ -129,8 +109,6 @@ class SocketServices {
 
       this.dataAnalizeSocket.registerHandlers(socket)
 
-      socket.emit("menu_data", await this.menuService.getMenu(), await this.menuService.getMenuOrdering());
-
       socket.on("manager_get_menu", async (_, callback) => {
         const data = {}
         data.menu = await this.menuService.getMenu()
@@ -142,14 +120,24 @@ class SocketServices {
       })
       
       socket.on("get_takeaway_menu_data",  async () => {
-          let menu = await this.menuService.getMenu()
+
+
+          let menu
+         let menuOrdering
+
           let data = centerSocket.get_menu_data()
 
           if (data) {
               console.log("get is_takeaway menu data ok!");
-              menu = data;
+              menu = data.menu;
+              menuOrdering = data.menuOrdering
           }
-        socket.emit("takeaway_menu_data", menu, this.appStateSocket.appStateService.appStateRepository.appState.orderMenuTab);
+          else {
+             menu = await this.menuService.getMenu()
+             menuOrdering = await this.menuService.getMenuOrdering()
+          }
+          console.log("send takeaway menu...");
+          socket.emit("takeaway_menu_data", menu, menuOrdering );
       });
 
       // 餐桌密码验证
@@ -214,7 +202,7 @@ class SocketServices {
           logger.info(`订单提交成功 订单号 - ${order.data.id}`)
           logger.info(formatOrderLog(orderData))
 
-          print_order(order.data);
+          print_order(order.data,appState.printModel.order);
 
           this.io.emit("new_order", order.data);
           logger.info("📢 已广播新订单:", order.data);
@@ -242,7 +230,7 @@ class SocketServices {
       // 管理端打印外卖订单
       socket.on("manager_takeaway_order", (orderData) => {
         console.log("takeaway order",orderData)
-        print_takeaway_order(orderData);
+        print_takeaway_order(orderData, appState.printModel.takeaway);
       })
 
       // 返回table id ，发送桌子信息，目前价格
@@ -422,9 +410,36 @@ class SocketServices {
         })
       })
 
+      await this.send_init_info(socket)
+
     })
   }
 
+  async send_init_info(socket) {
+
+    let ENABLE_ROAST_DUCK = false
+
+    if (process.env.ENABLE_ROAST_DUCK == undefined) {
+      ENABLE_ROAST_DUCK = true;
+    }
+
+    if (process.env.ENABLE_ROAST_DUCK == "true") {
+      ENABLE_ROAST_DUCK = true;
+    }
+
+    socket.emit("env", {
+      QR_ADDR: process.env.QR_ADDR,
+      ADDR: process.env.ADDR,
+      ENABLE_ROAST_DUCK: ENABLE_ROAST_DUCK,
+      TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT,
+      pageDir: db.pageDir,
+      shopType: appState.shopType,
+      restaurant: centerSocket.getRestaurant(),
+      location: appState.pickupData.latitudeAndLongitude,
+    });
+
+    socket.emit("menu_data", await this.menuService.getMenu(), await this.menuService.getMenuOrdering());
+  }
 }
 
 module.exports = {

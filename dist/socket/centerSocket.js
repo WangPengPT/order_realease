@@ -18,6 +18,7 @@ function extractAfterSlash(str) {
 let restaurantInfo = {}
 let menuData
 let update_data = false;
+let menuService
 
 class CenterSocket {
 
@@ -25,12 +26,12 @@ class CenterSocket {
         return menuData
     }
 
-    static set_menu_data(data) {
+    static async update_menu_data() {
         update_data = true;
-        menuData = data;
     }
 
-    static init() {
+    static init(menuServiceInstance) {
+        menuService = menuServiceInstance
 
         if (!process.env.SAVE_ADDR) {
             server_addr = "http://localhost"
@@ -62,13 +63,10 @@ class CenterSocket {
 
         const name = this.getRestaurant()
 
-        socket.on('connect', () => {
+        socket.on('connect', async () => {
             console.log('connect to center server');
-
-            this.set_menu_data(appState.menu);
+            await this.update_menu_data();
         });
-
-
 
         socket.on(name, (data) => {
             appState.socket_io.emit("new_shopify_orders", [data])
@@ -100,30 +98,42 @@ class CenterSocket {
     }
 
     static timeMessage() {
-        setTimeout( () => {
-            this.doTime();
+        setTimeout( async () => {
+            await this.doTime();
             this.timeMessage()
         }, 1000 * 1)
     }
 
-    static doTime() {
+    static async doTime() {
 
         // console.log("do time");
 
         let key = this.getRestaurant()
         key = key.trim();
 
-        if ( key.startsWith("org_") ) {
-            key  = key.substring(4)
+        if (key.startsWith("org_")) {
+            key = key.substring(4)
             if (update_data) {
-                socket.emit('message', "g_set_menu", {key, menuData})
-                update_data = false
+
+                let menu = await menuService.getMenu()
+                let menuOrdering = await menuService.getMenuOrdering()
+
+                if (menu && menuOrdering) {
+
+                    let data = {
+                        menu,
+                        menuOrdering
+                    }
+
+                    socket.emit('message', "g_set_menu", {key, data})
+                    update_data = false
+                }
+
             }
-        }
-        else if ( key != "" ) {
-            socket.emit('message', "g_get_menu", key, (menu)=> {
+        } else if (key != "") {
+            socket.emit('message', "g_get_menu", key, (menu) => {
                 if (menu) {
-                    // console.log("get menu data!");
+                    console.log("get menu data!");
                     menuData = menu
                 }
             })

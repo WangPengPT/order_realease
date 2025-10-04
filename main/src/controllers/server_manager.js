@@ -105,9 +105,9 @@ class ServerManager {
     }
 
     setRestaurants(params) {
-        console.log(params)
+        //console.log(params)
         if (params.shopify_name && params.shopify_name != "") {
-            console.log("map restaurant: " + params.shopify_name  + " -> " + params.id);
+            //console.log("map restaurant: " + params.shopify_name  + " -> " + params.id);
             this.restaurants[params.shopify_name] = params.id
         }
     }
