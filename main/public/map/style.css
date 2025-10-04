@@ -1,0 +1,176 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+/* Layout Containers */
+.container, .top_container {
+    margin: 0 auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: none;
+    padding-bottom: 2px;
+}
+
+header {
+    background-color: white;
+    color: black;
+    text-align: center;
+}
+
+/* Title */
+.title-with-icon {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 50px;
+}
+/* 去掉点击或聚焦时的蓝色边框和高亮 */
+.title-icon,
+.lang-flag,
+button,
+a {
+    outline: none;                     /* 聚焦时的轮廓线 */
+    -webkit-tap-highlight-color: transparent; /* 移动端点击高亮 */
+}
+.title-icon { position: absolute; left: 0; width:36px; height:36px; object-fit: contain; }
+.title-container { display: flex; flex-direction: column; align-items: start; padding-top: 0.5rem; padding-bottom: 0.5rem;}
+.top-bar-title { font-size: large; font-weight: bold; }
+
+@keyframes edge-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+    }
+    50% {
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 1))
+                drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+    }
+}
+
+.edge-glow-animation {
+    animation: edge-glow 1s ease-in-out 1; /* 闪烁两次，每次0.5秒 */
+}
+
+.title-icon:active {
+  transform: scale(0.9);
+}
+
+/* 遮罩层 */
+.lang-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.2); /* 半透明遮罩 */
+    display: none;
+    z-index: 900; /* 确保在页面内容上，但在国旗弹出层下 */
+}
+
+/* language */
+.map-icon-container {
+    position: relative;
+    display: inline-block;
+}
+
+.title-icon {
+    cursor: pointer;
+}
+
+.lang-popup {
+    position: absolute;
+    top: 30px; /* 图标下方 */
+    right: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.lang-popup.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lang-flag {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.lang-flag:hover {
+    transform: scale(1.2);
+}
+
+/* 当前语言光圈 */
+.lang-flag.active {
+    box-shadow: 0 0 10px 3px gold;
+}
+
+/* Menu */
+.menu-button {
+    margin-left:auto;
+    background: transparent;
+    border: none;
+    color:#016450;
+    cursor:pointer;
+    width:2rem; height:2rem;
+    font-size:1.8rem;
+    display:flex; align-items:center; justify-content:center;
+}
+.side-menu {
+    height:100%; width:0; position:fixed; top:0; right:0;
+    background:white; box-shadow:-2px 0 8px rgba(0,0,0,0.3);
+    overflow-x:hidden; transition:0.3s; z-index:2000; padding-top:60px;
+}
+.side-menu a { padding:10px; font-size:18px; color:black; text-decoration:none; display:block; transition:0.2s; }
+.side-menu a:hover { background-color:#f0f0f0; }
+.side-menu .close-btn { position:absolute; top:10px; left:20px; font-size:30px; text-decoration:none; }
+
+/* Overlay */
+.overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; z-index:1500; }
+
+/* Info Bar */
+.information-bar { display:flex; justify-content: space-between; background:white; border-radius:8px; margin-top: 10px; margin-left: 10px; margin-right: 10px ;box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.info-box { padding:0.5rem; display:flex; font-size:.8rem; align-items:center; justify-content:center; overflow:hidden;}
+.info-box .label, .info-box .value { color:gray; }
+.split-line { color:gray; margin:0 .5rem; }
+.flip { transition: transform 0.4s ease-in-out; transform-origin: bottom; }
+.flip.animate { transform: rotateX(90deg); }
+
+/* Announcement Bar */
+.announcement-bar { background:black; height:30px; color:white; display:flex; align-items:center; position:relative; overflow:hidden;}
+.announcement-text { white-space:nowrap; display:inline-block; padding-left:100%; animation:scroll-left 15s linear infinite; font-size:x-small;}
+@keyframes scroll-left { 0%{transform:translateX(0);} 100%{transform:translateX(-100%);} }
+
+/* Widget Container */
+.widget-container { background:white; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); padding:10px; margin:10px; }
+
+/* Footer */
+footer { text-align:center; margin-top:30px; padding:20px; color:#666; font-size:14px; }
+.footer-content { display:flex; justify-content:space-between; padding:0 2rem; }
+.footer-info, .footer-links { display:flex; flex-direction:column; align-items:start; }
+.law-container { display:flex; flex-direction:column; align-items:start; }
+.law-text { color:gray; }
+
+/* SPA Pages */
+.page { display:none; }
+.page.active { display:block; }
+
+/* Back To Top Button */
+#backToTopBtn {
+    position:fixed; bottom:10px; right:10px;
+    z-index:1000; background:white; border:1px solid #ddd;
+    border-radius:50%; cursor:pointer; width:2rem; height:2rem;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1); transition:opacity 0.3s; opacity:0.8; padding:0;
+}
+#backToTopBtn .material-icons { font-size:1rem !important; line-height:1.5; color:#444; }

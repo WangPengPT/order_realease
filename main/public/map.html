@@ -4,344 +4,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>The Liberated Zone Map</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-
-        .container {
-            max-width: 1800px;
-            margin: 0 auto;
-            padding: 15px;
-        }
-
-        .top_container {
-            max-width: 1800px;
-            margin: 0 auto;
-            padding: 15px;
-        }
-
-        header {
-            background-color: white;
-            color: black;
-            padding: 0px 0;
-            text-align: center;
-        }
-
-        .widget-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 10px;
-            margin: 10px;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .title-with-icon {
-            display: flex;
-            align-items: center;
-            /* 垂直居中 */
-            position: relative;
-            padding: 0;
-            margin: 0;
-            padding-left: 50px;
-            /* 为图标留出空间 */
-        }
-
-        .title-icon {
-            position: absolute;
-            left: 0;
-            width: 36px;
-            /* 设置你想要的图标大小 */
-            height: 36px;
-            object-fit: contain;
-            /* 保持图片比例 */
-            margin-right: 5px;
-            /* 图标和文字之间的间距 */
-        }
-
-        .title-container {
-            display: flex;
-            flex-direction: column;
-            align-items: start;
-        }
-
-        .menu-button {
-            margin-left: auto;
-            background: transparent;
-            color: #016450;
-            border: none;
-            padding: 5px 5px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 2rem;
-            height: 2rem;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .menu-button:hover {
-            /*background: #555;*/
-        }
-
-        .information-bar {
-            display: flex;
-            gap: 1rem;
-            /* 两个小块之间的间距 */
-            justify-content: space-between;
-            background: white;
-            border-radius: 8px;
-            /* 四角圆角，数值可以调大/调小 */
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-            /* 阴影 */
-        }
-
-        .info-box {
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-            padding-left: .5rem;
-            padding-right: .5rem;
-            display: flex;
-            overflow: hidden;
-            font-size: .8rem;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .info-box .label,
-        .info-box .value {
-            color: gray;
-        }
-
-        .value-border {
-            padding: 0.3rem;
-            border: 1px solid gray;
-            border-radius: 6px;
-        }
-
-        .split-line {
-            color: gray;
-            margin-left: .5rem;
-            margin-right: .5rem;
-        }
-
-        /* 翻牌动画 */
-        .flip {
-            transition: transform 0.4s ease-in-out;
-            transform-origin: bottom;
-        }
-
-        .flip.animate {
-            transform: rotateX(90deg);
-        }
-
-        #backToTopBtn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background-color: white;
-            color: black;
-            padding: 2px 2px;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            transition: opacity 0.3s;
-            opacity: 0.7;
-        }
-
-        #backToTopBtn:hover {
-            opacity: 1;
-        }
-
-        .announcement-bar {
-            background: black;
-            height: 30px;
-            color: white;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-
-        .announcement-text {
-            white-space: nowrap;
-            display: inline-block;
-            padding-left: 100%;
-            /* 从右侧开始 */
-            animation: scroll-left 15s linear infinite;
-            font-size: x-small;
-        }
-
-        @keyframes scroll-left {
-            0% {
-                transform: translateX(0);
-            }
-
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-
-        .law-container {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 菜单样式 */
-        .side-menu {
-            height: 100%;
-            width: 0;
-            /* 默认隐藏 */
-            position: fixed;
-            top: 0;
-            right: 0;
-            background-color: white;
-            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
-            overflow-x: hidden;
-            transition: 0.3s;
-            z-index: 2000;
-            padding-top: 60px;
-        }
-
-        /* 菜单链接样式 */
-        .side-menu a {
-            padding: 10px 20px;
-            text-decoration: none;
-            font-size: 18px;
-            color: black;
-            display: block;
-            transition: 0.2s;
-        }
-
-        .side-menu a:hover {
-            background-color: #f0f0f0;
-        }
-
-        /* 关闭按钮（右上角的 ×） */
-        .side-menu .close-btn {
-            position: absolute;
-            top: 10px;
-            left: 20px;
-            /* 注意这里用 left，而不是 right */
-            font-size: 30px;
-            color: black;
-            text-decoration: none;
-        }
-
-        /* 遮罩层 */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            /* 默认不显示 */
-            z-index: 1500;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="map/style.css">
 </head>
 
 <body>
     <header>
-        <!-- <div style="background: #016450; height: 5px"></div> -->
         <div class="announcement-bar">
-            <div class="announcement-text">
-                🔔 公告：欢迎来到 The Liberated Zone Map！Authentic Flavors Around
-                You...
+            <div class="announcement-text" data-i18n="announcement">
+                🔔 公告：欢迎来到 The Liberated Zone Map！Authentic Flavors Around You...
             </div>
         </div>
         <div class="top_container">
-            <h3 class="title-with-icon">
+            <div class="title-with-icon">
                 <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579"
-                    alt="Map Icon" class="title-icon">
+                        alt="Map Icon" class="title-icon">
+                <div class="map-icon-container">
+                    <div class="lang-popup" id="langPopup">
+                        <img src="map/flags/zh.png" class="lang-flag" data-lang="zh" id="flag-zh">
+                        <img src="map/flags/en.png" class="lang-flag" data-lang="en" id="flag-en">
+                        <img src="map/flags/pt.png" class="lang-flag" data-lang="pt" id="flag-pt">
+                    </div>
+
+                </div><!-- 遮罩层 -->
+<div id="langMask" class="lang-mask"></div>
+
                 <div class="title-container">
-                    <span>
-                        The Liberated Map ...🗺
-                    </span>
-                    <span style="font-size: x-small; color: gray; font-weight: normal;">
+                    <span data-i18n="title" class="top-bar-title">The Liberated Map ...🗺</span>
+                    <span style="font-size: x-small; color: gray; font-weight: normal;" data-i18n="subtitle">
                         Authentic Flavors Around You
                     </span>
                 </div>
-                <!-- 右上角菜单按钮 -->
                 <button class="menu-button" onclick="openMenu()">☰</button>
-
-                <!-- 右侧菜单栏 -->
-                <div id="sideMenu" class="side-menu">
-                    <a href="javascript:void(0)" class="close-btn" onclick="closeMenu()">×</a>
-                    <a href="#home">首页</a>
-                    <a href="#about">关于我们</a>
-                    <a href="#services">服务</a>
-                    <a href="#contact">联系我们</a>
-                </div>
-
-                <!-- 遮罩层 -->
-                <div id="overlay" class="overlay" onclick="closeMenu()"></div>
-
-            </h3>
+            </div>
         </div>
+        <div id="sideMenu" class="side-menu">
+            <a href="javascript:void(0)" class="close-btn" onclick="closeMenu()">×</a>
+            <a href="javascript:void(0)" onclick="navigateTo('home')" data-i18n="nav_home">Home</a>
+            <a href="javascript:void(0)" onclick="navigateTo('vip')" data-i18n="nav_vip">VIP</a>
+            <a href="javascript:void(0)" onclick="navigateTo('about')" data-i18n="nav_about">About</a>
+            <img src="https://xiaoxiong.pt/cdn/shop/files/XIAOXIONG_4d781207-589f-4748-a169-406984787108.png"
+                style="max-width: 100px; cursor: pointer; padding: 1rem;"
+                onclick="window.open('https://xiaoxiong.pt', '_blank')" alt="Xiaoxiong Logo">
+        </div>
+        <div id="overlay" class="overlay" onclick="closeMenu()"></div>
     </header>
 
-    <div style="margin-top: .6rem; margin-bottom: .1rem; margin-left: .7rem; margin-right: .7rem;">
-        <div class="information-bar">
-            <div class="info-box">
-                <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579"
-                    style="width: 1rem; padding-bottom: 0.2rem; padding-right: 0.2rem; object-fit: contain;" />
-                <span class="label">Take Away</span>
-                <span class="split-line">|</span>
-                <span class="value flip" id="takeaway">346</span>
-                <span class="value">/uni</span>
+    <main id="mainContent">
+        <section id="home" class="page active">
+            <div class="information-bar">
+                <div class="info-box">
+                    <span class="label" data-i18n="takeaway">Take Away</span>
+                    <span class="split-line">|</span>
+                    <span class="value flip" id="takeaway">346</span>
+                    <span class="value">/uni</span>
+                </div>
+                <div class="info-box">
+                    <span class="label" data-i18n="reserve">Reserve</span>
+                    <span class="split-line">|</span>
+                    <span class="value flip" id="reserve">154</span>
+                    <span class="value">/uni</span>
+                </div>
             </div>
-
-            <div class="info-box">
-                <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579"
-                    style="width: 1rem; padding-bottom: 0.2rem; padding-right: 0.2rem; object-fit: contain;" />
-                <span class="label">Reserve</span>
-                <span class="split-line">|</span>
-                <span class="value flip" id="reserve">154</span>
-                <span class="value">/uni</span>
+            <div class="widget-container"> <!-- Start Stockist.co widget --> <stockist-store-locator
+                    data-stockist-widget-tag="map_93g8gzpq"> Loading store locator from <a
+                        href="https://stockist.co">Stockist store locator</a>... </stockist-store-locator>
+                <script async src="https://stockist.co/embed/v1/widget.min.js"></script> <!-- End Stockist.co widget -->
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div class="widget-container">
-        <!-- Start Stockist.co widget -->
-        <stockist-store-locator data-stockist-widget-tag="map_93g8gzpq">
-            Loading store locator from <a href="https://stockist.co">Stockist store locator</a>...
-        </stockist-store-locator>
-        <script async src="https://stockist.co/embed/v1/widget.min.js"></script>
-        <!-- End Stockist.co widget -->
-    </div>
+        <section id="vip" class="page">
+            <h2 data-i18n="vip_login">VIP Login</h2>
+            <p data-i18n="vip_desc">VIP 登录</p>
+        </section>
+
+        <section id="about" class="page">
+            <h2 data-i18n="about_title">Sobre Nós</h2>
+            <p data-i18n="about_desc">这里是关于我们的介绍。</p>
+        </section>
+    </main>
 
     <footer>
-        <div class="law-container">
-            <span>
-                <a href="/policies/privacy-policy">Politica de
-                    privacidade</a>
-            </span>
-            <span>
-                <a href="/policies/terms-of-service">Termos de serviços</a>
-            </span>
-            <span>
-                <a href="https://www.livroreclamacoes.pt/Inicio/">Livro de
-                    reclamações</a>
-            </span>
+        <div class="footer-content">
+            <div class="footer-info">
+                <span>Xiaoxiong, Lda</span>
+                <span data-i18n="info">Informações:</span>
+                <span data-i18n="contact">Contacto: 968815050</span>
+                <span data-i18n="email">E-mail: comercial@xiaoxiong.pt</span>
+            </div>
+            <div class="footer-links">
+                <span data-i18n="links">Links úteis</span>
+                <div class="law-container">
+                    <span><a href="privacy-policy.html" class="law-text" data-i18n="privacy">Politica de
+                            privacidade</a></span>
+                    <span><a href="terms-of-service.html" class="law-text" data-i18n="terms">Termos de
+                            serviços</a></span>
+                    <span><a href="https://www.livroreclamacoes.pt/Inicio/" class="law-text"
+                            data-i18n="complaints">Livro de reclamações</a></span>
+                </div>
+            </div>
         </div>
         <div class="container">
             <p>©2025 Xiaoxiong Company. Todos os direitos reservados.</p>
@@ -349,66 +111,10 @@
     </footer>
 
     <button id="backToTopBtn">
-        <span class="material-icons" style="font-size: 24px;">arrow_drop_up</span>
+        <span class="material-icons">keyboard_control_key</span>
     </button>
 
-    <script>
-        function updateNumber(id, newValue) {
-            const el = document.getElementById(id);
-            el.classList.add("animate");
-
-            // 动画中间换数字
-            setTimeout(() => {
-                el.textContent = newValue;
-            }, 200);
-
-            // 动画结束移除 class
-            el.addEventListener("transitionend", () => {
-                el.classList.remove("animate");
-            }, { once: true });
-        }
-
-        // 初始值
-        let takeaway = 346;
-        let reserve = 154;
-        let direction = 1; // 1 表示加，-1 表示减
-
-        setInterval(() => {
-            takeaway += direction;
-            reserve += direction;
-            updateNumber("takeaway", takeaway);
-            updateNumber("reserve", reserve);
-
-            // 每次执行完就反向
-            direction *= -1;
-        }, 3000);
-
-        const backToTopBtn = document.getElementById("backToTopBtn");
-
-        // 点击按钮回到顶部
-        backToTopBtn.addEventListener("click", () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
-        // 当滚动超过 200px 显示按钮
-        window.addEventListener("scroll", () => {
-            if (window.scrollY > 200) {
-                backToTopBtn.style.display = "block";
-            } else {
-                backToTopBtn.style.display = "none";
-            }
-        });
-
-        function openMenu() {
-            document.getElementById("sideMenu").style.width = "66%"; // 占屏幕三分之二
-            document.getElementById("overlay").style.display = "block";
-        }
-
-        function closeMenu() {
-            document.getElementById("sideMenu").style.width = "0";
-            document.getElementById("overlay").style.display = "none";
-        }
-    </script>
+    <script src="map/script.js"></script>
 </body>
 
 </html>
