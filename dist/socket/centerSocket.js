@@ -125,6 +125,8 @@ class CenterSocket {
                         menuOrdering
                     }
 
+                    console.log("update menu data!");
+
                     socket.emit('message', "g_set_menu", {key, data})
                     update_data = false
                 }
@@ -133,7 +135,7 @@ class CenterSocket {
         } else if (key != "") {
             socket.emit('message', "g_get_menu", key, (menu) => {
                 if (menu) {
-                    console.log("get menu data!");
+                    //console.log("get menu data!");
                     menuData = menu
                 }
             })
