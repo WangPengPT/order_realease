@@ -120,14 +120,14 @@ class CenterSocket {
 
                 if (menu && menuOrdering) {
 
-                    let data = {
+                    let menuData = {
                         menu,
                         menuOrdering
                     }
 
                     console.log("update menu data!");
 
-                    socket.emit('message', "g_set_menu", {key, data})
+                    socket.emit('message', "g_set_menu", {key, menuData})
                     update_data = false
                 }
 
