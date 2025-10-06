@@ -43,6 +43,7 @@ class ServerManager {
     async setServer(params) {
         await db.set(db.serverTable, params);
 
+        redirectPage.updateStore(params)
         this.setRestaurants(params)
         
         return {
