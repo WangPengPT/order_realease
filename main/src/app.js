@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/map', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'map.html'));
+    res.redirect('/map.html');
 });
 
 // 创建 HTTP 服务器
