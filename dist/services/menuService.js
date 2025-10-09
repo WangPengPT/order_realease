@@ -396,6 +396,9 @@ class MenuService {
 
             console.log(orgData)
           }
+          else {
+            orgData.deliveryPrice = orgData.price
+          }
         }
       }
 
