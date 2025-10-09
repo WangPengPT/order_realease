@@ -67,6 +67,7 @@ class SocketServices {
     await this.userSocket.userService.InitOrLoadUserData()
     await this.customDish.customDishService.initializeCustomDish()
     await this.menuService.loadMenu()
+    await this.menuService.initMenuOrdering()
   }
 
   initSocket() {
@@ -112,7 +113,9 @@ class SocketServices {
       socket.on("manager_get_menu", async (_, callback) => {
         const data = {}
         data.menu = await this.menuService.getMenu()
-        data.menuTab = await this.menuService.getMenuOrdering()
+        //data.menuTab = await this.menuService.getMenuOrdering()
+        data.dineTab = (await this.menuService.getDineInMenuAndTabs()).tabs
+        data.takeTab = (await this.menuService.getTakeawayMenuAndTabs()).tabs
         callback({
           success: true,
           data: data
@@ -294,12 +297,12 @@ class SocketServices {
         }
       });
 
-      socket.on('manager_updateMenuIndex', async (newMenuSorted, callback) => {
+      socket.on('manager_updateMenuIndex', async (newMenuSorted, type, callback) => {
         logger.info("更新菜品与分类顺序")
         if (!newMenuSorted) return;
         if (newMenuSorted.length == 0) return;
 
-        const result = await this.menuService.updateMenuSorted(newMenuSorted)
+        const result = await this.menuService.updateDineOrTakeMenuSorted(newMenuSorted, type)
         if (result.success) {
           callback(result)
           logger.info("更新菜品与分类顺序成功")
@@ -331,8 +334,9 @@ class SocketServices {
             appState.dishTags[id] = item.tags;
           }
           // Broadcast updated item and full menu
-          this.io.emit("menu_item_changed", item);
-          this.io.emit("menu_data", await this.menuService.getMenu(), await this.menuService.getMenuOrdering());
+          //this.io.emit("menu_item_changed", item);
+          //this.io.emit("menu_data", await this.menuService.getMenu(), await this.menuService.getMenuOrdering());
+          await this.send_menu(this.io)
 
           logger.info(`Dish updated and broadcasted: ${item.name || item.handle}`);
         } catch (err) {
@@ -436,8 +440,33 @@ class SocketServices {
       location: appState.pickupData.latitudeAndLongitude,
     });
 
-    socket.emit("menu_data", await this.menuService.getMenu(), await this.menuService.getMenuOrdering());
+    await this.send_menu(socket)
   }
+
+  async send_menu(s) {
+    const menu = await this.menuService.getMenu()
+    const menuOrdering = await this.menuService.getMenuOrdering()
+    s.emit("menu_data", menu, menuOrdering);
+
+    const m1 = await this.menuService.getDineInMenuAndTabs()
+    const m2 = await this.menuService.getTakeawayMenuAndTabs()
+    s.emit("manager_menu_data", menu, m1.tabs, m2.tabs)
+
+    let data = centerSocket.get_menu_data()
+    if (data) {
+      s.emit("takeaway_menu_data", data.menu, data.menuOrdering);
+    }
+    else {
+      const menuAndTabs = await this.menuService.getTakeawayMenuAndTabs()
+      
+      s.emit("takeaway_menu_data", menuAndTabs.menu, menuAndTabs.tabs);
+    }
+
+    const menuAndTabs = await this.menuService.getDineInMenuAndTabs()
+    s.emit("dinner_menu_data", menuAndTabs.menu, menuAndTabs.tabs);
+
+  }
+
 }
 
 module.exports = {

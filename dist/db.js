@@ -118,7 +118,7 @@ class DB {
         );
     }
     static async cleanTable(table, session = null) {
-        await db.collection(table).deleteMany({}, { session })
+        return await db.collection(table).deleteMany({}, { session })
     }
 
     static async getByDateRange(table, startDate, endDate, session = null) {
@@ -130,6 +130,35 @@ class DB {
 
         return await collection.find(filter, { session }).toArray();
     }
+
+    static async getAllDineInMenu(table, session = null) {
+    const collection = db.collection(table);
+
+    const filter = {
+        $or: [
+            { "value.orderType": { $exists: false } }, // 没有这个字段
+            { "value.orderType": { $in: ["DINEIN", "DINEIN&TAKEAWAY"] } } // 等于这两个值
+        ]
+    };
+
+    const users = await collection.find(filter, { session }).toArray();
+    return users;
+    }
+
+    static async getAllTakeawayMenu(table, session = null) {
+    const collection = db.collection(table);
+
+    const filter = {
+        $or: [
+            { "value.orderType": { $exists: false } }, // 没有这个字段
+            {"value.orderType": { $in: ["TAKEAWAY", "DINEIN&TAKEAWAY"] } }
+        ]
+    };
+
+    const users = await collection.find(filter, { session }).toArray();
+    return users;
+    }
+
 
     static async getTopDishesByDateRange(table, startDate, endDate, session = null) {
         const collection = db.collection(table);
