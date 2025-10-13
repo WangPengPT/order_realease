@@ -203,6 +203,13 @@ class SocketServices {
           return;
         }
 
+        if (orderService.hasUniCode(orderData.table, orderData.uniCode)) {
+          callback( {
+            success: true
+          });
+          return;
+        }
+
         logger.info(`订单提交`)
 
         const order = orderService.addOrder(orderData)
@@ -438,6 +445,10 @@ class SocketServices {
             callback(cb)
           }
         })
+      })
+
+      socket.on("get_menu", async () => {
+        await this.send_menu(socket)
       })
 
       await this.send_init_info(socket)
