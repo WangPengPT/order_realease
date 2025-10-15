@@ -3,7 +3,7 @@ module.exports = {
   apps: [{
     name: "XX_ENTRECAMPOS",
     script: "./server.js",
-    cwd: "../dist_xiaoxiong",
+    cwd: "../dist",
     instances: 1,
     autorestart: true,
     watch: false,
@@ -14,10 +14,11 @@ module.exports = {
       HTTPS_HEAD: "order",
       PORT: 501,
       QR_ADDR: "https://order.xiaoxiong.pt:501/client.html?table=",
+      ADDR: "https://order.xiaoxiong.pt:501",
+      ADMIN_PASS: "1015",
       TABLE_NUMBER: [[1, 35]],
       SAVE_ADDR: "save/xx_entrecampos",
-      ENABLE_ROAST_DUCK: false,
-	  ENABLE_MENU_LUNCH: false,
+      JWT_SECRET: "my_jwt_secret_key"
     }
   }]
 }
