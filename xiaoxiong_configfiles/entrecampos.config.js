@@ -16,7 +16,7 @@ module.exports = {
       QR_ADDR: "https://order.xiaoxiong.pt:501/client.html?table=",
       ADDR: "https://order.xiaoxiong.pt:501",
       ADMIN_PASS: "1015",
-      TABLE_NUMBER: [[1, 35]],
+      TABLES_NUMBER: [[1, 35]],
       SAVE_ADDR: "save/xx_entrecampos",
       JWT_SECRET: "my_jwt_secret_key"
     }
