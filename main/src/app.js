@@ -12,6 +12,7 @@ const reserveManager = require('./controllers/reserve_manager')
 const mapManager = require('./controllers/map_manager')
 
 const redirectPage = require('./controllers/redirect_page')
+const payService = require('./service/pay_service')
 
 const httpAPI = require('./utils/http_api');
 const fs = require("fs");
@@ -88,7 +89,16 @@ async function initApp() {
     await mapManager.init();
 
     await redirectPage.init(app)
+    await payService.init(orderManager)
 
+
+    // const info = {
+    //     phone: "351#964880226",
+    //     email: "bbksoftai@gmail.com ",
+    //     description: "test"
+    // }
+    //await payService.newPayment("123456", "mbway", 0.01, info)
+    // await payService.checkState("123456");
     // orderManager.xxOrderCreate({
     //     id: "123",
     //     billing_address: {

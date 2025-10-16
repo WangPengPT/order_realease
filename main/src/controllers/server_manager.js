@@ -5,6 +5,7 @@ const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const redirectPage = require('./redirect_page')
+const httpAPI = require("../utils/http_api");
 
 const BASE_PORT = 7100
 
@@ -25,6 +26,10 @@ class ServerManager {
             const params = datas[i]
             this.setRestaurants(params)
         }
+
+        httpAPI.get("/get_info", async (query) => {
+            return await this.get_info()
+        });
 
         socket.registerMessage("addServer", this.addServer.bind(this));
         socket.registerMessage("setServer", this.setServer.bind(this));
@@ -170,6 +175,16 @@ class ServerManager {
         };
 
         return {
+        }
+    }
+
+    async get_info() {
+        let reserve_count = await db.getValue("server_reserve_max_id", 1);
+        let order_count = await db.getValue("server_order_max_id", 1);
+
+        return {
+            reserve_count,
+            order_count
         }
     }
 

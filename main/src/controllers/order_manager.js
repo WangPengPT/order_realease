@@ -4,15 +4,10 @@ const socket = require('../utils/socket');
 const httpAPI = require('../utils/http_api');
 const serverManager = require('./server_manager')
 const mailAPI = require("../utils/mail");
-
+const payService = require('../service/pay_service')
 
 class OrderManager {
 
-
-
-    constructor() {
-
-    }
 
     async init() {
 
@@ -163,6 +158,15 @@ class OrderManager {
         await mailAPI.send(mail, "new order", html );
         await this.orderUpdated(org_data)
 
+        if (org_data.pay_type == "MB WAY") {
+            const info = {
+                phone: customer_info.phone, //"351#964880226"
+                email: customer_info.email,
+                description: "online mbway pay"
+            }
+            await payService.newPayment(orderId, "mbway", totalPrice, info)
+        }
+
         return {
             result: true,
             data: org_data
@@ -240,7 +244,7 @@ class OrderManager {
     async getAllOrder(count) {
 
         const sort = {
-            pickup_date: -1,
+            _id: -1,
         }
 
         const datas = await db.find(db.orderTable, {}, sort, count)
@@ -362,17 +366,24 @@ class OrderManager {
 
     get_pickup_date(data) {
 
+        let ret
         if (!data.note_attributes) {
-            return data.pickupDate
+            ret = data.pickupDate
         }
-
-        let ret= ""
-        for (let i = 0; i < data.note_attributes.length; i++) {
-            const value = data.note_attributes[i]
-            if (value.name == "Pickup-Date") {
-                ret = value.value;
+        else {
+            for (let i = 0; i < data.note_attributes.length; i++) {
+                const value = data.note_attributes[i]
+                if (value.name == "Pickup-Date") {
+                    ret = value.value;
+                }
             }
         }
+
+        if (!ret) {
+            const now = new Date();
+            ret = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
         return ret;
     }
 
@@ -410,6 +421,17 @@ class OrderManager {
             })
         }
         return ret;
+    }
+
+    async updatePayState(id,status) {
+
+        const order =  await db.get(db.orderTable, id)
+
+        if (order) {
+            order.pay_state = status;
+            await this.orderUpdated(order)
+        }
+
     }
 }
 

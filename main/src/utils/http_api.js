@@ -15,7 +15,7 @@ class HttpAPI {
         console.log("get: ", cmd );
 
         this.app.get(cmd, async (req, res) => {
-            console.log("do get: ", cmd);
+            //console.log("do get: ", cmd);
 
             const ret = await fn(req.query)
             res.json(ret);
