@@ -20,14 +20,15 @@ class CustomDishRepository {
         result.forEach(template => {
             const customDishTemplate = CustomDishTemplate.fromJSON(template.value)
             if (customDishTemplate.enable) {
-                if (customDishTemplate.id === ids.xiaoxiong_menu_lunch) {
-                    const currentPeriod = get_portugal_time_period()
-                    if (currentPeriod > 'lunch') {
-                        templates.push(customDishTemplate)
-                    }
-                } else {
-                    templates.push(customDishTemplate)
-                }
+                // if (customDishTemplate.id === ids.xiaoxiong_menu_lunch) {
+                //     const currentPeriod = get_portugal_time_period()
+                //     if (currentPeriod > 'lunch') {
+                //         templates.push(customDishTemplate)
+                //     }
+                // } else {
+                //     templates.push(customDishTemplate)
+                // }
+                templates.push(customDishTemplate)
             }
         })
         return templates
