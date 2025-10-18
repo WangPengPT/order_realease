@@ -31,7 +31,7 @@ class Socket {
             // 监听新消息
             socket.on('message', async (msg, params, callback) => {
 
-                //console.log(msg);
+                // console.log(msg, params);
 
                 try {
                     if (msgFuns[msg]) {

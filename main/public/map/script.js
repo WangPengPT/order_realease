@@ -178,43 +178,41 @@ flags.forEach(flag => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("✅ 页面加载完成，开始请求数据...");
+    //console.log("✅ 页面加载完成，开始请求数据...");
     fetchData();
 
     // 如果想每隔30秒刷新一次，可以取消注释
-    // setInterval(fetchData, 30000);
+    setInterval(fetchData, 30000);
 });
 
 async function fetchData() {
-    console.log("🔍 正在向服务器请求 takeaway/reserve 数据...");
+    //console.log("🔍 正在向服务器请求 takeaway/reserve 数据...");
     try {
         // ✅ 注意：去掉多余的 “https://”
         const response = await fetch("https://v.xiaoxiong.pt/api/get_info");
 
-        console.log("🌐 请求已发送，等待响应...");
+        //console.log("🌐 请求已发送，等待响应...");
 
         if (!response.ok) {
             throw new Error("❌ 网络响应错误: " + response.status);
         }
 
         const data = await response.json();
-        console.log("📦 收到的数据：", data);
+        //console.log("📦 收到的数据：", data);
 
-        if (typeof data.takeaway !== "undefined" && typeof data.reserve !== "undefined") {
-            updateValues(data.takeaway, data.reserve);
+        if (typeof data.order_count !== "undefined" && typeof data.reserve_count !== "undefined") {
+            updateValues(data.order_count, data.reserve_count);
         } else {
-            console.warn("⚠️ API 数据格式异常：", data);
+            //console.warn("⚠️ API 数据格式异常：", data);
         }
     } catch (error) {
-        console.error("🚨 获取数据失败：", error);
+        //console.error("🚨 获取数据失败：", error);
     }
 }
 
 function updateValues(takeaway, reserve) {
     const takeawayEl = document.getElementById("takeaway");
     const reserveEl = document.getElementById("reserve");
-
-    console.log(`🔢 更新数字：takeaway=${takeaway}, reserve=${reserve}`);
 
     if (takeawayEl) animateFlip(takeawayEl, takeaway);
     if (reserveEl) animateFlip(reserveEl, reserve);
@@ -226,19 +224,18 @@ function updateValues(takeaway, reserve) {
  * @param {number|string} newValue - 新的数值
  */
 function animateFlip(element, newValue) {
-    if (element.textContent === String(newValue)) return; // 不重复动画
+    if (element.textContent === String(newValue)) return;
 
-    element.classList.add("animate"); // 加上翻转动画类
-    console.log(`🎞 开始翻转动画 -> ${element.id}`);
+    // 添加动画类，让它向内翻转
+    element.classList.add("animate");
 
-    // 动画执行中间时替换数字
+    // 动画中途更新数字
     setTimeout(() => {
         element.textContent = newValue;
     }, 200);
 
-    // 动画结束后移除类
+    // 再翻转回来
     setTimeout(() => {
         element.classList.remove("animate");
-        console.log(`✅ 翻转动画完成 -> ${element.id}`);
     }, 400);
 }

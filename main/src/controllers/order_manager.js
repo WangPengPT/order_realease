@@ -50,6 +50,18 @@ class OrderManager {
             }
         })
 
+
+        socket.registerMessage("getOrderMonthList", async (query) => {
+
+            console.log("getOrderMonthList:" + query)
+            const data = await this.getOrderMonthList(query.year, query.month)
+
+            return {
+                result: true,
+                data: data
+            }
+        })
+
         this.max_id = await db.getValue("server_order_max_id", 1);
     }
 
@@ -257,6 +269,30 @@ class OrderManager {
         return ret
     }
 
+    async getOrderMonthList(year, month) {
+
+        const sort = {
+            _id: -1,
+        }
+
+        month = String(month).padStart(2, '0');
+
+        const q = {
+            "name": { "$regex": "^T" },
+            "pickupDate": { "$regex": `^${year}/${month}` }
+        }
+
+        const datas = await db.find(db.orderTable, q, sort)
+
+        const ret = []
+        for (let i = 0; i < datas.length; i++) {
+            ret.push(this.toData(datas[i]));
+        }
+
+        return ret
+    }
+
+
     toData(data) {
         let ret = {}
 
@@ -286,6 +322,8 @@ class OrderManager {
 
         ret.payment_gateway_names = data.payment_gateway_names
         //ret.financial_status = data.financial_status
+
+        ret.restaurant = data.restaurant
 
         return ret;
     }
@@ -434,6 +472,8 @@ class OrderManager {
 
     }
 }
+
+
 
 const orderManager =  new OrderManager();
 module.exports = orderManager;
