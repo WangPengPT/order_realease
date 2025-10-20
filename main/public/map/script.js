@@ -43,7 +43,7 @@ window.addEventListener("scroll", () => {
 // ====== 多语言支持 ======
 const translations = {
     "zh": {
-        announcement: "🔔 公告：欢迎来到 The Liberated Zone Map！Authentic Flavors Around You...",
+        announcement: "📯 公告：欢迎来到 The Liberated Zone Map！Authentic Flavors Around You...",
         title: "解放区地图 ...🗺",
         subtitle: "发觉你身边的真实美食",
         nav_home: "首页",
@@ -64,7 +64,7 @@ const translations = {
         complaints: "投诉书"
     },
     "en": {
-        announcement: "🔔 Announcement: Welcome to The Liberated Zone Map!",
+        announcement: "📯 Announcement: Welcome to The Liberated Zone Map!",
         title: "The Liberated Map ...🗺",
         subtitle: "Authentic Flavors Around You",
         nav_home: "Home",
@@ -85,7 +85,7 @@ const translations = {
         complaints: "Complaint Book"
     },
     "pt": {
-        announcement: "🔔 Aviso: Bem-vindo ao The Liberated Zone Map! Sabores autênticos à sua volta...",
+        announcement: "📯 Aviso: Bem-vindo ao The Liberated Zone Map! Sabores autênticos à sua volta...",
         title: "O Mapa Liberado ...🗺",
         subtitle: "Sabores autênticos à sua volta",
         nav_home: "Início",
