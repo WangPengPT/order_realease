@@ -120,9 +120,33 @@ class PayService {
     this.payments["mbway"] = new MBWayPayment()
 
 
+
+    httpAPI.pos("/mbwaypay", async (query) => {
+      let requestId = query.requestId;
+      let orderId = query.orderId;
+
+      const ret = await this.checkPaymentStatus("mbway", requestId);
+
+      console.log(ret, query, orderId, requestId)
+
+      if (!ret.error)
+      {
+        ret.id = orderId;
+        await this.changePayState(ret);
+      }
+      
+      return {
+        success: true
+      }
+    });
+
     httpAPI.get("/mbwaypay", async (query) => {
       let {orderId,requestId} = query;
+
+
       const ret = await this.checkPaymentStatus("mbway", requestId);
+
+      console.log(ret, query, orderId, requestId)
 
       if (!ret.error)
       {
@@ -196,7 +220,7 @@ class PayService {
   }
 
   async checkPaymentStatus(type,requestId) {
-    type = "mbway"
+
     const fun = this.payments[type]
 
     if (fun) {
