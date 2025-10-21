@@ -28,7 +28,7 @@ class MBWayPayment {
       description: info.description
     });
 
-    console.log(bodyData);
+    //console.log(bodyData);
 
     const {statusCode, body} = await request('https://api.ifthenpay.com/spg/payment/mbway', {
       method: 'POST',
@@ -38,10 +38,10 @@ class MBWayPayment {
       body: bodyData
     })
 
-    console.log(statusCode, body)
+    //console.log(statusCode, body)
     if ( statusCode == 200) {
       const ret = await body.json();
-      console.log(ret)
+      //console.log(ret)
       if (ret.Status == "000")
       {
         return {
@@ -134,7 +134,7 @@ class PayService {
         ret.id = orderId;
         await this.changePayState(ret);
       }
-      
+
       return {
         success: true
       }
@@ -158,6 +158,40 @@ class PayService {
         success: true
       }
     });
+
+    this.updateCheckStateData = []
+    this.updateCheckState()
+  }
+
+
+
+  async updateCheckState() {
+
+    const datas = [...this.updateCheckStateData]
+
+    for (const key in datas) {
+      const data = datas[key]
+
+      console.log("check state ... ", data)
+      const info = await this.checkState(data)
+
+      if (info.status != ST_pending) {
+        let index = this.updateCheckStateData.indexOf(data);
+        if (index !== -1) {
+          this.updateCheckStateData.splice(index, 1);
+        }
+
+        const ret = {
+          id: data,
+          status: info.status,
+        };
+        await this.changePayState(ret);
+      }
+    }
+
+    setTimeout(() => {
+      this.updateCheckState();
+    }, 30000)
   }
 
   async newPayment(orderId, type, price, info) {
@@ -174,6 +208,8 @@ class PayService {
 
       if (!ret.error)
       {
+        this.updateCheckStateData.push(orderId)
+
         ret.type = type;
         return await this.writePayment(ret)
       }
@@ -187,20 +223,22 @@ class PayService {
 
   async checkState(orderId) {
     const info = await this.loadPayment(orderId)
-    console.log(info);
+    //console.log(info);
     if (info && info.id == orderId) {
 
-      if (info.status != "pending") {
+      if (info.status != ST_pending) {
         return info;
       }
 
       var ret = await this.checkPaymentStatus(info.type,info.requestId);
 
-      console.log(ret);
+      //console.log(ret);
 
       if (!ret.error) {
         info.status = ret.status
-        await this.writePayment(info);
+        if (info.status != ST_pending) {
+          await this.writePayment(info);
+        }
         return info;
       }
       return ret;
