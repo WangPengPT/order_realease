@@ -68,12 +68,15 @@
                     <span class="value">/uni</span>
                 </div>
             </div>
-            <div class="widget-container"> <!-- Start Stockist.co widget --> <stockist-store-locator
-                    data-stockist-widget-tag="map_93g8gzpq"> Loading store locator from <a
-                        href="https://stockist.co">Stockist store locator</a>... </stockist-store-locator>
-                <script async src="https://stockist.co/embed/v1/widget.min.js"></script> <!-- End Stockist.co widget -->
+
+            <div class="widget-container">
+                <!-- Stockist widget -->
+                <stockist-store-locator data-stockist-widget-tag="map_93g8gzpq">
+                    Loading store locator...
+                </stockist-store-locator>
             </div>
         </section>
+
 
         <section id="vip" class="page">
             <h2 data-i18n="vip_login">VIP Login</h2>
@@ -119,6 +122,10 @@
     </button>
 
     <script src="./map/script.js"></script>
+
+    <!-- Stockist JS -->
+    <script src="https://stockist.co/embed/v1/widget.min.js"></script>
+
 </body>
 
 </html>
