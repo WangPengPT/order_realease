@@ -54,7 +54,18 @@ const translations = {
         vip_login: "VIP 登录",
         vip_desc: "VIP 登录",
         about_title: "关于我们",
-        about_desc: "这里是关于我们的介绍。",
+        about_subtitle: "XIAOXIONG 餐饮 SaaS 系统 | 餐饮私域新时代的引领者",
+        about_desc:
+            "在竞争激烈的餐饮时代，我们相信——每一家餐厅都应拥有属于自己的根据地。\n" +
+            "我们帮助商家摆脱高抽成平台的束缚，让顾客、数据和利润回归到餐厅手中。\n" +
+            "\n" +
+            "我们的系统不仅是一套工具，而是一场「私域革命」的作战武器：\n" +
+            "二维码点餐连接顾客，会员体系强化粘性，预定系统提升效率，私域外卖重获主动。\n" +
+            "\n" +
+            "我们致力于让每一家餐厅从被动等待，走向主动经营；\n" +
+            "让数据助力战略，让科技成为餐厅的战友。\n" +
+            "\n" +
+            "加入我们，一起点燃属于餐厅的新时代。",
         info: "信息:",
         contact: "联系方式: 968815050",
         email: "邮箱: comercial@xiaoxiong.pt",
@@ -75,7 +86,18 @@ const translations = {
         vip_login: "VIP Login",
         vip_desc: "VIP Login",
         about_title: "About Us",
-        about_desc: "Here is an introduction about us.",
+        about_subtitle: "XIAOXIONG Restaurant SaaS | Leading the New Era of Private Dining Domains",
+        about_desc:
+            "In today’s highly competitive restaurant world, we believe every restaurant deserves its own territory.\n" +
+            "We help merchants break free from high-commission delivery platforms, regaining control over customers, data, and profit.\n" +
+            "\n" +
+            "Our system is more than just software — it’s a strategy for revolution.\n" +
+            "QR ordering builds connections, membership strengthens loyalty, reservations improve efficiency, and private delivery puts power back in your hands.\n" +
+            "\n" +
+            "We empower restaurants to shift from waiting to acting,\n" +
+            "from relying on luck to winning through strategy.\n" +
+            "\n" +
+            "Join us and ignite your restaurant’s new era.",
         info: "Information:",
         contact: "Contact: 968815050",
         email: "Email: comercial@xiaoxiong.pt",
@@ -96,7 +118,18 @@ const translations = {
         vip_login: "Login VIP",
         vip_desc: "Login VIP",
         about_title: "Sobre Nós",
-        about_desc: "Aqui está uma introdução sobre nós.",
+        about_subtitle: "XIAOXIONG Sistema SaaS de Restauração | Líder da Nova Era do Domínio Privado",
+        about_desc:
+            "Num mercado cada vez mais competitivo, acreditamos que cada restaurante deve ter a sua própria base.\n" +
+            "Ajudamos os parceiros a libertarem-se das plataformas com altas comissões, devolvendo aos restaurantes o controlo sobre clientes, dados e lucros.\n" +
+            "\n" +
+            "O nosso sistema não é apenas uma ferramenta — é uma estratégia de revolução.\n" +
+            "Pedidos por QR aproximam clientes, o sistema de membros cria fidelização, as reservas aumentam eficiência e o delivery privado devolve autonomia.\n" +
+            "\n" +
+            "Queremos que cada restaurante passe da espera à ação,\n" +
+            "da incerteza à estratégia.\n" +
+            "\n" +
+            "Junte-se a nós e acenda a nova era da restauração.",
         info: "Informações:",
         contact: "Contacto: 968815050",
         email: "E-mail: comercial@xiaoxiong.pt",
