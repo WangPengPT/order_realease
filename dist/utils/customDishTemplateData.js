@@ -391,9 +391,9 @@ const xiaoxiongLunchTypes = [
     new CustomDish(1454, "Carne de Porco Agridoce", "古老肉", "Sweet and Sour Pork (Canton)", "Carne de Porco Agridoce"),
     new CustomDish(1451, "Frango Kung Pao", "宫保鸡丁", "Kung Pao chicken", "Frango Kung Pao"),
     new CustomDish(1450, "Frango General Tso", "左宗棠鸡", "General Tso's Chicken", "Frango General Tso"),
-    new CustomDish(1418, "Sizzler Frango Teriyaki", "铁板鸡", "Sizzling Chicken Platter", "Frango Teriyaki"),
-    new CustomDish(1417, "Sizzler carne de vaca com molho de ostra", "铁板牛肉", "Sizzling Beef Platter", "Carne de vaca"),
-    new CustomDish(1416, "Sizzler Camarão com alho", "铁板虾", "Sizzling Shrimp Platter", "Camarão com alho")
+    new CustomDish(1418, "Sizzler Frango Teriyaki", "铁板鸡 +1€", "Sizzling Chicken Platter +1€", "Frango Teriyaki +1€", 1),
+    new CustomDish(1417, "Sizzler carne de vaca com molho de ostra", "铁板牛肉 +1€", "Sizzling Beef Platter +1€", "Carne de vaca +1€", 1),
+    new CustomDish(1416, "Sizzler Camarão com alho", "铁板虾 +2€", "Sizzling Shrimp Platter +2€", "Camarão com alho +2€", 2)
   ], 1, 1),
 
   new CustomDishType(3, "massa_arroz", "🍚面饭类", "🍚Noodles & Rice", "🍚Massa & Arroz", [
