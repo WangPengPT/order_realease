@@ -50,6 +50,11 @@ class OrderManager {
             }
         })
 
+        socket.registerMessage("order_change_state", async (query) => {
+            return await this.changePayState(query)
+        });
+
+
 
         socket.registerMessage("getOrderMonthList", async (query) => {
 
@@ -174,7 +179,7 @@ class OrderManager {
             const info = {
                 phone: customer_info.phone, //"351#964880226"
                 email: customer_info.email,
-                description: "online mbway pay"
+                description: "id: " + orderName,
             }
             await payService.newPayment(orderId, "mbway", totalPrice, info)
         }
@@ -267,6 +272,17 @@ class OrderManager {
         }
 
         return ret
+    }
+
+    async changePayState(data) {
+        const dbData = await db.get(db.orderTable, data.id)
+        if (dbData) {
+            dbData.pay_state = data.value
+            await db.set(db.orderTable, dbData);
+            return {success: true, data: data};
+        }
+
+        return {}
     }
 
     async getOrderMonthList(year, month) {

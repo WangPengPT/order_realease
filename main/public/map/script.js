@@ -1,4 +1,4 @@
-// 地图icon 闪烁
+
 const mapIcon = document.querySelector('.title-icon');
 
 mapIcon.addEventListener('click', () => {
@@ -72,8 +72,21 @@ const translations = {
         links: "有用链接",
         privacy: "隐私政策",
         terms: "服务条款",
-        complaints: "投诉书"
+        complaints: "投诉书",
+        joinUs: "加入我们",
+
+        // ✅ Join Us 弹窗
+        joinus_title: "填写餐厅信息",
+        joinus_subtitle: "我们将为您提供一份专属的<strong>数字化转型方案</strong>",
+        joinus_name: "名字",
+        joinus_restaurant_name: "餐厅名称",
+        joinus_email: "邮箱",
+        joinus_phone: "电话号码",
+        joinus_address: "餐厅地址",
+        joinus_submit: "提交",
+        joinus_notice: "注册即表示您同意接收营销电子邮件和优惠信息。有关详细信息，请查看我们的隐私政策和服务条款。"
     },
+
     "en": {
         announcement: "📯 Announcement: Welcome to The Liberated Zone Map!",
         title: "The Liberated Map ...🗺",
@@ -104,8 +117,21 @@ const translations = {
         links: "Useful Links",
         privacy: "Privacy Policy",
         terms: "Terms of Service",
-        complaints: "Complaint Book"
+        complaints: "Complaint Book",
+        joinUs: "Join us",
+
+        // ✅ Join Us Popup
+        joinus_title: "Fill in Restaurant Information",
+        joinus_subtitle: "We’ll provide you with a personalized <strong>digital transformation plan</strong>",
+        joinus_name: "Name",
+        joinus_restaurant_name: "Restaurant Name",
+        joinus_email: "Email",
+        joinus_phone: "Phone Number",
+        joinus_address: "Restaurant Address",
+        joinus_submit: "Submit",
+        joinus_notice: "By registering, you agree to receive marketing emails and offers. For details, please see our Privacy Policy and Terms of Service."
     },
+
     "pt": {
         announcement: "📯 Aviso: Bem-vindo ao The Liberated Zone Map! Sabores autênticos à sua volta...",
         title: "O Mapa Liberado ...🗺",
@@ -136,7 +162,19 @@ const translations = {
         links: "Links úteis",
         privacy: "Política de Privacidade",
         terms: "Termos de Serviço",
-        complaints: "Livro de Reclamações"
+        complaints: "Livro de Reclamações",
+        joinUs: "Junte-se a nós",
+
+        // ✅ Join Us Popup
+        joinus_title: "Preencha as informações do restaurante",
+        joinus_subtitle: "Oferecemos um <strong>plano de transformação digital personalizado</strong> para si",
+        joinus_name: "Nome",
+        joinus_restaurant_name: "Nome do Restaurante",
+        joinus_email: "E-mail",
+        joinus_phone: "Número de Telefone",
+        joinus_address: "Endereço do Restaurante",
+        joinus_submit: "Enviar",
+        joinus_notice: "Ao registar-se, concorda em receber e-mails promocionais e ofertas. Para mais detalhes, consulte a nossa Política de Privacidade e Termos de Serviço."
     }
 };
 
@@ -158,8 +196,32 @@ let currentLang = 'en'; // 默认语言
 function renderLang() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if(translations[currentLang] && translations[currentLang][key]) {
+        if (translations[currentLang] && translations[currentLang][key]) {
             el.textContent = translations[currentLang][key];
+        }
+    });
+
+    // ✅ 支持 HTML 内容（例如带 <strong> 的副标题）
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        const key = el.getAttribute('data-i18n-html');
+        if (translations[currentLang] && translations[currentLang][key]) {
+            el.innerHTML = translations[currentLang][key];
+        }
+    });
+
+    // ✅ 支持输入框 placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (translations[currentLang] && translations[currentLang][key]) {
+            el.placeholder = translations[currentLang][key];
+        }
+    });
+
+    // ✅ 支持按钮文字
+    document.querySelectorAll('[data-i18n-value]').forEach(el => {
+        const key = el.getAttribute('data-i18n-value');
+        if (translations[currentLang] && translations[currentLang][key]) {
+            el.value = translations[currentLang][key];
         }
     });
 }
@@ -243,6 +305,62 @@ async function fetchData() {
     }
 }
 
+function getBaseUrl() {
+    // 检查当前域名是否是本地回环地址（如 localhost, 127.0.0.1）
+    // 或者检查协议是否是 file: （直接打开文件）
+    const isLocalDevelopment = (
+        window.location.hostname === 'localhost' || 
+        window.location.hostname === '127.0.0.1' ||
+        window.location.protocol === 'file:'
+    );
+
+    if (isLocalDevelopment) {
+        // 开发模式：使用完整的后端地址
+        return `http://localhost:80`;
+    } else {
+        // 生产模式：使用相对路径（假设部署在同一域名下，通过 Nginx 等代理）
+        return 'https://v.xiaoxiong.pt'; 
+    }
+}
+
+async function sendEmailRequest(content) {
+   const apiPath = '/api/restaurant_send_email';
+    const baseUrl = getBaseUrl();
+    const url = baseUrl + apiPath; // 拼接最终的 URL
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST', // 指定方法为 POST
+            
+            // 必须设置 Content-Type 头部，告知服务器请求体是 JSON 格式
+            headers: {
+                'Content-Type': 'application/json' 
+            },
+            
+            // 🚀 关键步骤：将 JavaScript 对象转换为 JSON 字符串作为请求体
+            
+            body: JSON.stringify({
+                data: content}) 
+        });
+
+        if (!response.ok) {
+            // 处理 HTTP 错误状态（如 404, 500 等）
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        // 成功时，解析服务器返回的 JSON 响应
+        const data = await response.json();
+        console.log("Email sent response:", data);
+        return data;
+        
+    } catch (error) {
+        console.error("Error sending email:", error);
+        // 您可以在这里抛出错误，让调用者处理
+        throw error;
+    }
+}
+
 function updateValues(takeaway, reserve) {
     const takeawayEl = document.getElementById("takeaway");
     const reserveEl = document.getElementById("reserve");
@@ -271,4 +389,201 @@ function animateFlip(element, newValue) {
     setTimeout(() => {
         element.classList.remove("animate");
     }, 400);
+}
+
+function openJoinUsPopup() {
+document.getElementById('joinUsOverlay').style.display = 'block';
+document.getElementById('joinUsPopup').style.display = 'block';
+closeMenu()
+}
+
+// 关闭成功模态框
+function closeSuccessModal() {
+    document.getElementById('successModalOverlay').style.display = 'none';
+    document.getElementById('successModal').classList.remove('show');
+}
+
+/**
+ * 显示成功消息的自定义模态框
+ * @param {string} message - 要显示的消息文本
+ */
+function showSuccessMessage(message) {
+    const modal = document.getElementById('successModal');
+    const overlay = document.getElementById('successModalOverlay');
+    const messageEl = document.getElementById('successMessage');
+    
+    // 设置内容
+    // 假设标题是固定的（“信息已提交成功！”）或者您可以根据语言再设置一个 data-i18n
+    // 这里只更新详细消息
+    messageEl.textContent = message; 
+
+    // 显示模态框和遮罩
+    overlay.style.display = 'block';
+    // 使用 class 'show' 触发 CSS 动画
+    modal.classList.add('show'); 
+    
+    // 保持 5 秒后自动关闭（可选）
+    // setTimeout(closeSuccessModal, 5000); 
+}
+
+
+function closeJoinUsPopup() {
+    document.getElementById('joinUsOverlay').style.display = 'none';
+    document.getElementById('joinUsPopup').style.display = 'none';
+}
+
+
+// 显示错误
+function showError(inputName, message){
+    const div = document.querySelector(`[data-error-for="${inputName}"]`);
+    if (div) {
+        div.textContent = message;
+        div.style.display = 'block'; // 显示
+    }
+};
+
+// 清空错误
+function clearErrors(){
+    document.querySelectorAll('.error-message').forEach(div => {
+        div.textContent = '';
+        div.style.display = 'none'; // 隐藏
+    });
+};
+
+
+function escapeHtml(str) {
+    return str ? str.replace(/[&<>"']/g, m => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[m])) : "";
+}
+
+function buildJoinUsEmailHtml({ name, restaurant, email, countryCode, phone, address }) {
+    const now = new Date();
+    const localTime = now.toLocaleString();
+    const utcTime = now.toISOString();
+    const pageUrl = window.location.href;
+
+    return `
+        <html>
+        <body style="font-family: Arial, sans-serif; color:#222;">
+            <h2 style="color:#1b6ca8;">新用户加入我们（Join Us）</h2>
+
+            <h3>用户信息</h3>
+            <table cellpadding="6" cellspacing="0" style="font-size:14px;">
+                <tr><td><b>姓名</b></td><td>${escapeHtml(name)}</td></tr>
+                <tr><td><b>餐厅名称</b></td><td>${escapeHtml(restaurant)}</td></tr>
+                <tr><td><b>邮箱</b></td><td>${escapeHtml(email)}</td></tr>
+                <tr><td><b>电话</b></td><td>${escapeHtml(countryCode)} ${escapeHtml(phone)}</td></tr>
+                <tr><td><b>餐厅地址</b></td><td>${escapeHtml(address)}</td></tr>
+            </table>
+
+            <h3 style="margin-top:15px;">提交信息</h3>
+            <table cellpadding="6" cellspacing="0" style="font-size:14px;">
+                <tr><td><b>提交时间（本地）</b></td><td>${escapeHtml(localTime)}</td></tr>
+                <tr><td><b>提交时间（UTC）</b></td><td>${escapeHtml(utcTime)}</td></tr>
+                <tr><td><b>来源页面</b></td><td>${escapeHtml(pageUrl)}</td></tr>
+            </table>
+
+            <hr/>
+            <p style="color:#666; font-size:12px;">请妥善处理用户隐私信息</p>
+        </body>
+        </html>
+    `;
+}
+
+
+
+async function submitJoinUsForm(event) {
+    event.preventDefault();
+    const form = event.target;
+
+    clearErrors(); // 清空之前的错误
+
+    // 获取用户输入
+    const name = form.querySelector('input[name="name"]').value.trim();
+    const restaurant = form.querySelector('input[name="restaurant"]').value.trim();
+    const emailInput = form.querySelector('input[type="email"]');
+    const phoneInput = form.querySelector('input[type="tel"]');
+    const address = form.querySelector('input[name="address"]').value.trim();
+    const countryCode = form.querySelector('select[name="countryCode"]').value;
+
+    const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
+
+    // 多语言错误提示
+    const errorTexts = {
+        emailInvalid: { zh: "邮箱格式不正确", pt: "Email inválido", en: "Email is invalid" },
+        phoneInvalid: { zh: "电话号码格式不正确", pt: "Número de telefone inválido", en: "Phone number is invalid" },
+        alreadySubmitted: { zh: "您已经提交过此邮箱或电话号码", pt: "Você já enviou este e-mail ou telefone", en: "This email or phone has already been submitted" },
+    };
+
+    const successTexts = {
+        zh: "信息已提交成功！感谢您的信任！我们的专属顾问将在 24小时工作日内 通过电话与您联系。",
+        en: "Submission successful! Thank you for your trust. Our dedicated consultant will contact you by phone within 24 business hours.",
+        pt: "Submissão bem-sucedida! Agradecemos a sua confiança. O nosso consultor entrará em contacto por telefone dentro de 24 horas úteis."
+    };
+
+    const lang = 'zh'; // todo:改为你当前语言变量
+
+    // 邮箱验证
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showError('email', errorTexts.emailInvalid[lang]);
+        emailInput.focus();
+        return;
+    }
+
+    // 电话验证（葡萄牙 +351 9 位）
+    const phoneValid = countryCode === '+351'
+        ? /^[0-9]{9}$/.test(phone)
+        : /^[0-9]{6,15}$/.test(phone);
+
+    if (!phoneValid) {
+        showError('phone', errorTexts.phoneInvalid[lang]);
+        phoneInput.focus();
+        return;
+    }
+
+    // 检查 localStorage 是否已提交过
+    const submittedData = JSON.parse(localStorage.getItem('joinUsSubmissions') || '[]');
+    const alreadySubmitted = submittedData.some(item => item.email === email || item.phone === phone);
+    if (alreadySubmitted) {
+        showError('email', errorTexts.alreadySubmitted[lang]);
+        showError('phone', errorTexts.alreadySubmitted[lang]);
+        return;
+    }
+
+    // ✅ 生成邮件 HTML
+    const emailHtml = buildJoinUsEmailHtml({
+        name,
+        restaurant,
+        email,
+        countryCode,
+        phone,
+        address
+    });
+
+    try {
+        // ✅ 发邮件
+        await sendEmailRequest(emailHtml);
+
+        // ✅ 成功后：显示成功消息
+        showSuccessMessage(successTexts[lang] || successTexts['en']);
+        
+        // ✅ 保存 localStorage 防重复提交
+        submittedData.push({ email, phone });
+        localStorage.setItem('joinUsSubmissions', JSON.stringify(submittedData));
+    
+        // ✅ 清空表单
+        form.reset();
+        closeJoinUsPopup();
+
+    } catch (error) {
+        // 🚨 如果 sendEmailRequest 抛出错误（例如 405 错误，网络错误等）
+        console.error("Join Us Form submission failed:", error);
+        
+        // 可选：显示通用错误或网络错误
+        showError('email', (translations[lang] || translations['en']).general_error || "Submission failed. Please try again.");
+    }
+
 }

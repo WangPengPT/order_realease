@@ -21,6 +21,8 @@ const http = require("http");
 const tools = require('./utils/tools')
 const path = require("path");
 
+const VIPUserManager = require('./controllers/vip_user')
+
 const app = express();
 let port = 80;
 
@@ -91,6 +93,7 @@ async function initApp() {
     await redirectPage.init(app)
     await payService.init(orderManager)
 
+    VIPUserManager.init()
 
     // const info = {
     //     phone: "351#964880226",

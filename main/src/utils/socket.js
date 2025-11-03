@@ -1,4 +1,6 @@
 const { Server } = require('socket.io');
+const db = require("./db");
+const state = require("./state");
 
 const msgFuns = {}
 
@@ -47,7 +49,10 @@ class Socket {
             });
 
             // 断开连接
-            socket.on('disconnect', () => {
+            socket.on('disconnect', async () => {
+                if(socket.restaurant_data && socket.restaurant_data.id){
+                    state.setStatusOnline(socket.restaurant_data.id, false)
+                }
                 console.log('Client disconnected:', socket.id);
             });
 

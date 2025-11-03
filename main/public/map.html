@@ -7,6 +7,7 @@
     <title>The Liberated Map</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="./map/style.css">
+    <script src="./map/script.js"></script>
     <link rel="icon" type="image/png" href="map/map_icon.png">
 </head>
 
@@ -20,7 +21,7 @@
         <div class="top_container">
             <div class="title-with-icon">
                 <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/7gfRvrglyX-removebg-1.png?v=1759266579"
-                        alt="Map Icon" class="title-icon">
+                    alt="Map Icon" class="title-icon">
                 <div class="map-icon-container">
                     <div class="lang-popup" id="langPopup">
                         <img src="map/flags/zh.png" class="lang-flag" data-lang="zh" id="flag-zh">
@@ -29,7 +30,7 @@
                     </div>
 
                 </div><!-- 遮罩层 -->
-<div id="langMask" class="lang-mask"></div>
+                <div id="langMask" class="lang-mask"></div>
 
                 <div class="title-container">
                     <span data-i18n="title" class="top-bar-title">The Liberated Map ...🗺</span>
@@ -45,6 +46,9 @@
             <a href="javascript:void(0)" onclick="navigateTo('home')" data-i18n="nav_home">Home</a>
             <a href="javascript:void(0)" onclick="navigateTo('vip')" data-i18n="nav_vip">VIP</a>
             <a href="javascript:void(0)" onclick="navigateTo('about')" data-i18n="nav_about">About</a>
+
+           <a href="javascript:void(0)" onclick="openJoinUsPopup()" data-i18n="joinUs">Join Us</a>
+
             <img src="https://xiaoxiong.pt/cdn/shop/files/XIAOXIONG_4d781207-589f-4748-a169-406984787108.png"
                 style="max-width: 100px; cursor: pointer; padding: 1rem;"
                 onclick="window.open('https://xiaoxiong.pt', '_blank')" alt="Xiaoxiong Logo">
@@ -126,6 +130,67 @@
 
     <!-- Stockist JS -->
     <script src="https://stockist.co/embed/v1/widget.min.js"></script>
+
+
+    <!-- Join Us 弹窗 -->
+    <div id="joinUsOverlay" class="joinus-popup-overlay" onclick="closeJoinUsPopup()"></div>
+
+    <div id="joinUsPopup" class="joinus-popup-window">
+        <span class="joinus-popup-close" onclick="closeJoinUsPopup()">×</span>
+
+        <!-- 标题与副标题 -->
+        <h2 data-i18n="joinus_title">填写餐厅信息</h2>
+        <p data-i18n-html="joinus_subtitle">
+            我们将为您提供一份专属的 <strong>数字化转型方案</strong>
+        </p>
+
+        <!-- 表单 -->
+<form class="joinus-form" onsubmit="submitJoinUsForm(event)">
+
+    <input type="text" name="name" data-i18n-placeholder="joinus_name" placeholder="名字" required>
+    <div class="error-message" data-error-for="name"></div>
+
+    <input type="text" name="restaurant" data-i18n-placeholder="joinus_restaurant_name" placeholder="餐厅名称" required>
+    <div class="error-message" data-error-for="restaurant"></div>
+
+    <input type="email" name="email" data-i18n-placeholder="joinus_email" placeholder="邮箱" required>
+    <div class="error-message" data-error-for="email"></div>
+
+    <div class="phone-group">
+        <select name="countryCode">
+            <option value="+351">🇵🇹 +351</option>
+            <option value="+86">🇨🇳 +86</option>
+            <option value="+44">🇬🇧 +44</option>
+        </select>
+
+        <input type="tel" name="phone" data-i18n-placeholder="joinus_phone" placeholder="电话号码"
+               pattern="[0-9]*" inputmode="numeric" required>
+
+        <div class="error-message" data-error-for="phone"></div>
+    </div>
+
+    <input type="text" name="address" data-i18n-placeholder="joinus_address" placeholder="餐厅地址" required>
+    <div class="error-message" data-error-for="address"></div>
+
+    <button data-i18n="joinus_submit" type="submit">提交</button>
+
+    <small data-i18n="joinus_notice">
+        注册即表示您同意接收营销电子邮件和优惠信息。有关详细信息，请查看我们的隐私政策和服务条款。
+    </small>
+</form>
+    </div>
+
+
+    <div id="successModalOverlay" class="joinus-popup-overlay" onclick="closeSuccessModal()"></div>
+<div id="successModal" class="success-popup-window">
+    <span class="joinus-popup-close" onclick="closeSuccessModal()">×</span>
+    <div class="success-icon">
+        <span class="material-icons">check_circle</span>
+    </div>
+    <h2 id="successTitle">信息已提交成功！</h2>
+    <p id="successMessage" style="white-space: pre-wrap;"></p>
+    <button class="success-ok-btn" onclick="closeSuccessModal()">OK</button>
+</div>
 
 </body>
 

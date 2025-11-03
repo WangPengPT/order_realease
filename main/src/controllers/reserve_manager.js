@@ -52,15 +52,21 @@ class ReserveManager {
             }
         })
 
-        socket.registerMessage("update_reserve_data", async (value,callback) => {
-            try{
-                if(!value) throw new Error("Reserve data is empty")
-                if(await db.get(db.reserveTable,value.id,false)) throw new Error("Reserve data is not found")
-                await db.set(db.reserveTable, value)
-            }catch (e) {
-                callback({success:false, data: e.message})
+        socket.registerMessage("getAllreservecancels", async (query) => {
+            let count = query.count;
+            count = parseInt(count)
+            console.log(count)
+            const data = await this.getAllreservecancels(count)
+
+            return {
+                result: true,
+                data: data
             }
         })
+
+        socket.registerMessage("g_update_reserve_data", this.update_reserve_data.bind(this))
+
+        socket.registerMessage("setReserve", this.update_reserve_data.bind(this))
 
         this.max_id = await db.getValue("server_reserve_max_id", 1);
 
@@ -262,6 +268,43 @@ class ReserveManager {
         }
 
         return ret
+    }
+
+    async getAllreservecancels(count) {
+        const sort = {
+            date: -1,
+        }
+
+        const q = {status:'processing'}
+
+        const datas = await db.find(db.reserveTable, q, sort, count)
+
+        const ret = []
+        for(let i=0; i<datas.length; i++) {
+            ret.push(this.toData(datas[i]));
+        }
+        console.log("ret",ret)
+
+        return ret
+    }
+
+    async update_reserve_data(value){
+        try{
+
+            if(!value) throw new Error("Reserve data is empty")
+            const reserve = await db.get(db.reserveTable,value.id)
+
+            if(!reserve) {
+                throw new Error("Reserve data is not found")
+            }else{
+                await db.set(db.reserveTable, value)
+            }
+
+            return {success:true, data:value}
+
+        }catch (e) {
+            return {success:false, data: e.message}
+        }
     }
 
     toData(data) {

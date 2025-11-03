@@ -1,5 +1,6 @@
 
 const db = require('../utils/db');
+const state = require('../utils/state');
 const socket = require('../utils/socket');
 const { execFile } = require('child_process');
 const path = require('path');
@@ -39,6 +40,8 @@ class ServerManager {
         socket.registerMessage("g_set_menu", this.set_menu.bind(this));
         socket.registerMessage("g_get_menu", this.get_menu.bind(this));
 
+        socket.registerMessage("g_get_config", this.get_config.bind(this));
+
         this.maxPort = await db.getValue("server_max_id", BASE_PORT);
 
         this.menu_data = {}
@@ -46,7 +49,11 @@ class ServerManager {
     }
 
     async setServer(params) {
+        // console.log("setServer", params);
+
         await db.set(db.serverTable, params);
+
+        socket.broadcast("set_server_"+params.id, params);
 
         redirectPage.updateStore(params)
         this.setRestaurants(params)
@@ -95,10 +102,27 @@ class ServerManager {
             params.url = `https://v.xiaoxiong.pt:${param1}`;
         }
 
-        if (params.takeWay) {
-            params.takeWay = false
+        if (!params.permissionsControl) {
+            params.permissionsControl = {
+                order: true,
+                delivery: true,
+                reserver: true,
+                vip: true,
+            }
         }
 
+        if (!params.customDishesControl) {
+           params.customDishesControl = {
+               1: {enabled: true, name: 'Sushi Aleatória®'},
+               2: {enabled: true, name: 'Poke Bowl'},
+               3: {enabled: true, name: 'MY BOX'},
+               4: {enabled: true, name: 'bibimbap'},
+               5: {enabled: true, name: 'XIAOXIONG® RAMEN'},
+               6: {enabled: true, name: 'Menu Almoço'},
+           }
+        }
+
+        console.log("params", params);
         await db.set(db.serverTable, params);
 
         redirectPage.updateStore(params)
@@ -123,14 +147,7 @@ class ServerManager {
         return {
             result: true,
             datas: datas,
-        }
-    }
-
-    async getAllServer() {
-        const datas = await db.getAll(db.serverTable);
-        return {
-            result: true,
-            datas: datas,
+            states: state.getAllStates(),
         }
     }
 
@@ -175,8 +192,44 @@ class ServerManager {
         };
 
         return {
+
         }
     }
+
+    async get_config(data,socket){
+        // console.log("get_config", data);
+
+        const result = { success: false, data: undefined}
+
+        try{
+            const server = await db.get(db.serverTable,data.id)
+
+            if(server){
+                for(const key in data){
+                    server[key] = data[key];
+                }
+
+                socket.restaurant_data = { id:data.id }
+                result.data = "Change to Statu Online"
+
+            }else{
+                await this.addServer(data)
+                result.data = "Create new Server"
+
+            }
+
+            state.setStatusOnline(data.id, true)
+
+            result.success = true
+            return result
+
+        }catch (e){
+            result.data = e.message
+            return result
+        }
+
+    }
+
 
     async get_info() {
         let reserve_count = await db.getValue("server_reserve_max_id", 1);

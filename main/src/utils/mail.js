@@ -2,12 +2,12 @@ const { Resend } = require('resend');
 
 class Mail {
 
-    static async send(mailAddr, subject, html) {
+    static async send(mailAddr, subject, html, from = 'orders@ordermail.xiaoxiongeats.com') {
 
         const resend = new Resend('re_4JmU5oJE_QAXsod5nMwvEAAaJXEnmba9e');
 
         const {data, error} = await resend.emails.send({
-            from: 'orders@ordermail.xiaoxiongeats.com',
+            from: from,
             to: mailAddr,
             subject: subject,
             html: html
