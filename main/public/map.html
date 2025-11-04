@@ -7,7 +7,8 @@
     <title>The Liberated Map</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="./map/style.css">
-    <script src="./map/script.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link rel="icon" type="image/png" href="map/map_icon.png">
 </head>
 
@@ -29,7 +30,7 @@
                         <img src="map/flags/pt.png" class="lang-flag" data-lang="pt" id="flag-pt">
                     </div>
 
-                </div><!-- 遮罩层 -->
+                </div>
                 <div id="langMask" class="lang-mask"></div>
 
                 <div class="title-container">
@@ -42,17 +43,37 @@
             </div>
         </div>
         <div id="sideMenu" class="side-menu">
-            <a href="javascript:void(0)" class="close-btn" onclick="closeMenu()">×</a>
+    <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100vh;">
+
+        <div style="display: flex; flex-direction: column;">
+            <div style="width: 100%; padding: 10px;" >
+                <button onclick="closeMenu()" style="display: flex; align-items: start; background: none; border: none; box-shadow: none;font-size: 30px;">×</button>
+            </div>
             <a href="javascript:void(0)" onclick="navigateTo('home')" data-i18n="nav_home">Home</a>
             <a href="javascript:void(0)" onclick="navigateTo('vip')" data-i18n="nav_vip">VIP</a>
             <a href="javascript:void(0)" onclick="navigateTo('about')" data-i18n="nav_about">About</a>
 
-           <a href="javascript:void(0)" onclick="openJoinUsPopup()" data-i18n="joinUs">Join Us</a>
-
-            <img src="https://xiaoxiong.pt/cdn/shop/files/XIAOXIONG_4d781207-589f-4748-a169-406984787108.png"
-                style="max-width: 100px; cursor: pointer; padding: 1rem;"
-                onclick="window.open('https://xiaoxiong.pt', '_blank')" alt="Xiaoxiong Logo">
+            <a href="javascript:void(0)" onclick="openJoinUsPopup()" data-i18n="joinUs">Join Us</a>
+            
+            <div style="width: 100%; text-align: center; padding-top: 1rem;">
+                <img src="https://xiaoxiong.pt/cdn/shop/files/XIAOXIONG_4d781207-589f-4748-a169-406984787108.png"
+                    style="max-width: 100px; cursor: pointer;"
+                    onclick="window.open('https://xiaoxiong.pt', '_blank')" alt="Xiaoxiong Logo">
+            </div>
         </div>
+
+        <div style="display: flex; justify-content: end; padding-bottom: 20px; padding-right: 10px;">
+    <a href="https://www.instagram.com/theliberatedmap/" target="_blank" 
+       style="color: #c13584; text-decoration: none; font-size: 1.2rem; display: flex; align-items: center;">
+       
+       <img src="./map/instagram.png" 
+            alt="Instagram Logo" 
+            style="width: 24px; height: 24px; vertical-align: middle;"> 
+    </a>
+</div>
+        
+    </div>
+</div>
         <div id="overlay" class="overlay" onclick="closeMenu()"></div>
     </header>
 
@@ -74,7 +95,6 @@
             </div>
 
             <div class="widget-container">
-                <!-- Stockist widget -->
                 <stockist-store-locator data-stockist-widget-tag="map_93g8gzpq">
                     Loading store locator...
                 </stockist-store-locator>
@@ -126,71 +146,67 @@
         <span class="material-icons">keyboard_control_key</span>
     </button>
 
-    <script src="./map/script.js"></script>
-
-    <!-- Stockist JS -->
-    <script src="https://stockist.co/embed/v1/widget.min.js"></script>
-
-
-    <!-- Join Us 弹窗 -->
     <div id="joinUsOverlay" class="joinus-popup-overlay" onclick="closeJoinUsPopup()"></div>
 
     <div id="joinUsPopup" class="joinus-popup-window">
         <span class="joinus-popup-close" onclick="closeJoinUsPopup()">×</span>
 
-        <!-- 标题与副标题 -->
         <h2 data-i18n="joinus_title">填写餐厅信息</h2>
         <p data-i18n-html="joinus_subtitle">
             我们将为您提供一份专属的 <strong>数字化转型方案</strong>
         </p>
 
-        <!-- 表单 -->
-<form class="joinus-form" onsubmit="submitJoinUsForm(event)">
+        <form class="joinus-form" onsubmit="submitJoinUsForm(event)">
 
-    <input type="text" name="name" data-i18n-placeholder="joinus_name" placeholder="名字" required>
-    <div class="error-message" data-error-for="name"></div>
+            <input type="text" name="name" data-i18n-placeholder="joinus_name" placeholder="名字" required>
+            <div class="error-message" data-error-for="name"></div>
 
-    <input type="text" name="restaurant" data-i18n-placeholder="joinus_restaurant_name" placeholder="餐厅名称" required>
-    <div class="error-message" data-error-for="restaurant"></div>
+            <input type="text" name="restaurant" data-i18n-placeholder="joinus_restaurant_name" placeholder="餐厅名称"
+                required>
+            <div class="error-message" data-error-for="restaurant"></div>
 
-    <input type="email" name="email" data-i18n-placeholder="joinus_email" placeholder="邮箱" required>
-    <div class="error-message" data-error-for="email"></div>
+            <input type="email" name="email" data-i18n-placeholder="joinus_email" placeholder="邮箱" required>
+            <div class="error-message" data-error-for="email"></div>
 
-    <div class="phone-group">
-        <select name="countryCode">
-            <option value="+351">🇵🇹 +351</option>
-            <option value="+86">🇨🇳 +86</option>
-            <option value="+44">🇬🇧 +44</option>
-        </select>
+            <div class="phone-group">
+                <select name="countryCode">
+                    <option value="+351">🇵🇹 +351</option>
+                    <option value="+86">🇨🇳 +86</option>
+                    <option value="+44">🇬🇧 +44</option>
+                </select>
 
-        <input type="tel" name="phone" data-i18n-placeholder="joinus_phone" placeholder="电话号码"
-               pattern="[0-9]*" inputmode="numeric" required>
+                <input type="tel" name="phone" data-i18n-placeholder="joinus_phone" placeholder="电话号码" pattern="[0-9]*"
+                    inputmode="numeric" required>
 
-        <div class="error-message" data-error-for="phone"></div>
-    </div>
+                <div class="error-message" data-error-for="phone"></div>
+            </div>
 
-    <input type="text" name="address" data-i18n-placeholder="joinus_address" placeholder="餐厅地址" required>
-    <div class="error-message" data-error-for="address"></div>
+            <input type="text" name="address" data-i18n-placeholder="joinus_address" placeholder="餐厅地址" required>
+            <div class="error-message" data-error-for="address"></div>
 
-    <button data-i18n="joinus_submit" type="submit">提交</button>
+            <button data-i18n="joinus_submit" type="submit">提交</button>
 
-    <small data-i18n="joinus_notice">
-        注册即表示您同意接收营销电子邮件和优惠信息。有关详细信息，请查看我们的隐私政策和服务条款。
-    </small>
-</form>
+            <small data-i18n="joinus_notice">
+                注册即表示您同意接收营销电子邮件和优惠信息。有关详细信息，请查看我们的隐私政策和服务条款。
+            </small>
+        </form>
     </div>
 
 
     <div id="successModalOverlay" class="joinus-popup-overlay" onclick="closeSuccessModal()"></div>
-<div id="successModal" class="success-popup-window">
-    <span class="joinus-popup-close" onclick="closeSuccessModal()">×</span>
-    <div class="success-icon">
-        <span class="material-icons">check_circle</span>
+    <div id="successModal" class="success-popup-window">
+        <span class="joinus-popup-close" onclick="closeSuccessModal()">×</span>
+        <div class="success-icon">
+            <span class="material-icons">check_circle</span>
+        </div>
+        <h2 id="successTitle" data-i18n="success_title">信息已提交成功！</h2>
+        <p id="successMessage" style="white-space: pre-wrap;"></p>
+        <button class="success-ok-btn" onclick="closeSuccessModal()">OK</button>
     </div>
-    <h2 id="successTitle">信息已提交成功！</h2>
-    <p id="successMessage" style="white-space: pre-wrap;"></p>
-    <button class="success-ok-btn" onclick="closeSuccessModal()">OK</button>
-</div>
+
+    <script src="https://stockist.co/embed/v1/widget.min.js"></script>
+
+    <script src="./map/script.js"></script>
 
 </body>
 
