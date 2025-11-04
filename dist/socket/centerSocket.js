@@ -6,6 +6,7 @@ const DB = require('../db.js');
 const http = require('http');
 const https = require('https');
 const {appState} = require("../state");
+const {logger} = require("../utils/logger");
 
 
 
@@ -21,6 +22,7 @@ let restaurantInfo = {}
 let menuData
 let update_data = false;
 let menuService
+
 
 class CenterSocket {
 
@@ -67,6 +69,18 @@ class CenterSocket {
 
         socket.on('connect', async () => {
             console.log('connect to center server');
+
+            socket.emit('message', 'g_get_config',
+                {id:name, port: process.env.PORT || 8080, url: process.env.ADDR,},
+                (cb)=>{
+                    if(cb.success){
+                        logger.info('Center Server get config successfully: '+cb.data);
+                    }else{
+                        logger.error('Center Server get config failed: '+cb.data);
+                    }
+                }
+            )
+
             await this.update_menu_data();
         });
 
@@ -78,6 +92,20 @@ class CenterSocket {
             console.log('reserve_'+name,data);
             appState.socket_io.emit("new_reserves", [data])
         });
+
+        socket.on("set_server_"+name, (data) => {
+            console.log('set_server_'+name,data);
+
+            if(data.permissionsControl){
+                appState.updatePermissionsControl(data.permissionsControl)
+                appState.socket_io.emit("permissions_control", data.permissionsControl)
+            }
+            if(data.customDishesControl){
+                appState.updateCustomDishesControl(data.customDishesControl)
+                appState.socket_io.emit("manager_get_custom_dish_control", data.customDishesControl)
+            }
+
+        })
 
 
         this.connect_socket();
@@ -153,7 +181,7 @@ class CenterSocket {
     }
 
     static getRestaurant() {
-        let name = "sc_sushi"
+        let name = "local"
 
         // name = "org_sushi"
 
@@ -204,8 +232,8 @@ class CenterSocket {
         });
     }
 
-    static updateReserveData(key, value, callback){
-        socket.emit('update_reserve_data', {key:key, value:value}, callback)
+    static updateReserveData(value, callback){
+        socket.emit('message', 'g_update_reserve_data', value, callback)
     }
 
 

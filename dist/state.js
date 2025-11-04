@@ -18,6 +18,22 @@ class AppState {
             takeaway: 0,
         }
 
+        this.permissionsControl = {
+            order: true,
+            delivery: true,
+            reserver: true,
+            vip: true,
+        }
+
+        this.customDishesControl = {
+            1: {enabled: true, name: 'Sushi Aleatória®'},
+            2: {enabled: true, name: 'Poke Bowl'},
+            3: {enabled: true, name: 'MY BOX'},
+            4: {enabled: true, name: 'bibimbap'},
+            5: {enabled: true, name: 'XIAOXIONG® RAMEN'},
+            6: {enabled: true, name: 'Menu Almoço'},
+        }
+
         this.settings = {
             checkIP: false,
             delivery: false,
@@ -88,6 +104,10 @@ class AppState {
     }
 
     // 所有 Get 函数
+    getPermissionsControl(){
+        return this.permissionsControl
+    }
+
     getPriceData(){
         const result = {
             weekPrice: this.weekPrice.getAllPrices(),
@@ -174,6 +194,16 @@ class AppState {
     }
 
     // 所有 Update 函数
+    updatePermissionsControl(value){
+        this.permissionsControl = value
+        console.log("update PermissionsControl:", this.permissionsControl)
+    }
+
+    updateCustomDishesControl(value){
+        this.customDishesControl = value
+        console.log("update CustomDishesControl:", this.customDishesControl)
+    }
+
     updateSettings(key, value) {
         this.settings[key] = value
         console.log("update settings: ", key,this.settings[key])
@@ -361,6 +391,20 @@ class AppState {
                     return tableManager;
                 }
                 return new TableManager([]);
+            },
+            permissionsControl: (value) => {
+                if (!value) return this.permissionsControl;
+                for (const k of Object.keys(value)) {
+                    this.permissionsControl[k] = value[k];
+                }
+                return this.permissionsControl;
+            },
+            customDishesControl: (value) => {
+                if (!value) return this.customDishesControl;
+                for (const k of Object.keys(value)) {
+                    this.customDishesControl[k] = value[k];
+                }
+                return this.customDishesControl;
             },
             settings: (value) => {
                 if (!value) return this.settings;

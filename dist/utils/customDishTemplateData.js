@@ -3,7 +3,7 @@ const CustomDishTemplate = require('../model/customDishTemplate')
 const CustomDishType = require('../model/customDishType')
 
 const ids = {
-    sushi_aleatoria : 1,
+    sushi_aleatoria: 1,
     pock_bowl: 2,
     nine_square: 3,
     bibimbap: 4,
@@ -97,7 +97,6 @@ const pokebowlTypes = [
         new CustomDish(19, "Ovo cozido", "水煮蛋", "Boiled egg", "Ovo cozido")
     ], 3, 1),
     new CustomDishType(3, "vegetable", "素食", "Vegetable", "Vegetal", [
-        new CustomDish(30, "Cenoura", "胡萝卜", "Carrot", "Cenoura"),
         new CustomDish(31, "Wakame", "裙带菜", "Wakame", "Wakame"),
         new CustomDish(32, "Cenoura", "胡萝卜", "Carrot", "Cenoura"),
         new CustomDish(33, "Abacate", "牛油果", "Avocado", "Abacate"),
@@ -406,9 +405,9 @@ const xiaoxiongLunchTypes = [
     new CustomDish(2030, "Chow Mein Massa Pho(Vegetariano)", "素炒河粉", "Stir-fried pho noodles(Vegetarian)", "Massa Pho")
   ],1, 1),
   new CustomDishType(4, "upgrade", "🦐炒面配料", "🦐Ingredients", "🦐Ingredientes", [
-    new CustomDish(60, "Três Delícias", "地三鲜 +2.80€", "3 Delights +2.80€", "Três Delícias +2.80€", 2.8),
-    new CustomDish(61, "Frango Panado", "炸鸡排 +3.00€", "Fried chicken cutlet +3.00€", "Frango Panado +3.00€", 3.0),
-    new CustomDish(62, "Carne de Vaca", "牛肉 +3.50€", "Beef +3.50€", "Carne de Vaca +3.50€", 3.5)
+    new CustomDish(60, "Três Delícias", "地三鲜 +2.80€", "3 Delights +2.80€", "Três Delícias +3.00€", 3),
+    new CustomDish(61, "Frango Panado", "炸鸡排 +3.00€", "Fried chicken cutlet +3.00€", "Frango Panado +1.00€", 1),
+    new CustomDish(62, "Carne de Vaca", "牛肉 +3.50€", "Beef +3.50€", "Carne de Vaca +2.00€", 2)
   ], 1, 0)
 ]
 
