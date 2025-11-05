@@ -108,6 +108,7 @@ class ServerManager {
                 delivery: true,
                 reserver: true,
                 vip: true,
+                fandays: true,
             }
         }
 
