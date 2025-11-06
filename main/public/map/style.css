@@ -17,13 +17,23 @@ body {
 }
 
 /* Layout Containers */
-.container, .top_container {
+.top_container {
     margin: 0 auto;
     padding-left: 15px;
     padding-right: 15px;
     padding-top: none;
     padding-bottom: 2px;
     background-color: #016450;
+}
+
+.container{
+    margin-left: 0;
+    padding-right: 0;
+    background-color: #016450;
+    align-content: center;
+    color: white;
+    height: auto;
+    width: 100%;
 }
 
 header {
@@ -281,7 +291,6 @@ a {
 footer {
     text-align: center;
     margin-top: 30px;
-    padding: 20px;
     color: #666;
     font-size: clamp(14px, 2vw, 20px);
 }
@@ -291,6 +300,7 @@ footer {
     justify-content: space-between;
     flex-wrap: wrap;
     padding: 0 2rem;
+    padding: 20px;
 }
 
 .footer-info, .footer-links {
