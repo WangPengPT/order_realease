@@ -22,6 +22,13 @@ cd ..
 cd mg-manager
 call npm install
 call npm run build
+ren .\dist\index.html mg.html
+xcopy .\dist %DST_PATH%\public /E /Y /I
+cd ..
+
+cd ..\dinefinder-map
+call npm install
+call npm run build
 xcopy .\dist %DST_PATH%\public /E /Y /I
 cd ..
 

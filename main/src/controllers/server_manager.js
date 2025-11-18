@@ -200,7 +200,7 @@ class ServerManager {
     async get_config(data,socket){
         // console.log("get_config", data);
 
-        const result = { success: false, data: undefined}
+        const result = { success: false, data: undefined, permissionsControl: undefined}
 
         try{
             const server = await db.get(db.serverTable,data.id)
@@ -220,6 +220,8 @@ class ServerManager {
             }
 
             state.setStatusOnline(data.id, true)
+
+            result.permissionsControl = server.permissionsControl
 
             result.success = true
             return result

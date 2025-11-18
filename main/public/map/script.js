@@ -76,7 +76,7 @@ const translations = {
 
         // ✅ Join Us 弹窗
         joinus_title: "填写餐厅信息",
-        joinus_subtitle: "我们将为您提供一份专属的<strong>数字化转型方案</strong> \n 或者可联系我们的WhatsApp号码：+351 968815050",
+        joinus_subtitle: "我们将为您提供一份专属的<strong>数字化转型方案</strong>",
         joinus_name: "名字",
         joinus_restaurant_name: "餐厅名称",
         joinus_email: "邮箱",
@@ -124,7 +124,7 @@ const translations = {
 
         // ✅ Join Us Popup
         joinus_title: "Fill in Restaurant Information",
-        joinus_subtitle: "We’ll provide you with a personalized <strong>digital transformation plan</strong>. Alternatively, you can contact us on WhatsApp at: +351 968815050",
+        joinus_subtitle: "We’ll provide you with a personalized <strong>digital transformation plan</strong>",
         joinus_name: "Name",
         joinus_restaurant_name: "Restaurant Name",
         joinus_email: "Email",
@@ -149,7 +149,7 @@ const translations = {
         vip_login: "Login VIP",
         vip_desc: "Login VIP",
         about_title: "Sobre Nós",
-        about_subtitle: "XIAOXIONG Sistema SaaS de Restauração | Líder da Nova Era do Domínio Privado.",
+        about_subtitle: "XIAOXIONG Sistema SaaS de Restauração | Líder da Nova Era do Domínio Privado",
         about_desc:
             "Num mercado cada vez mais competitivo, acreditamos que cada restaurante deve ter a sua própria base.\n" +
             "Ajudamos os parceiros a libertarem-se das plataformas com altas comissões, devolvendo aos restaurantes o controlo sobre clientes, dados e lucros.\n" +
@@ -172,7 +172,7 @@ const translations = {
 
         // ✅ Join Us Popup
         joinus_title: "Preencha as informações do restaurante",
-        joinus_subtitle: "Oferecemos um <strong>plano de transformação digital personalizado</strong> para si. Alternativamente, pode contactar-nos via WhatsApp: +351 968815050",
+        joinus_subtitle: "Oferecemos um <strong>plano de transformação digital personalizado</strong> para si",
         joinus_name: "Nome",
         joinus_restaurant_name: "Nome do Restaurante",
         joinus_email: "E-mail",
@@ -522,9 +522,9 @@ async function submitJoinUsForm(event) {
 
     // 🎯 更新：使用 \n 实现美观的分行
     const successTexts = {
-        zh: "信息已提交成功！\n感谢您的信任！\n我们的专属顾问将在 24小时工作日内\n通过电话与您联系。\n或者，您可以通过 WhatsApp 联系我们：+351 968815050。",
-        en: "Submission successful!\nThank you for your trust.\nOur dedicated consultant will contact you by phone\nwithin 24 business hours. \nAlternatively, you can reach us on WhatsApp at +351 968815050.",
-        pt: "Submissão bem-sucedida!\nAgradecemos a sua confiança.\nO nosso consultor entrará em contacto por telefone\ndentro de 24 horas úteis. \nAlternativamente, pode contactar-nos no WhatsApp através do número +351 968815050."
+        zh: "信息已提交成功！\n感谢您的信任！\n我们的专属顾问将在 24小时工作日内\n通过电话与您联系。",
+        en: "Submission successful!\nThank you for your trust.\nOur dedicated consultant will contact you by phone\nwithin 24 business hours.",
+        pt: "Submissão bem-sucedida!\nAgradecemos a sua confiança.\nO nosso consultor entrará em contacto por telefone\ndentro de 24 horas úteis."
     };
 
 

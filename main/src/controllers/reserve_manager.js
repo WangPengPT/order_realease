@@ -40,6 +40,21 @@ class ReserveManager {
             }
         })
 
+        socket.registerMessage("reserve_change_state", async (query) => {
+            return await this.changePayState(query)
+        });
+
+        socket.registerMessage("getReserveMonthList", async (query) => {
+
+            console.log("getReserveMonthList:" + query)
+            const data = await this.getReserveMonthList(query.year, query.month)
+
+            return {
+                result: true,
+                data: data
+            }
+        })
+
         socket.registerMessage("getAllreserve", async (query) => {
             let count = query.count;
             count = parseInt(count)
@@ -305,6 +320,39 @@ class ReserveManager {
         }catch (e) {
             return {success:false, data: e.message}
         }
+    }
+
+    async changePayState(data) {
+        const dbData = await db.get(db.reserveTable, data.id)
+        if (dbData) {
+            dbData.state = data.value
+            await db.set(db.reserveTable, dbData);
+            return {success: true, data: data};
+        }
+
+        return {}
+    }
+
+    async getReserveMonthList(year, month) {
+
+        const sort = {
+            _id: -1,
+        }
+
+        month = String(month).padStart(2, '0');
+
+        const q = {
+            "date": { "$regex": `^${year}-${month}` }
+        }
+
+        const datas = await db.find(db.reserveTable, q, sort)
+
+        const ret = []
+        for (let i = 0; i < datas.length; i++) {
+            ret.push(this.toData(datas[i]));
+        }
+
+        return ret
     }
 
     toData(data) {
