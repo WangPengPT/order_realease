@@ -89,7 +89,7 @@ class MapManager {
             const content = emailData.data;
 
             // 在这里执行邮件发送逻辑...
-            await mailAPI.send('comercial@xiaoxiong.pt', "New Join Request", content);
+            await mailAPI.send('info@xiaoxiong.pt', "New Join Request", content);
 
             return {
                 result: true,
