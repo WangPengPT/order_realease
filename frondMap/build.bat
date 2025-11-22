@@ -9,7 +9,7 @@ set DST_PATH=%script_dir%\dist
 cd %SRC_PATH%
 call npm install
 call npm run build
-xcopy .\dist %DST_PATH%\public /E /Y /I
+xcopy .\dist\* %DST_PATH%\ /E /Y /I
 
 cd %DST_PATH%
 
