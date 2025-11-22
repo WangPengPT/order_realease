@@ -7,7 +7,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 DIST_DIR="$SCRIPT_DIR/dist"
 
 # Nginx 静态文件目录
-NGINX_HTML="/usr/share/nginx/html"
+NGINX_HTML="/var/www/html"
 
 echo "开始部署 Vite React 项目..."
 echo "构建目录: $DIST_DIR"
