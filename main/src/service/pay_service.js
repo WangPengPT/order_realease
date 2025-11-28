@@ -19,10 +19,14 @@ class MBWayPayment {
 
   async newPayment(orderId, price, info) {
 
+      if (typeof(price) == 'number') {
+          price = price.toFixed(2)
+      }
+
     const bodyData = JSON.stringify({
       mbWayKey: this.key,
       orderId: orderId,
-      amount: price.toFixed(2),
+      amount: price,
       mobileNumber: info.phone,
       email: info.email,
       description: info.description
