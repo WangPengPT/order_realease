@@ -131,51 +131,275 @@ class ReserveManager {
 
         const html = `
         <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>reserve Confirmation</title>
-            <style>
-                .confirm-btn {
-                    display: inline-block;
-                    padding: 10px 20px;
-                    background-color: #44ff44;
-                    color: white;
-                    text-decoration: none;
-                    breserve-radius: 4px;
-                    font-family: Arial, sans-serif;
-                }
-                
-                .cancel-btn {
-                    display: inline-block;
-                    padding: 10px 20px;
-                    background-color: #ff4444;
-                    color: white;
-                    text-decoration: none;
-                    breserve-radius: 4px;
-                    font-family: Arial, sans-serif;
-                }
-            </style>
-        </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <p>Dear <strong>${customerName}</strong>, your reserve is confirmed!</p>
-            
-            <div style="margin: 15px 0; padding-left: 10px; breserve-left: 3px solid #ff6b6b;">
-                <p><strong>reserve id:</strong> ${reserveId}</p>
-                <p><strong>Reserve Time:</strong> ${reserveTime}</p>
-                <p><strong>Number People:</strong> ${reserveNumberPeople}</p>
-                <p><strong>Reserve Phone:</strong> ${customerPhone}</p>
-                <p><strong>Reserve Note:</strong> ${customerNote}</p>
-            </div>
-        
-            <a href="http://localhost/confirm-reserve.html?id=${timeId}&name=${reserveId}" class="confirm-btn">confirm reserve</a>
-            <a href="http://localhost/cancel-reserve.html?id=${timeId}&name=${reserveId}" class="cancel-btn">cancel reserve</a>
-<!--            <a href="https://v.xiaoxiong.pt/cancel-reserve.html?id=${timeId}" class="cancel-btn">cancel reserve</a>-->
-    
-            <p>Thank you for choosing us!</p>
-            <p style="color: #666; font-size: 0.9em;">© 2025 Your Restaurant Name</p>
-        </body>       
-        </html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirmar Reserva</title>
+  </head>
+  <body
+    style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;"
+  >
+    <table
+      role="presentation"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      width="100%"
+      style="max-width: 420px; margin: 0 auto; background-color: #ffffff;"
+    >
+      <!-- Header Section -->
+      <tr>
+        <td
+          style="padding: 40px 24px 24px 24px; text-align: center; background: linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.01) 100%);"
+        >
+          <!-- Calendar Icon -->
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 16px auto;">
+            <tr>
+              <td
+                style="width: 64px; height: 64px; background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); border-radius: 16px; text-align: center; vertical-align: middle;"
+              >
+                <span style="font-size: 28px;">📅</span>
+              </td>
+            </tr>
+          </table>
+          <h1 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: #1a1a1a;">Confirmar Reserva</h1>
+          <p style="margin: 0; font-size: 14px; color: #6b7280;">Verifique seus dados antes de confirmar</p>
+        </td>
+      </tr>
+
+      <!-- Details Section -->
+      <tr>
+        <td style="padding: 0;">
+          <table
+            role="presentation"
+            cellspacing="0"
+            cellpadding="0"
+            border="0"
+            width="100%"
+            style="border-collapse: collapse;"
+          >
+            <!-- Reserve ID -->
+            <tr>
+              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div
+                        style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;"
+                      >
+                        <span style="font-size: 20px;">🎫</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span
+                        style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"
+                        >Reserve ID</span
+                      >
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${org_data.name}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Data -->
+            <tr>
+              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div
+                        style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;"
+                      >
+                        <span style="font-size: 20px;">📅</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span
+                        style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"
+                        >Data</span
+                      >
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${customerDate}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Hora -->
+            <tr>
+              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div
+                        style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;"
+                      >
+                        <span style="font-size: 20px;">🕐</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span
+                        style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"
+                        >Hora</span
+                      >
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${customerTime}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Nome -->
+            <tr>
+              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div
+                        style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;"
+                      >
+                        <span style="font-size: 20px;">👤</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span
+                        style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"
+                        >Nome</span
+                      >
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${customerName}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Número Telefone -->
+            <tr>
+              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div
+                        style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;"
+                      >
+                        <span style="font-size: 20px;">📞</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span
+                        style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"
+                        >Número Telefone</span
+                      >
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${customerPhone}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Número de Pessoas -->
+            <tr>
+              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div
+                        style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;"
+                      >
+                        <span style="font-size: 20px;">👥</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span
+                        style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"
+                        >Número de Pessoas</span
+                      >
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${reserveNumberPeople}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Nota (if exists) -->
+            <tr>
+              <td style="padding: 20px 24px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div
+                        style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;"
+                      >
+                        <span style="font-size: 20px;">📝</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span
+                        style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"
+                        >Nota</span
+                      >
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${customerNote}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Buttons Section -->
+      <tr>
+        <td style="padding: 24px;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tr>
+              <td style="width: 48%; padding-right: 8px;">
+                <a
+                  href="http://localhost/cancel-reserve.html?id=${timeId}&name=${reserveId}"
+                  style="display: block; padding: 16px 24px; background-color: #ffffff; border: 2px solid #e5e5e5; border-radius: 12px; text-align: center; text-decoration: none; font-size: 14px; font-weight: 600; color: #333333;"
+                >
+                  CANCEL
+                </a>
+              </td>
+              <td style="width: 48%; padding-left: 8px;">
+                <a
+                  href="http://localhost/confirm-reserve.html?id=${timeId}&name=${reserveId}"
+                  style="display: block; padding: 16px 24px; background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); border-radius: 12px; text-align: center; text-decoration: none; font-size: 14px; font-weight: 600; color: #ffffff;"
+                >
+                  CONFIRM
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="padding: 24px; text-align: center; background-color: #fafafa;">
+          <p style="margin: 0 0 8px 0; font-size: 14px; color: #666666;">Obrigado por escolher-nos!</p>
+          <p style="margin: 0; font-size: 12px; color: #999999;">© 2025 XIAOXIONG®</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
         `;
 
         await mailAPI.send(customerMail, "new reserve", html );
@@ -199,13 +423,12 @@ class ReserveManager {
 
             let timestamp = reserve.date + " " + reserve.time
             let dateObject = new Date(timestamp);
-
-            const diffMinutes = this.getMinutesDiff(dateObject,Date.now());
-            console.log(diffMinutes)
+            const diffTimestamp = dateObject - Date.now();
+            // console.log(diffTimestamp)
 
             const cancelLimitTime = 30 // min
 
-            if (diffMinutes >= cancelLimitTime)  {
+            if (diffTimestamp >= cancelLimitTime * 60 * 1000)  {
                 reserve.status = "voided"
                 reserve.financial_status = "voided"
                 await this.reserveUpdated(reserve)
