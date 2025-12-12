@@ -1,5 +1,6 @@
 
 const { MongoClient } = require('mongodb');
+const httpAPI = require("./http_api");
 const uri = 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
 
@@ -25,6 +26,11 @@ class DB {
         } catch (error) {
             console.error('Connection error:', error);
         }
+
+        httpAPI.pos("/query_data", async (value) => {
+            const datas = await this.queryData(value.table,value.query,value.count)
+            return datas
+        })
     }
 
     static async get(table,id, defValue) {
@@ -98,6 +104,15 @@ class DB {
         if (datas) return datas
 
         return []
+    }
+
+    static async queryData(table,query,count){
+
+        if (count > 1000) count = 1000;
+
+        const collection = db.collection(table);
+        const datas = await collection.find(query).limit(count).toArray();
+        return datas;
     }
 
 }
