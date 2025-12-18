@@ -11,11 +11,14 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="theme-color" content="#005c53" />
     
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/favicon.png" as="image" />
+    
     <link rel="icon" href="/favicon.png" type="image/png" />
     
     <title>Xiaoxiong Market - Discover Amazing Restaurants</title>
     <meta name="description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers. Find your next culinary adventure with Xiaoxiong Market." />
-    <parameter name="author" content="Xiaoxiong Market" />
+    <meta name="author" content="Xiaoxiong Market" />
 
     <meta property="og:title" content="Xiaoxiong Market - Discover Amazing Restaurants" />
     <meta property="og:description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers" />
@@ -27,11 +30,108 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@XiaoxiongMarket" />
     <meta name="twitter:image" content="/og-image.png" />
-    <script type="module" crossorigin src="/assets/index--j21-G-R.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CUSFDAg2.css">
+
+    <!-- Critical CSS for initial loader - inlined for immediate render -->
+    <style>
+      #initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #005c53 0%, #003d37 100%);
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+      #initial-loader.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #initial-loader-logo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 24px;
+        animation: pulse-scale 2s ease-in-out infinite;
+      }
+      #initial-loader-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255,255,255,0.2);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      #initial-loader-text {
+        margin-top: 16px;
+        color: rgba(255,255,255,0.9);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse-scale {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+      }
+      /* Prevent FOUC */
+      .app-loading #root > *:not(#initial-loader) {
+        visibility: hidden;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-DduPXw3p.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CcT3CfTj.css">
   </head>
 
-  <body>
-    <div id="root"></div>
+  <body class="app-loading">
+    <div id="root">
+      <!-- Initial loader - will be replaced by React -->
+      <div id="initial-loader" aria-label="Loading application">
+        <img 
+          id="initial-loader-logo" 
+          src="/favicon.png" 
+          alt="Xiaoxiong Market"
+          onerror="this.style.display='none'"
+        />
+        <div id="initial-loader-spinner"></div>
+        <div id="initial-loader-text">Loading...</div>
+      </div>
+    </div>
+    <script>
+      // Remove loading class once React mounts
+      window.addEventListener('DOMContentLoaded', function() {
+        // Give React a moment to render, then fade out loader
+        var checkReactMounted = setInterval(function() {
+          var root = document.getElementById('root');
+          if (root && root.children.length > 1) {
+            document.body.classList.remove('app-loading');
+            var loader = document.getElementById('initial-loader');
+            if (loader) {
+              loader.classList.add('fade-out');
+              setTimeout(function() {
+                if (loader.parentNode) {
+                  loader.parentNode.removeChild(loader);
+                }
+              }, 300);
+            }
+            clearInterval(checkReactMounted);
+          }
+        }, 50);
+        // Fallback: remove loader after 10 seconds regardless
+        setTimeout(function() {
+          clearInterval(checkReactMounted);
+          document.body.classList.remove('app-loading');
+          var loader = document.getElementById('initial-loader');
+          if (loader && loader.parentNode) {
+            loader.parentNode.removeChild(loader);
+          }
+        }, 10000);
+      });
+    </script>
   </body>
 </html>
