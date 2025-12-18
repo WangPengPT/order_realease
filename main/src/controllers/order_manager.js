@@ -326,6 +326,8 @@ class OrderManager {
         ret.note = data.note
         ret.pay_type =  data.pay_type ? data.pay_type : this.get_pay_type(data)
 
+        ret.deliveryType = data.deliveryType ? data.deliveryType : this.get_delivery_type(data)
+        ret.deliveryAddress = data.deliveryAddress
 
         const attributes = this.get_note_attributes(data)
 
@@ -381,6 +383,10 @@ class OrderManager {
         else {
             return "";
         }
+    }
+
+    get_delivery_type(data){
+        return 'pickUpInShop'
     }
 
     get_note_attributes(data) {
