@@ -126,8 +126,11 @@ class ReserveManager {
         const customerNote = data.note
 
         const reserveId = data.name
-        const reserveTime = customerDate + " " +  customerTime
         const reserveNumberPeople = data.numberPeople
+
+        const centerServerURL = data.restaurant =='local'? 'localhost':'v.xiaoxiong.pt'
+
+        const restaurantName = await this.getRestaurantName(data.restaurant)
 
         const html = `
         <!DOCTYPE html>
@@ -153,13 +156,11 @@ class ReserveManager {
         <td
           style="padding: 40px 24px 24px 24px; text-align: center; background: linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.01) 100%);"
         >
-          <!-- Calendar Icon -->
+          <!-- Logo -->
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 16px auto;">
             <tr>
-              <td
-                style="width: 64px; height: 64px; background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); border-radius: 16px; text-align: center; vertical-align: middle;"
-              >
-                <span style="font-size: 28px;">📅</span>
+              <td style="text-align: center; vertical-align: middle;">
+                <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/XIAOXIONG_LOGO.png?v=1766177011" alt="XIAOXIONG Logo" style="max-width: 200px; height: auto;" />
               </td>
             </tr>
           </table>
@@ -181,7 +182,7 @@ class ReserveManager {
           >
             <!-- Reserve ID -->
             <tr>
-              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                   <tr>
                     <td style="width: 48px; vertical-align: middle;">
@@ -204,10 +205,36 @@ class ReserveManager {
                 </table>
               </td>
             </tr>
+            
+            <!-- Reserve ID -->
+            <tr>
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div
+                        style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;"
+                      >
+                        <span style="font-size: 20px;">🏠</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span
+                        style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;"
+                        >Restaurant</span
+                      >
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${restaurantName}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
 
             <!-- Data -->
             <tr>
-              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                   <tr>
                     <td style="width: 48px; vertical-align: middle;">
@@ -233,7 +260,7 @@ class ReserveManager {
 
             <!-- Hora -->
             <tr>
-              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                   <tr>
                     <td style="width: 48px; vertical-align: middle;">
@@ -259,7 +286,7 @@ class ReserveManager {
 
             <!-- Nome -->
             <tr>
-              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                   <tr>
                     <td style="width: 48px; vertical-align: middle;">
@@ -285,7 +312,7 @@ class ReserveManager {
 
             <!-- Número Telefone -->
             <tr>
-              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                   <tr>
                     <td style="width: 48px; vertical-align: middle;">
@@ -311,7 +338,7 @@ class ReserveManager {
 
             <!-- Número de Pessoas -->
             <tr>
-              <td style="padding: 20px 24px; border-bottom: 1px solid #e5e5e5;">
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                   <tr>
                     <td style="width: 48px; vertical-align: middle;">
@@ -337,7 +364,7 @@ class ReserveManager {
 
             <!-- Nota (if exists) -->
             <tr>
-              <td style="padding: 20px 24px;">
+              <td style="padding: 10px 24px;">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                   <tr>
                     <td style="width: 48px; vertical-align: middle;">
@@ -367,22 +394,39 @@ class ReserveManager {
       <!-- Buttons Section -->
       <tr>
         <td style="padding: 24px;">
+          <p style="margin: 0 0 6px 0; font-size: 12px; color: #9ca3af; text-align: center;">
+            Clique no botão confirmar para concluir a confirmação da reserva
+          </p>
+        
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
             <tr>
-              <td style="width: 48%; padding-right: 8px;">
+              <td style="width: 48%; padding-right: 6px;">
                 <a
-                  href="http://localhost/cancel-reserve.html?id=${timeId}&name=${reserveId}"
+                  href="http://${centerServerURL}/cancel-reserve.html?id=${timeId}&name=${reserveId}"
                   style="display: block; padding: 16px 24px; background-color: #ffffff; border: 2px solid #e5e5e5; border-radius: 12px; text-align: center; text-decoration: none; font-size: 14px; font-weight: 600; color: #333333;"
                 >
                   CANCEL
                 </a>
               </td>
-              <td style="width: 48%; padding-left: 8px;">
+              <td style="width: 48%; padding-left: 6px;">
                 <a
-                  href="http://localhost/confirm-reserve.html?id=${timeId}&name=${reserveId}"
+                  href="http://${centerServerURL}/confirm-reserve.html?id=${timeId}&name=${reserveId}"
                   style="display: block; padding: 16px 24px; background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); border-radius: 12px; text-align: center; text-decoration: none; font-size: 14px; font-weight: 600; color: #ffffff;"
                 >
                   CONFIRM
+                </a>
+              </td>
+            </tr>
+          </table>
+          
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top: 16px;">
+            <tr>
+              <td style="text-align: center;">
+                <a
+                  href="https://6585f65c-3a22-4484-a187-26abe723404d.lovableproject.com/r/${data.restaurant}"
+                  style="display: inline-block; padding: 12px 32px; background-color: darkseagreen; border-radius: 8px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 500; color: #ffffff;"
+                >
+                  Faça avaliações de restaurantes e GANHE pontos
                 </a>
               </td>
             </tr>
@@ -576,6 +620,14 @@ class ReserveManager {
         }
 
         return ret
+    }
+
+    async getRestaurantName(restaurantID){
+        const dbData = await db.get(db.serverTable, restaurantID)
+        if (dbData && dbData.shopify_name) {
+            return dbData.shopify_name
+        }
+        return 'restaurant'
     }
 
     toData(data) {
