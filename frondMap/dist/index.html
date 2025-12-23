@@ -1,103 +1,60 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-critters-container>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     
     <!-- 移动端优化 -->
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="theme-color" content="#005c53" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#005c53">
+    
+    <!-- Preconnect to critical origins for faster requests -->
+    <link rel="preconnect" href="https://tzdgqhwyzsxkxnncgzap.supabase.co" crossorigin>
+    <link rel="dns-prefetch" href="https://tzdgqhwyzsxkxnncgzap.supabase.co">
     
     <!-- Preload critical resources -->
-    <link rel="preload" href="/favicon.png" as="image" />
+    <link rel="preload" href="/favicon.png" as="image">
+    <!-- Preload LCP hero images for faster render (mobile and desktop) -->
+    <link rel="preload" as="image" href="/images/sushi-ramen-hero.jpg" fetchpriority="high" media="(min-width: 640px)">
+    <link rel="preload" as="image" href="/images/sushi-ramen-mobile.jpg" fetchpriority="high" media="(max-width: 639px)">
     
-    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="icon" href="/favicon.png" type="image/png">
     
     <title>Xiaoxiong Market - Discover Amazing Restaurants</title>
-    <meta name="description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers. Find your next culinary adventure with Xiaoxiong Market." />
-    <meta name="author" content="Xiaoxiong Market" />
+    <meta name="description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers. Find your next culinary adventure with Xiaoxiong Market.">
+    <meta name="author" content="Xiaoxiong Market">
 
-    <meta property="og:title" content="Xiaoxiong Market - Discover Amazing Restaurants" />
-    <meta property="og:description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:title" content="Xiaoxiong Market - Discover Amazing Restaurants">
+    <meta property="og:description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@XiaoxiongMarket" />
-    <meta name="twitter:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@XiaoxiongMarket">
+    <meta name="twitter:image" content="/og-image.png">
 
     <!-- Critical CSS for initial loader - inlined for immediate render -->
-    <style>
-      #initial-loader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #005c53 0%, #003d37 100%);
-        z-index: 9999;
-        transition: opacity 0.3s ease-out;
-      }
-      #initial-loader.fade-out {
-        opacity: 0;
-        pointer-events: none;
-      }
-      #initial-loader-logo {
-        width: 80px;
-        height: 80px;
-        margin-bottom: 24px;
-        animation: pulse-scale 2s ease-in-out infinite;
-      }
-      #initial-loader-spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid rgba(255,255,255,0.2);
-        border-top-color: #ffffff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      #initial-loader-text {
-        margin-top: 16px;
-        color: rgba(255,255,255,0.9);
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        font-size: 14px;
-        letter-spacing: 0.5px;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-      @keyframes pulse-scale {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.05); opacity: 0.9; }
-      }
-      /* Prevent FOUC */
-      .app-loading #root > *:not(#initial-loader) {
-        visibility: hidden;
-      }
-    </style>
-    <script type="module" crossorigin src="/assets/index-tBrG_sQo.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-98W55x5Z.css">
+    <style>#initial-loader{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg, #005c53 0%, #003d37 100%);z-index:9999;transition:opacity 0.3s ease-out}#initial-loader-logo{width:80px;height:80px;margin-bottom:24px;animation:pulse-scale 2s ease-in-out infinite}#initial-loader-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:#ffffff;border-radius:50%;animation:spin 1s linear infinite}#initial-loader-text{margin-top:16px;color:rgba(255,255,255,0.9);font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:14px;letter-spacing:0.5px}@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse-scale{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:0.9}}</style>
+    <script type="module" crossorigin src="/assets/index-Do1W_89N.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-iAJ0IrSD.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-ui-DAmPMpEA.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-i18n-DxKeo2S1.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-charts-Bz7hPIBd.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-query-BlSVl3IQ.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-KNAP0qdW.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CnGNRh74.css">
   </head>
 
   <body class="app-loading">
     <div id="root">
       <!-- Initial loader - will be replaced by React -->
       <div id="initial-loader" aria-label="Loading application">
-        <img 
-          id="initial-loader-logo" 
-          src="/favicon.png" 
-          alt="Xiaoxiong Market"
-          onerror="this.style.display='none'"
-        />
+        <img id="initial-loader-logo" src="/favicon.png" alt="Xiaoxiong Market" onerror="this.style.display='none'">
         <div id="initial-loader-spinner"></div>
         <div id="initial-loader-text">Loading...</div>
       </div>
