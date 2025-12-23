@@ -210,6 +210,8 @@ class ServerManager {
                     server[key] = data[key];
                 }
 
+                await db.set(db.serverTable, server);
+
                 socket.restaurant_data = { id:data.id }
                 result.data = "Change to Statu Online"
 

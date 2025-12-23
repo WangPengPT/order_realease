@@ -83,6 +83,18 @@ class ReserveManager {
 
         socket.registerMessage("setReserve", this.update_reserve_data.bind(this))
 
+        socket.registerMessage("updateReservePeople", async (query) => {
+            return await this.updateReservePeople(query.id, query.numberPeople)
+        });
+
+        socket.registerMessage("updateReserveStatus", async (query) => {
+            return await this.updateReserveStatus(query.id, query.status)
+        });
+
+        socket.registerMessage("getReserveByName", async (query) => {
+            return await this.getReserveByName(query.name)
+        });
+
         this.max_id = await db.getValue("server_reserve_max_id", 1);
 
         console.log()
@@ -578,7 +590,7 @@ class ReserveManager {
 
             if(!reserve) {
                 throw new Error("Reserve data is not found")
-            }else{
+            } else {
                 await db.set(db.reserveTable, value)
             }
 
@@ -628,6 +640,93 @@ class ReserveManager {
             return dbData.shopify_name
         }
         return 'restaurant'
+    }
+
+    async updateReservePeople(reserveId, numberPeople) {
+        try {
+            const reserve = await db.get(db.reserveTable, reserveId);
+            if (!reserve) {
+                throw new Error("Reserve not found");
+            }
+
+            const oldPeople = reserve.numberPeople;
+            reserve.numberPeople = parseInt(numberPeople);
+            reserve.lastModified = new Date().toISOString();
+            reserve.modificationHistory = reserve.modificationHistory || [];
+            reserve.modificationHistory.push({
+                field: 'numberPeople',
+                oldValue: oldPeople,
+                newValue: numberPeople,
+                timestamp: new Date().toISOString()
+            });
+
+            await db.set(db.reserveTable, reserve);
+            this.broadcast(reserve);
+
+            return { success: true, data: reserve };
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
+    }
+
+    async updateReserveStatus(reserveId, status) {
+        try {
+            const reserve = await db.get(db.reserveTable, reserveId);
+            if (!reserve) {
+                throw new Error("Reserve not found");
+            }
+
+            const validStatuses = ['new', 'confirmed', 'completed', 'voided', 'processing'];
+            if (!validStatuses.includes(status)) {
+                throw new Error("Invalid status");
+            }
+
+            const oldStatus = reserve.status;
+            reserve.status = status;
+            reserve.lastModified = new Date().toISOString();
+            reserve.modificationHistory = reserve.modificationHistory || [];
+            reserve.modificationHistory.push({
+                field: 'status',
+                oldValue: oldStatus,
+                newValue: status,
+                timestamp: new Date().toISOString()
+            });
+
+            await db.set(db.reserveTable, reserve);
+            this.broadcast(reserve);
+
+            return { success: true, data: reserve };
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
+    }
+
+    async getReserveByName(reserveName) {
+        try {
+            if (!reserveName) {
+                throw new Error("Reserve name is required");
+            }
+
+            // 支持模糊搜索，可以搜索预约ID或客户姓名
+            const query = {
+                $or: [
+                    { name: { $regex: reserveName, $options: 'i' } },
+                    { customerName: { $regex: reserveName, $options: 'i' } }
+                ]
+            };
+
+            const sort = { date: -1 };
+            const reserves = await db.find(db.reserveTable, query, sort, 20); // 限制返回20条结果
+
+            const ret = [];
+            for (let i = 0; i < reserves.length; i++) {
+                ret.push(this.toData(reserves[i]));
+            }
+
+            return { success: true, data: ret };
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
     }
 
     toData(data) {
