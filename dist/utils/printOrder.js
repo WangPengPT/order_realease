@@ -5,7 +5,7 @@ const dataTime = require('./dateTime.js')
 
 const printers = [];
 
-function print_order(order, printModelIndex) {
+async function print_order(order, printModelIndex) {
     logger.info(`打印订单 订单号 - ${order.id}`)
     for (const key in printers) {
         const printer = printers[key];
@@ -19,7 +19,7 @@ function print_order(order, printModelIndex) {
             let type = menuService.getDishCategory(item);
             if (printer.data.menu.includes(type)) {
                 hasData = true;
-                break;  
+                break;
             }
         }
 
@@ -30,10 +30,14 @@ function print_order(order, printModelIndex) {
             datas.forEach((item) => {
                 printer.socket.emit("print", item);
             })
-        }
-        else {
+
+            // 等待1秒
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } else {
             logger.info(`订单打印失败 订单号 - ${order.id}`)
         }
+
+
     }
 }
 
