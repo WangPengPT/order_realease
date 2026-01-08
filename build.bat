@@ -25,5 +25,3 @@ call npm run build
 xcopy .\dist %DST_PATH%\public /E /Y /I
 
 cd %DST_PATH%
-
-pause
