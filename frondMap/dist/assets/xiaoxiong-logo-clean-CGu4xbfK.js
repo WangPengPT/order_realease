@@ -1,0 +1,2 @@
+import{a as o}from"./vendor-query-D82cqPtt.js";import{s as i}from"./index-CLDmU-vQ.js";const e=()=>o({queryKey:["activity-restaurant-counts"],queryFn:async()=>{const{data:r,error:a}=await i.from("activity_restaurants").select("activity_id");if(a)throw a;const t={};return r.forEach(s=>{t[s.activity_id]=(t[s.activity_id]||0)+1}),t}}),u="/assets/xiaoxiong-logo-v3-D4uDr23w.png";export{u as l,e as u};
+//# sourceMappingURL=xiaoxiong-logo-clean-CGu4xbfK.js.map
