@@ -81,6 +81,8 @@ class OrderManager {
                 this.max_id = num;
             }
         }
+
+        serverManager.orderManager_max_id = this.max_id
         console.log("reserve max_id:" + this.max_id)
     }
 
@@ -128,6 +130,7 @@ class OrderManager {
         org_data.name = `T${maxId}`;
 
         this.max_id = this.max_id + 1;
+        serverManager.orderManager_max_id = this.max_id
         //await db.setValue("server_order_max_id", this.max_id);
 
         const data = this.toData(org_data)

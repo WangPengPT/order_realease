@@ -8,8 +8,6 @@ const fs = require('fs');
 const redirectPage = require('./redirect_page')
 const httpAPI = require("../utils/http_api");
 
-const orderManager = require('./order_manager')
-const reserveManager = require('./reserve_manager')
 
 const BASE_PORT = 7100
 
@@ -20,7 +18,8 @@ class ServerManager {
     restaurants = {}
 
     constructor() {
-
+        this.reserveManager_max_id = 0
+        this.orderManager_max_id = 0
     }
 
     async init() {
@@ -30,6 +29,8 @@ class ServerManager {
             const params = datas[i]
             this.setRestaurants(params)
         }
+
+        console.log(this.restaurants)
 
         httpAPI.get("/get_info", async (query) => {
             return await this.get_info()
@@ -240,8 +241,8 @@ class ServerManager {
 
 
     async get_info() {
-        let reserve_count = reserveManager.max_id - 1;
-        let order_count = orderManager.max_id - 1;
+        let reserve_count = this.reserveManager_max_id - 1;
+        let order_count = this.orderManager_max_id - 1;
 
         return {
             reserve_count,

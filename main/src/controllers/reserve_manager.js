@@ -106,6 +106,8 @@ class ReserveManager {
                 this.max_id = num;
             }
         }
+
+        serverManager.reserveManager_max_id = this.max_id
         console.log("reserve max_id:" + this.max_id)
 
         console.log()
@@ -136,6 +138,7 @@ class ReserveManager {
         org_data.status = 'new';
 
         this.max_id = this.max_id + 1;
+        serverManager.reserveManager_max_id = this.max_id
         //await db.setValue("server_reserve_max_id", this.max_id);
 
         const data = this.toData(org_data)
