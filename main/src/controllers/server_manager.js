@@ -8,6 +8,9 @@ const fs = require('fs');
 const redirectPage = require('./redirect_page')
 const httpAPI = require("../utils/http_api");
 
+const orderManager = require('./order_manager')
+const reserveManager = require('./reserve_manager')
+
 const BASE_PORT = 7100
 
 class ServerManager {
@@ -237,8 +240,8 @@ class ServerManager {
 
 
     async get_info() {
-        let reserve_count = await db.getValue("server_reserve_max_id", 1);
-        let order_count = await db.getValue("server_order_max_id", 1);
+        let reserve_count = reserveManager.max_id - 1;
+        let order_count = orderManager.max_id - 1;
 
         return {
             reserve_count,

@@ -95,7 +95,18 @@ class ReserveManager {
             return await this.getReserveByName(query.name)
         });
 
-        this.max_id = await db.getValue("server_reserve_max_id", 1);
+        this.max_id = 1;
+
+        const max_id_value = await db.getMaxValue(db.reserveTable, "name", "R")
+        if (max_id_value)
+        {
+            let num = parseInt(max_id_value.replace(/\D/g, ""), 10);
+            num = num + 1
+            if (num > this.max_id) {
+                this.max_id = num;
+            }
+        }
+        console.log("reserve max_id:" + this.max_id)
 
         console.log()
     }
@@ -125,7 +136,7 @@ class ReserveManager {
         org_data.status = 'new';
 
         this.max_id = this.max_id + 1;
-        await db.setValue("server_reserve_max_id", this.max_id);
+        //await db.setValue("server_reserve_max_id", this.max_id);
 
         const data = this.toData(org_data)
 

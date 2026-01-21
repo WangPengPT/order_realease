@@ -6,6 +6,9 @@ const serverManager = require('./server_manager')
 const mailAPI = require("../utils/mail");
 const payService = require('../service/pay_service')
 
+// 给外送软件
+const orderClient = require('../utils/orderClient')
+
 class OrderManager {
 
 
@@ -67,7 +70,18 @@ class OrderManager {
             }
         })
 
-        this.max_id = await db.getValue("server_order_max_id", 1);
+        this.max_id = 1;
+
+        const max_id_value = await db.getMaxValue(db.orderTable, "name",  "T")
+        if (max_id_value)
+        {
+            let num = parseInt(max_id_value.replace(/\D/g, ""), 10);
+            num = num + 1
+            if (num > this.max_id) {
+                this.max_id = num;
+            }
+        }
+        console.log("reserve max_id:" + this.max_id)
     }
 
 
@@ -88,6 +102,10 @@ class OrderManager {
 
         console.log(data)
 
+        if (data.name.startsWith("T") &&  data.deliveryType == 'delivery2home') {
+            await orderClient.updateOrder(this.toData(data))
+        }
+
         this.broadcast(data)
     }
 
@@ -103,13 +121,14 @@ class OrderManager {
 
         const maxId = this.max_id;
 
-        const timeId = this.generateUniqueId();
+        //const timeId = this.generateUniqueId();
+        //org_data.id = `${timeId}`;
 
-        org_data.id = `${timeId}`;
+        org_data.id = `T${maxId}`;
         org_data.name = `T${maxId}`;
 
         this.max_id = this.max_id + 1;
-        await db.setValue("server_order_max_id", this.max_id);
+        //await db.setValue("server_order_max_id", this.max_id);
 
         const data = this.toData(org_data)
 
@@ -190,6 +209,67 @@ class OrderManager {
         }
     }
 
+    async sendToRestrant(org_data) {
+        const data = this.toData(org_data)
+
+        const orderName = data.name
+        const orderId = data.id;
+        const customer_info = data.customer
+
+        const customerName = customer_info.name
+        const mail = customer_info.email
+
+        const orderTime = data.pickupDate + " " +  data.pickupTime
+        const pickupLocation = data.pickupLocation
+        const totalPrice = data.total_price;
+
+        let lines = "";
+
+        for (let i = 0; i < data.line_items.length; i++) {
+            const value = data.line_items[i]
+            lines += `<li>${value.name}  ${value.price} x ${value.quantity}</li>`;
+        }
+
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Order Confirmation</title>
+            <style>
+                .cancel-btn {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background-color: #ff4444;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    font-family: Arial, sans-serif;
+                }
+            </style>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <p>New order from: <strong>${customerName}</strong></p>
+            
+            <div style="margin: 15px 0; padding-left: 10px; border-left: 3px solid #ff6b6b;">
+                <p><strong>order id:</strong> ${orderName}</p>
+                <p><strong>Pickup Time:</strong> ${orderTime}</p>
+                <p><strong>Pickup Location:</strong> ${pickupLocation}</p>
+                
+                <h4>Order Details:</h4>
+                <ul style="margin-top: 5px; padding-left: 20px;">
+                    ${lines}
+                </ul>                
+                <p><strong>Total:</strong> ${totalPrice}</p>
+            </div>
+        
+            <p style="color: #666; font-size: 0.9em;">© 2025 Your Restaurant Name</p>
+        </body>       
+        </html>
+        `;
+
+        await mailAPI.send(mail, "new order: " + orderName, html );
+    }
 
     getMinutesDiff(date1, date2) {
         const timeDiff = Math.abs(date2.getTime() - date1.getTime());
@@ -278,7 +358,10 @@ class OrderManager {
         const dbData = await db.get(db.orderTable, data.id)
         if (dbData) {
             dbData.pay_state = data.value
-            await db.set(db.orderTable, dbData);
+            //await db.set(db.orderTable, dbData);
+
+            this.orderUpdated(dbData)
+
             return {success: true, data: data};
         }
 

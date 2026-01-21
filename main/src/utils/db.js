@@ -81,6 +81,58 @@ class DB {
         return defValue
     }
 
+    static async getMaxValue(tableName,field,valueStartKey) {
+
+        const table = db.collection(tableName);
+
+        try {
+            const pipeline = [
+                {
+                    // 1. 过滤掉空值，且只匹配以指定前缀开头的数据
+                    $match: {
+                        [field]: { $regex: new RegExp(`^${valueStartKey}\\d+`) }
+                    }
+                },
+                {
+                    // 2. 转换逻辑
+                    $addFields: {
+                        // 移除前缀并转为整数以便正确排序
+                        numericPart: {
+                            $toInt: {
+                                $trim: {
+                                    input: {
+                                        $replaceAll: {
+                                            input: `$${field}`,
+                                            find: valueStartKey,
+                                            replacement: ""
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    // 3. 按提取出的数字降序排列
+                    $sort: { numericPart: -1 }
+                },
+                {
+                    // 4. 只取最大的那一条
+                    $limit: 1
+                }
+            ];
+
+            const result = await table.aggregate(pipeline).toArray();
+
+            // 如果找到结果，返回原始字段值 (如 "T102")，否则返回 null
+            return result.length > 0 ? result[0][field] : null;
+
+        } catch (error) {
+            console.error(`获取字段 ${field} 最大值失败:`, error);
+            return null;
+        }
+    }
+
     static async find(table, q, sort, count) {
 
         const collection = db.collection(table);
