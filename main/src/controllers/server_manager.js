@@ -38,6 +38,7 @@ class ServerManager {
 
         socket.registerMessage("addServer", this.addServer.bind(this));
         socket.registerMessage("setServer", this.setServer.bind(this));
+        socket.registerMessage("deleteServer", this.deleteServer.bind(this));
         socket.registerMessage("getAllServer", this.getAllServer.bind(this));
 
 
@@ -45,6 +46,7 @@ class ServerManager {
         socket.registerMessage("g_get_menu", this.get_menu.bind(this));
 
         socket.registerMessage("g_get_config", this.get_config.bind(this));
+        socket.registerMessage("resetServerPassword", this.resetServerPassword.bind(this));
 
         this.maxPort = await db.getValue("server_max_id", BASE_PORT);
 
@@ -64,6 +66,29 @@ class ServerManager {
         
         return {
             result: true,
+        }
+    }
+
+    async deleteServer(params) {
+        if (!params.id) {
+            return {
+                result: false,
+                message: "Missing server ID"
+            }
+        }
+
+        await db.del(db.serverTable, params.id);
+        
+        // Remove from restaurants map if exists
+        for (const [key, value] of Object.entries(this.restaurants)) {
+            if (value === params.id) {
+                delete this.restaurants[key];
+            }
+        }
+
+        return {
+            result: true,
+            id: params.id
         }
     }
 
@@ -239,6 +264,20 @@ class ServerManager {
 
     }
 
+
+    async resetServerPassword(params) {
+        if (!params.id) {
+            return { result: false, message: "Missing restaurant ID" };
+        }
+        
+        console.log(`Resetting password for restaurant: ${params.id}`);
+        const result = await socket.sendToRestaurant(params.id, "manager_resetPassword", "admin");
+        
+        return {
+            result: result && result.success,
+            data: result ? result.data : "Unknown error",
+        };
+    }
 
     async get_info() {
         let reserve_count = this.reserveManager_max_id - 1;

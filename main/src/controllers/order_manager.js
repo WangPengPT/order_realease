@@ -70,6 +70,9 @@ class OrderManager {
             }
         })
 
+        // 骑手订单状态管理 API - 给其他系统调用
+        httpAPI.pos("/rider_order_action", this.riderOrderAction.bind(this))
+
         this.max_id = 1;
 
         const max_id_value = await db.getMaxValue(db.orderTable, "name",  "T")
@@ -102,7 +105,7 @@ class OrderManager {
         data.pickup_date = this.get_pickup_date(data)
         await db.set(db.orderTable, data)
 
-        console.log(data)
+        //console.log(data)
 
         if (data.name.startsWith("T") &&  data.deliveryType == 'delivery2home') {
             await orderClient.updateOrder(this.toData(data))
@@ -400,7 +403,6 @@ class OrderManager {
 
         ret.id = data.id
 
-
         ret.name = data.name
         ret.created_at = data.created_at
         //ret.customer = data.customer ? data.customer : this.get_customer_info(data)
@@ -428,6 +430,9 @@ class OrderManager {
         //ret.financial_status = data.financial_status
 
         ret.restaurant = data.restaurant
+
+        // 骑手相关信息
+        ret.riderData = data.riderData || null
 
         return ret;
     }
@@ -578,6 +583,54 @@ class OrderManager {
             await this.orderUpdated(order)
         }
 
+    }
+
+    /**
+     * 骑手订单操作 API - 给其他系统调用
+     */
+    async riderOrderAction(data) {
+        const { orderId, state, riderName, riderPhone, reason } = data;
+        
+        if (!orderId || !state) {
+            return {
+                result: false,
+                error: "订单ID和操作类型是必填项"
+            }
+        }
+
+        try {
+            // 获取订单信息
+            const order = await db.get(db.orderTable, orderId);
+            if (!order) {
+                return {
+                    result: false,
+                    error: "订单不存在"
+                }
+            }
+
+            data.riderActionTime = new Date().toISOString()
+
+            let updateData = {
+                riderData: data
+            };
+
+            // 更新订单数据
+            Object.assign(order, updateData);
+            await this.orderUpdated(order);
+
+            console.log(`骑手订单状态: ${state}, 订单: ${orderId}, 骑手: ${riderName}`);
+
+            return {
+                result: true
+            }
+
+        } catch (error) {
+            console.error("骑手订单操作失败:", error);
+            return {
+                result: false,
+                error: "操作失败: " + error.message
+            }
+        }
     }
 }
 

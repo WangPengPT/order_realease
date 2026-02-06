@@ -79,6 +79,26 @@ class Socket {
     static broadcast(msg,data) {
         io.emit(msg,data)
     }
+
+    static async sendToRestaurant(restaurantId, msg, data) {
+        // Find socket with restaurant_data.id == restaurantId
+        // io.sockets.sockets is a Map
+        for (const [id, socket] of io.sockets.sockets) {
+            if (socket.restaurant_data && socket.restaurant_data.id === restaurantId) {
+                return new Promise((resolve) => {
+                    socket.emit(msg, data, (response) => {
+                        resolve(response);
+                    });
+                    
+                    // Set a timeout in case the client doesn't respond
+                    setTimeout(() => {
+                        resolve({ success: false, data: "Timeout waiting for restaurant server response" });
+                    }, 5000);
+                });
+            }
+        }
+        return { success: false, data: "Restaurant server not connected" };
+    }
 }
 
 module.exports = Socket;
