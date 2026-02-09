@@ -1,7 +1,0 @@
-import{c as n,s as a}from"./index-Do1W_89N.js";import{r as o}from"./vendor-react-iAJ0IrSD.js";import{u as l}from"./vendor-query-BlSVl3IQ.js";/**
- * @license lucide-react v0.462.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const h=n("CircleUser",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["circle",{cx:"12",cy:"10",r:"3",key:"ilqhr7"}],["path",{d:"M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662",key:"154egf"}]]),r=e=>{const s=l();o.useEffect(()=>{const t=e?`activity-realtime-${e}`:"activities-realtime-all",c=a.channel(t).on("postgres_changes",{event:"*",schema:"public",table:"subscriptions",...e?{filter:`activity_id=eq.${e}`}:{}},i=>{console.log("Subscription change detected:",i),e&&s.invalidateQueries({queryKey:["subscriberCount",e]}),s.invalidateQueries({queryKey:["activities"]}),s.invalidateQueries({queryKey:["admin-activities"]})}).on("postgres_changes",{event:"*",schema:"public",table:"activity_shares",...e?{filter:`activity_id=eq.${e}`}:{}},i=>{console.log("Share change detected:",i),e&&s.invalidateQueries({queryKey:["shareCount",e]}),s.invalidateQueries({queryKey:["activities"]}),s.invalidateQueries({queryKey:["admin-activities"]})}).subscribe(i=>{console.log(`Realtime subscription status for ${t}:`,i)});return()=>{a.removeChannel(c)}},[e,s])},y=()=>{r()},g=e=>{r(e)},v="/assets/xiaoxiong-logo-v3-D4uDr23w.png";export{h as C,g as a,v as p,y as u};
-//# sourceMappingURL=xiaoxiong-logo-v3-DvoE5cjE.js.map

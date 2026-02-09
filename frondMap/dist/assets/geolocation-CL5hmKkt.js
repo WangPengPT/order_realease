@@ -1,6 +1,0 @@
-import{c as l}from"./index-tBrG_sQo.js";/**
- * @license lucide-react v0.462.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const w=l("Navigation",[["polygon",{points:"3 11 22 2 13 21 11 13 3 11",key:"1ltx0t"}]]),M=(o,e,t,n)=>{const s=c(t-o),a=c(n-e),i=Math.sin(s/2)*Math.sin(s/2)+Math.cos(c(o))*Math.cos(c(t))*Math.sin(a/2)*Math.sin(a/2);return 6371*(2*Math.atan2(Math.sqrt(i),Math.sqrt(1-i)))},c=o=>o*Math.PI/180,u=()=>new Promise((o,e)=>{navigator.geolocation?navigator.geolocation.getCurrentPosition(o,t=>{console.log("Geolocation error code:",t.code,"message:",t.message),e(t)},{enableHighAccuracy:!0,timeout:1e4,maximumAge:0}):e(new Error("Geolocation is not supported by this browser."))}),$=(o,e,t)=>{const n=navigator.userAgent,r=/iPad|iPhone|iPod/.test(n),s=/Android/.test(n),a=r&&!/Safari/.test(n),i=s&&(/wv/.test(n)||/Version\/[\d.]+.*Chrome/.test(n)),p=`https://maps.apple.com/?daddr=${o},${e}&q=${encodeURIComponent(t)}`,d=`https://www.google.com/maps/dir/?api=1&destination=${o},${e}`,g=`maps://maps.apple.com/?daddr=${o},${e}&q=${encodeURIComponent(t)}`,h=`geo:${o},${e}?q=${o},${e}(${encodeURIComponent(t)})`;r?a?window.location.href=p:window.open(g,"_blank"):s?i?window.location.href=d:window.open(h,"_blank"):window.open(d,"_blank")};export{w as N,M as c,u as g,$ as o};

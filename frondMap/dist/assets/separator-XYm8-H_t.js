@@ -1,2 +1,0 @@
-import{r as p,j as l,d1 as a}from"./vendor-react-D8EXe6Pj.js";import{e as m}from"./index-Flvc7LYa.js";const x=p.forwardRef(({className:o,orientation:r="horizontal",decorative:s=!0,...t},e)=>l.jsx(a,{ref:e,decorative:s,orientation:r,className:m("shrink-0 bg-border",r==="horizontal"?"h-[1px] w-full":"h-full w-[1px]",o),...t}));x.displayName=a.displayName;export{x as S};
-//# sourceMappingURL=separator-XYm8-H_t.js.map
