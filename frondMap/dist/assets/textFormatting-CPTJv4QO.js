@@ -1,0 +1,2 @@
+import{j as t}from"./vendor-react-BycBeP44.js";const s=e=>{if(!e)return e;const r=e.split(/(®|™|©)/g);return r.length===1?e:r.map((n,a)=>["®","™","©"].includes(n)?t.jsx("span",{className:"text-[0.45em] font-normal align-top leading-none relative top-[0.15em]",children:n},a):n)},i=e=>e?e.replace(/([®™©])/g,'<span style="font-size:0.45em;font-weight:normal;vertical-align:top;line-height:1;position:relative;top:0.15em">$1</span>'):e||"";export{i as a,s as f};
+//# sourceMappingURL=textFormatting-CPTJv4QO.js.map
