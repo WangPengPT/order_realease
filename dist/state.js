@@ -37,7 +37,6 @@ class AppState {
         }
 
         this.settings = {
-            qrcodeInfo: false,
             checkIP: false,
             order: true,
             delivery: false,
