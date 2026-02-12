@@ -37,6 +37,7 @@ class AppState {
         }
 
         this.settings = {
+            qrcodeInfo: false,
             checkIP: false,
             order: true,
             delivery: false,
@@ -65,8 +66,8 @@ class AppState {
             },
             logoPath: "",
             instagramUrl: "",
-            tableCoolingTime: 0,
-            orderCoolingTime: 0,
+            tableCoolingTime: 1,
+            orderCoolingTime: 1,
         }
 
         this.pickupData = {
@@ -308,7 +309,7 @@ class AppState {
 
     getTableById(tableId) {
         if (!tableId) return undefined;
-        if (typeof variable === 'string') {
+        if (typeof tableId === 'string') {
             const id = tableId.replace('#', '')
             return this.tables.getTableById(id)
         } else {
@@ -640,7 +641,7 @@ class AppState {
     }
 
     localIps = []
-
+    blacklistIps = []
 
     getClientIP(socket) {
         const headers = socket.handshake.headers;
@@ -664,6 +665,25 @@ class AppState {
         }
 
         return true
+    }
+
+    checkBlacklistIP(socket) {
+        if (this.blacklistIps && this.blacklistIps.length > 0) {
+            const ip = this.getClientIP(socket)
+            return this.blacklistIps.includes(ip)
+        }
+        return false
+    }
+
+    addBlacklistIP(ip) {
+        if (!this.blacklistIps) this.blacklistIps = []
+        if (this.blacklistIps.includes(ip)) return;
+        this.blacklistIps.push(ip)
+    }
+
+    removeBlacklistIP(ip) {
+        if (!this.blacklistIps) return;
+        this.blacklistIps = this.blacklistIps.filter(item => item !== ip);
     }
 }
 
