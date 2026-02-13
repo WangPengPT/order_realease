@@ -46,6 +46,7 @@ class AppState {
             useChildrenDiscount: false,
             homeDelivery: false,
             dividerTime: 17,
+            useAuth: false, // 认证系统开关
         }
 
         this.shopInfo = {

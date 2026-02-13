@@ -15,11 +15,12 @@ class AppStateSocket {
         if(result.success){
             logger.info(`管理端更新设置数据${value.key}成功`)
             this.io.emit("client_send_settings", {key: value.key, value: result.data})
+            callback({ code: 200, ...result })
         }else{
             logger.error(`管理端更新${value.key}失败`)
             logger.error(`失败原因: ${result.data}`)
+            callback({ code: 400, ...result })
         }
-        callback(result)
     }
 
     updateShopInfo(value, callback){
@@ -27,11 +28,12 @@ class AppStateSocket {
         const result = this.appStateService.updateShopInfo(value.key, value.value)
         if(result.success){
             logger.info(`管理端更新商店信息${value.key}成功`)
+            callback({ code: 200, ...result })
         }else{
             logger.error(`管理端更新${value.key}失败`)
             logger.error(`失败原因: ${result.data}`)
+            callback({ code: 400, ...result })
         }
-        callback(result)
     }
 
     updatePickupDate(value, callback){
@@ -40,11 +42,12 @@ class AppStateSocket {
         if(result.success){
             logger.info(`管理端更新取餐数据${value.key}成功`)
             this.io.emit("client_send_pickupData", {key: value.key, value: result.data})
+            callback({ code: 200, ...result })
         }else{
             logger.info(`管理端更新${value.key}失败`)
             logger.info(`失败原因: ${result.data}`)
+            callback({ code: 400, ...result })
         }
-        callback(result)
     }
 
     updateHomeDeliveryDate(value, callback){
@@ -53,11 +56,12 @@ class AppStateSocket {
         if(result.success){
             logger.info(`管理端更新配送数据${value.key}成功`)
             this.io.emit("client_send_homeDeliveryData", {key: value.key, value: result.data})
+            callback({ code: 200, ...result })
         }else{
             logger.info(`管理端更新${value.key}失败`)
             logger.info(`失败原因: ${result.data}`)
+            callback({ code: 400, ...result })
         }
-        callback(result)
     }
 
     updateReserverDate(value, callback){
@@ -66,11 +70,12 @@ class AppStateSocket {
         if(result.success){
             logger.info(`管理端更新订台数据${value.key}成功`)
             this.io.emit("client_send_reserverData", {key: value.key, value: result.data})
+            callback({ code: 200, ...result })
         }else{
             logger.info(`管理端更${value.key}失败`)
             logger.info(`失败原因: ${result.data}`)
+            callback({ code: 400, ...result })
         }
-        callback(result)
     }
 
 
@@ -84,11 +89,12 @@ class AppStateSocket {
         }
         if (res.success) {
             logger.info(`管理端更改价格成功`)
+            callback({ code: 200, ...res })
         } else {
             logger.info(`管理端更改价格失败`)
             logger.info(`失败原因: ${res.data}`)
+            callback({ code: 400, ...res })
         }
-        callback(res)
     }
 
     updatePrintModel(value, callback){
@@ -96,11 +102,12 @@ class AppStateSocket {
         const result = this.appStateService.updatePrintModel(value.key, value.value)
         if(result.success){
             logger.info(`管理端更新订台数据${value.key}成功`)
+            callback({ code: 200, ...result })
         }else{
             logger.info(`管理端更${value.key}失败`)
             logger.info(`失败原因: ${result.data}`)
+            callback({ code: 400, ...result })
         }
-        callback(result)
     }
 
     // 管理端获取数据
@@ -138,10 +145,11 @@ class AppStateSocket {
                     result = {success: false, data: "Not Found Get Key"}
             }
             logger.info("Manager get data => "+result.success)
-            callback(result)
+            callback({ code: result.success ? 200 : 404, ...result })
         } catch (error) {
             logger.warn("管理端获取信息失败，意料之外的错误")
             logger.warn(error.message)
+            callback({ code: 500, success: false, data: error.message })
         }
 
     }
@@ -173,7 +181,7 @@ class AppStateSocket {
                 this.updatePrintModel(value, callback)
                 break
             default:
-                callback({success: false, data: "Not Found Update Key"})
+                callback({ code: 404, success: false, data: "Not Found Update Key" })
         }
     }
 
@@ -194,9 +202,16 @@ class AppStateSocket {
 
         socket.on("default_menu_order_sorting", () => { this.defaultMenuOrdering() })
 
-        socket.on("manager_refresh_table", (value, cb) => { cb(this.appStateService.getAllTables()) })
+        socket.on("manager_refresh_table", (value, cb) => { 
+            const tables = this.appStateService.getAllTables();
+            if (cb) cb(tables) 
+        })
 
-        socket.on("get_shop_info", () => { socket.emit("shop_info", this.appStateService.appStateRepository.appState.shopInfo) })
+        socket.on("get_shop_info", (callback) => { 
+            const info = this.appStateService.appStateRepository.appState.shopInfo;
+            if (callback) callback(info);
+            socket.emit("shop_info", info) 
+        })
 
 
 
