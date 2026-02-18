@@ -48,6 +48,8 @@ class ServerManager {
         socket.registerMessage("g_get_config", this.get_config.bind(this));
         socket.registerMessage("resetServerPassword", this.resetServerPassword.bind(this));
 
+        socket.registerMessage("center_manual_update", this.manual_update.bind(this));
+
         this.maxPort = await db.getValue("server_max_id", BASE_PORT);
 
         this.menu_data = {}
@@ -95,7 +97,7 @@ class ServerManager {
     async addServer(params) {
 
         const name = params.id;
-        const param1 = this.maxPort;
+        const server_port = this.maxPort;
 
 
         const serverData = await db.get(db.serverTable, name);
@@ -122,13 +124,13 @@ class ServerManager {
                     throw new Error(`can't find: ${scriptPath}`);
                 }
 
-                execFile(scriptPath, [param1, name, 'true'], {cwd: path.dirname(scriptPath)}, callback);
+                execFile(scriptPath, [server_port, name, 'true'], {cwd: path.dirname(scriptPath)}, callback);
 
             } catch (e) {
                 console.log(e)
             }
 
-            params.url = `https://v.xiaoxiong.pt:${param1}`;
+            params.url = `https://v.xiaoxiong.pt:${server_port}`;
         }
 
         if (!params.permissionsControl) {
@@ -137,18 +139,18 @@ class ServerManager {
                 delivery: true,
                 reserver: true,
                 vip: true,
-                fandays: true,
+                fandays: false,
             }
         }
 
         if (!params.customDishesControl) {
            params.customDishesControl = {
-               1: {enabled: true, name: 'Sushi Aleatória®'},
-               2: {enabled: true, name: 'Poke Bowl'},
-               3: {enabled: true, name: 'MY BOX'},
-               4: {enabled: true, name: 'bibimbap'},
-               5: {enabled: true, name: 'XIAOXIONG® RAMEN'},
-               6: {enabled: true, name: 'Menu Almoço'},
+               1: {enabled: false, name: 'Sushi Aleatória®'},
+               2: {enabled: false, name: 'Poke Bowl'},
+               3: {enabled: false, name: 'MY BOX'},
+               4: {enabled: false, name: 'bibimbap'},
+               5: {enabled: false, name: 'XIAOXIONG® RAMEN'},
+               6: {enabled: false, name: 'Menu Almoço'},
            }
         }
 
@@ -277,6 +279,11 @@ class ServerManager {
             result: result && result.success,
             data: result ? result.data : "Unknown error",
         };
+    }
+
+    async manual_update(id){
+        console.log("restaurant_id",id)
+        socket.broadcast("center_manual_update_"+id)
     }
 
     async get_info() {
