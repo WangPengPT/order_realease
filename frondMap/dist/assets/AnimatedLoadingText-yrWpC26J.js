@@ -1,0 +1,2 @@
+import{r as e,j as l}from"./vendor-react-87iFmKFJ.js";const p=({messages:t,interval:r=2e3,className:i=""})=>{const[a,o]=e.useState(0),[s,n]=e.useState(!0);return e.useEffect(()=>{if(t.length<=1)return;const c=setInterval(()=>{n(!1),setTimeout(()=>{o(u=>(u+1)%t.length),n(!0)},300)},r);return()=>clearInterval(c)},[t,r]),l.jsx("p",{className:`text-sm text-primary transition-opacity duration-300 ${s?"opacity-100":"opacity-0"} ${i}`,children:t[a]})};export{p as A};
+//# sourceMappingURL=AnimatedLoadingText-yrWpC26J.js.map

@@ -1,0 +1,2 @@
+import{p as t,u as s,r as o,w as a}from"./vendor-react-87iFmKFJ.js";import{u as n}from"./index-C3xfGQgV.js";const l=()=>{const{user:i}=n(),{t:e}=t(),r=s();return{requireLogin:o.useCallback(()=>i?!0:(a.error(e("activities.loginRequired","需要登录"),{description:e("activities.loginRequiredMessage","请先登录后再使用此功能"),action:{label:e("activities.goToLogin","去登录"),onClick:()=>r("/auth")},duration:4e3}),!1),[i,e,r]),isLoggedIn:!!i}};export{l as u};
+//# sourceMappingURL=useLoginRequired-BPMAXLoc.js.map
