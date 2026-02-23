@@ -1,16 +1,14 @@
 class Settings{
-    constructor({checkIP, QRorder, takeaway, delivery, reserver, isFestiveDay, useFandays, useChildrenDiscount }){
-        this.checkIP = checkIP
-        this.QRorder = QRorder
-        this.takeaway = takeaway
-        this.delivery = delivery
-        this.reserver = reserver
-        this.isFestiveDay = isFestiveDay
-        // homeDelivery: false,
-        // dividerTime: 17,
+    constructor(){
+        this.checkIP = false
+        this.QRorder = false
+        this.takeaway = false
+        this.delivery = false
+        this.reserver = false
+        this.isFestiveDay = false
 
-        this.useFandays = useFandays
-        this.useChildrenDiscount = useChildrenDiscount
+        this.useFandays = false
+        this.useChildrenDiscount = false
 
         this.recordProps(this)
     }
@@ -51,7 +49,7 @@ class Settings{
     }
 
     static fromJSON(data){
-        const instance = new Settings()
+        const instance = new this()
         for(const key of instance._dataKeys){
             if(data.hasOwnProperty(key)){
                 instance[key] = data[key]

@@ -11,8 +11,10 @@ function isIP(str) {
     return net.isIP(str) !== 0;
 }
 
-function print_order(order, printModelIndex) {
+function print_order(order, printInfo) {
+    let result = {success: false, data: 0}
     logger.info(`打印订单 订单号 - ${order.id}`)
+    console.log("收到的order数据",order);
     for (const key in printers) {
         const printer = printers[key];
 
@@ -32,7 +34,12 @@ function print_order(order, printModelIndex) {
 
         if (hasData) {
             logger.info(`订单打印成功 订单号 - ${order.id}`);
-            const datas = print_order_model(order, printModelIndex, printer)
+
+            const printModelIndex = printInfo? (printInfo.printModel? (printInfo.printModel.order? printInfo.printModel.order:0):0):0
+            const printBoldModel = printInfo? (printInfo.printBoldModel):true
+            const printId = printInfo? (printInfo.printId):true
+
+            const datas = print_order_model(order, printModelIndex, printBoldModel, printId, printer)
             logger.info(`订单详细：${String(datas)}`)
 
 
@@ -49,10 +56,14 @@ function print_order(order, printModelIndex) {
                 })
             }
 
+            result = {success: true, data: result.data+1 }
+
         } else {
             logger.info(`订单打印失败 订单号 - ${order.id}`)
         }
     }
+
+    return result
 }
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -81,7 +92,7 @@ async function serializedPaint(socket, item) {
     return queue;
 }
 
-function print_takeaway_order(order,printModelIndex){
+function print_takeaway_order(order,printInfo){
     try {
         logger.info(`打印外卖订单 订单号 - ${order.name}`)
         for (const key in printers) {
@@ -96,9 +107,10 @@ function print_takeaway_order(order,printModelIndex){
             // logger.info("打印机 takeaway type: "+ (typeof printer.data.print_takeaway))
 
             let hasData = (order.line_items.length > 0);
-            // console.log("hasData: "+hasData)
 
             if (hasData) {
+                const printModelIndex = printInfo? (printInfo.printModel? (printInfo.printModel.takeaway? printInfo.printModel.takeaway:0):0):0
+
                 logger.info(`外卖订单打印成功 订单号 - ${order.id}`);
                 logger.info( "print takeaway...", order);
                 const data = print_takeaway_model(order, printModelIndex,printer)

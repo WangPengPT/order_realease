@@ -41,7 +41,7 @@ class CustomDishSocket{
 
             const menuAndTabs = await this.menuService.getDineInMenuAndTabs()
             this.io.emit("dinner_menu_data", menuAndTabs.menu, menuAndTabs.tabs)
-            this.io.emit("serverSend_customDish_Client", await this.customDishService.getAllEnableTemplates("DINEIN"))
+            //this.io.emit("serverSend_customDish_Client", await this.customDishService.getAllEnableTemplates("DINEIN"))
             callback({ code: 200, ...result })
         } else {
             logger.info("更改自定义菜开关失败")
@@ -50,7 +50,7 @@ class CustomDishSocket{
     }
 
     async updateTemplateSellType(id, value, callback) {
-        logger.info(`修改自定义菜出售类型- id: ${id}`)
+        logger.info(`修改自定义菜出售类型- id: ${id} 类型：${value}`)
         const result = await this.customDishService.updateTemplateSellType(id, value)
         if (result.success) {
             logger.info("修改自定义菜出售类型成功")
@@ -85,9 +85,22 @@ class CustomDishSocket{
             callback({ code: 400, ...result })
         }
     }
+    
+    async getCustomDishTake(type, callback) {
+        logger.info("获取自定义菜单")
+        const result = await this.customDishService.getAllEnableTemplates(type)
+        if (result.success) {
+            logger.info(`获取自定义菜单成功`)
+        } else {
+            logger.info(`获取自定义菜单失败`)
+        }
+        callback({ code: result.success ? 200 : 400, ...result })
+    }
 
     async registerHandlers(socket) {
-        socket.emit("serverSend_customDish_Client", await this.customDishService.getAllEnableTemplates("DINEIN"))
+        //socket.emit("serverSend_customDish_Client", await this.customDishService.getAllEnableTemplates("DINEIN"))
+
+        socket.on('client_get_customDish', async (type, cb) => { await this.getCustomDishTake(type, cb) })
 
         socket.emit("manager_get_all_customDishes", await this.customDishService.getAllTemplates())
 

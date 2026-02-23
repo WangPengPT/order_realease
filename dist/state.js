@@ -2,7 +2,11 @@ const {Order} = require('./model/order.js')
 const {TableManager} = require('./model/tableManager.js')
 const {TableStatus} = require('./model/TableStatus.js')
 const {Table} = require('./model/table.js')
-const WeekPrice = require("./model/WeekPrice");
+const {ShopInfo,PriceInfo} = require('./model/shopInfo.js')
+const {TakeawayInfo, DeliveryInfo, ReserverInfo, QROrderInfo} = require('./model/Info.js')
+const {PrintInfo} = require('./model/printInfo.js')
+const {Settings} = require('./model/settings.js')
+const {PermissionsControl} = require('./model/permissionsControl.js')
 const {logger} = require("./utils/logger");
 
 class AppState {
@@ -14,106 +18,18 @@ class AppState {
         this.printers = []
         this.maxOrderId = 0
 
-        this.printModel = {
-            order: 0,
-            takeaway: 0,
-        }
+        this.permissionsControl = new PermissionsControl()
 
-        this.permissionsControl = {
-            order: true,
-            delivery: true,
-            reserver: true,
-            vip: true,
-            fandays: true,
-        }
+        this.settings = new Settings()
 
-        this.customDishesControl = {
-            1: {enabled: true, name: 'Sushi Aleatória®'},
-            2: {enabled: true, name: 'Poke Bowl'},
-            3: {enabled: true, name: 'MY BOX'},
-            4: {enabled: true, name: 'bibimbap'},
-            5: {enabled: true, name: 'XIAOXIONG® RAMEN'},
-            6: {enabled: true, name: 'Menu Almoço'},
-        }
-
-        this.settings = {
-            checkIP: false,
-            order: true,
-            delivery: false,
-            reserver: false,
-            isFestiveDay: false,
-            useFandays: false,
-            useChildrenDiscount: false,
-            homeDelivery: false,
-            dividerTime: 17,
-            useAuth: false, // 认证系统开关
-        }
-
-        this.shopInfo = {
-            restaurantName:"Default Restaurant Name",
-            phoneNumber: "",
-            email:"",
-            location: {
-                street: "",
-                city: "",
-                region: "",
-                country: "",
-                postcode: "",
-            },
-            latitudeAndLongitude:{
-                latitude: undefined,
-                longitude: undefined,
-            },
-            logoPath: "",
-            instagramUrl: "",
-            tableCoolingTime: 1,
-            orderCoolingTime: 1,
-        }
-
-        this.pickupData = {
-            timeInterval: 15, // 每隔15分钟取一次餐
-            beginEndInterval: {}, // 默认从12点到15点，19点到23点
-            excludeDates: {
-                week:[],
-                month:[],
-                dates:[],
-            },
-        }
-        this.homeDeliveryData = {
-            timeInterval: 30,
-            beginEndInterval: {},
-            excludeDates: {
-                week:[],
-                month:[],
-                dates:[],
-            }
-        }
-        this.reserverData = {
-            timeInterval: 15, // 每隔15分钟取一次餐
-            beginEndInterval: {}, // 默认从12点到15点，19点到23点
-            excludeDates: {
-                week:[],
-                month:[],
-                dates:[],
-            },
-            excludeDiscountDates: [],
-        }
-        this.currentPageID = 1
-        this.currentTakeWayPageID = 1
-
-        this.shopType = {
-            dineIn: process.env.DINE_IN? (process.env.DINE_IN=="true") : true,
-            takeAway: process.env.TAKE_AWAY? (process.env.TAKE_AWAY=="true") : true,
-        }
-
-        this.childrenPricePercentage = 50
-        this.weekPrice = new WeekPrice(this.settings.dividerTime)
-        this.childrenWeekPrice = new WeekPrice(this.settings.dividerTime)
+        this.shopInfo = new ShopInfo()
+        this.qrOrderInfo = new QROrderInfo()
+        this.takeawayInfo = new TakeawayInfo()
+        this.deliveryInfo = new DeliveryInfo()
+        this.reserverInfo = new ReserverInfo()
+        this.printInfo = new PrintInfo()
 
         this.initTables()
-        this.pickupData.beginEndInterval = this.initBeginEndInterval()
-        this.reserverData.beginEndInterval = this.initBeginEndInterval()
-        this.homeDeliveryData.beginEndInterval = this.initBeginEndInterval()
 
         this.recordProps(this, ['menu', 'orderMenuTab'])
 
@@ -147,17 +63,23 @@ class AppState {
     }
 
     // 所有 Get 函数
-    getPermissionsControl(){
-        return this.permissionsControl
-    }
-
-    getPriceData(){
-        const result = {
-            weekPrice: this.weekPrice.getAllPrices(),
-            childrenWeekPrice: this.childrenWeekPrice.getAllPrices(),
-            childrenPricePercentage: this.childrenPricePercentage,
+    getCurrentPrice(type=undefined,time=Date.now()){
+        if(type){
+            const price = this.shopInfo.getCurrentPrice(type,time,this.settings.isFestiveDay,this.settings.useChildrenDiscount)
+            if(price){
+                return { success:true, data:price }
+            }
+            return {success: false, data: 'Not Found Price'}
+        }else{
+            const data = {
+                adult: this.shopInfo.getCurrentPrice(PriceInfo.type_adult,time,this.settings.isFestiveDay),
+                child: this.shopInfo.getCurrentPrice(PriceInfo.type_child,time,this.settings.isFestiveDay,this.settings.useChildrenDiscount)
+            }
+            if(data.adult && data.child){
+                return { success:true, data:data }
+            }
+            return { success: false, data: data }
         }
-        return result
     }
 
     getPeopleCurrentPriceData(tableId){
@@ -165,7 +87,7 @@ class AppState {
         const data = []
         const peopleType = this.tables.getTableById(tableId).peopleType
         for(const key in peopleType){
-            const price = key.toLowerCase().includes("adult") ? this.getAdultCurrentPrice() : this.getChildrenCurrentPrice()
+            const price = key.toLowerCase().includes("adult") ? this.getCurrentPrice(PriceInfo.type_adult) : this.getCurrentPrice(PriceInfo.type_child)
             data.push({
                 peopleType: key,
                 price: price,
@@ -177,124 +99,59 @@ class AppState {
         return { success:success, data:data }
     }
 
-    getAdultCurrentPrice(){
-        return this.weekPrice.getCurrentPrice(this.settings.isFestiveDay)
-    }
-
-    getChildrenCurrentPrice(){
-        const childrenPrice = this.settings.useChildrenDiscount?
-            (this.getAdultCurrentPrice() * this.childrenPricePercentage / 100 ) : this.childrenWeekPrice.getCurrentPrice(this.settings.isFestiveDay)
-        // console.log("getChildrenCurrentPrice:",childrenPrice)
-        return childrenPrice
-    }
-
-    getPickupData(){
-        const result = {}
-        for(const key in this.pickupData){
-            result[key] = this.pickupData[key]
-        }
-        return result
-    }
-
-    getHomeDeliveryData(){
-        const result = {}
-        for(const key in this.homeDeliveryData){
-            result[key] = this.homeDeliveryData[key]
-        }
-        return result
-    }
-
-    getReserverData(){
-        const result = {}
-        for(const key in this.reserverData){
-            result[key] = this.reserverData[key]
-        }
-        return result
-    }
-
-    getWeekPrice(){
-        let success = false
-        if(this.weekPrice){
-            success = true
-        }
-        return {success: success, data: this.weekPrice}
-    }
-
-    getChildrenWeekPrice(){
-        let success = false
-        if(this.childrenWeekPrice){
-            success = true
-        }
-        return {success: success, data: this.childrenWeekPrice}
-    }
-
-    getChildrenPricePercentage(){
-        let success = false
-        if(this.childrenPricePercentage){
-            success = true
-        }
-        return {success: success, data: this.childrenPricePercentage}
-    }
-
-    getPrintModel(){
-        let success = false
-        if(this.printModel){
-            success = true
-        }
-        return {success:success, data:this.printModel}
-    }
-
     // 所有 Update 函数
-    updatePermissionsControl(value){
-        this.permissionsControl = value
-        console.log("update PermissionsControl:", this.permissionsControl)
-    }
-
-    updateCustomDishesControl(value){
-        this.customDishesControl = value
-        console.log("update CustomDishesControl:", this.customDishesControl)
+    updatePermissionsControl(key,value){
+        console.log("update PermissionsControl: ", key)
+        const result = this.permissionsControl.update(key, value)
+        console.log("update ", (result.success ? "success, value: ": "failed, error:"), result.data )
     }
 
     updateSettings(key, value) {
-        this.settings[key] = value
-        console.log("update settings: ", key,this.settings[key])
+        console.log("update settings: ", key)
+        const result = this.settings.update(key, value)
+        console.log("update ", (result.success ? "success, value: ": "failed, error:"), result.data )
     }
 
     updateShopInfo(key, value){
-        this.shopInfo[key] = value
-        console.log("update shop_info:", key, this.shopInfo[key])
+        console.log("update shop_info:", key)
+        const result = this.shopInfo.update(key, value)
+        console.log("update ", (result.success ? "success, value: ": "failed, error:"), result.data )
+        return result
     }
 
-    updatePickupDate(key, value){
-        this.pickupData[key] = value
-        console.log("update pickupDate: ", key,this.pickupData[key])
+    updateQrOrderInfo(key, value){
+        console.log("update qrorder_info:", key)
+        const result = this.qrOrderInfo.update(key, value)
+        console.log("update ", (result.success ? "success, value: ": "failed, error:"), result.data )
+        return result
     }
 
-    updateHomeDeliveryDate(key, value){
-        this.homeDeliveryData[key] = value
-        console.log("update homeDeliveryData: ", key,this.homeDeliveryData[key])
+    updateTakeawayInfo(key, value){
+        console.log("update takeaway_info:", key)
+        const result = this.takeawayInfo.update(key, value)
+        console.log("update ", (result.success ? "success, value: ": "failed, error:"), result.data )
+        return result
     }
 
-    updateReserverDate(key, value){
-        this.reserverData[key] = value
-        console.log("update reserverData: ", key,this.reserverData[key])
+    updateDeliveryInfo(key, value){
+        console.log("update delivery_info:", key)
+        const result = this.deliveryInfo.update(key, value)
+        console.log("update ", (result.success ? "success, value: ": "failed, error:"), result.data )
+        return result
     }
 
-    updateChildrenPricePercentage(percentage){
-        this.childrenPricePercentage = percentage
-        return this.childrenPricePercentage
+    updateReserverInfo(key, value){
+        console.log("update reserver_info:", key)
+        const result = this.reserverInfo.update(key, value)
+        console.log("update ", (result.success ? "success, value: ": "failed, error:"), result.data )
+        return result
     }
 
-    updateWeekPrice(key,value){
-        if(key == 'childrenWeekPrice'){
-            return this.childrenWeekPrice.setAllPrices(value)
-        }else{
-            return this.weekPrice.setAllPrices(value)
-        }
-    }
-
-    updatePrintModel(key, value){
-        this.printModel[key] = value
+    updatePrintInfo(key, value){
+        console.log("update print_info:", key)
+        const result = this.printInfo.update(key, value)
+        console.log("update ", (result.success ? "success, value: ": "failed, error:"), result.data )
+        return result
     }
 
     createTable(startIdx, endIdx) {
@@ -455,66 +312,48 @@ class AppState {
             },
             permissionsControl: (value) => {
                 if (!value) return this.permissionsControl;
-                for (const k of Object.keys(value)) {
-                    this.permissionsControl[k] = value[k];
-                }
+                this.permissionsControl = PermissionsControl.fromJSON(value)
                 return this.permissionsControl;
-            },
-            customDishesControl: (value) => {
-                if (!value) return this.customDishesControl;
-                for (const k of Object.keys(value)) {
-                    this.customDishesControl[k] = value[k];
-                }
-                return this.customDishesControl;
             },
             settings: (value) => {
                 if (!value) return this.settings;
-                for (const k of Object.keys(value)) {
-                    this.settings[k] = value[k];
-                }
+                this.settings = Settings.fromJSON(value);
                 return this.settings;
             },
             shopInfo: (value) => {
                 if (!value) return this.shopInfo;
-                for (const k of Object.keys(value)) {
-                    this.shopInfo[k] = value[k];
-                }
+                this.shopInfo = ShopInfo.fromJSON(value)
                 return this.shopInfo;
             },
-            pickupData: (value) => {
-                if (!value) return this.pickupData;
-                for (const k of Object.keys(value)) {
-                    this.pickupData[k] = value[k];
-                }
-                return this.pickupData;
+            qrOrderInfo: (value) => {
+                if (!value) return this.qrOrderInfo;
+                this.qrOrderInfo = QROrderInfo.fromJSON(value)
+                return this.qrOrderInfo;
             },
-            homeDeliveryData: (value) => {
-                if (!value) return this.homeDeliveryData;
-                for (const k of Object.keys(value)) {
-                    this.homeDeliveryData[k] = value[k];
-                }
-                return this.homeDeliveryData;
+            takeawayInfo: (value) => {
+                if (!value) return this.takeawayInfo;
+                this.takeawayInfo = TakeawayInfo.fromJSON(value)
+                return this.takeawayInfo;
             },
-            reserverData: (value) => {
-                if (!value) return this.reserverData;
-                for (const k of Object.keys(value)) {
-                    this.reserverData[k] = value[k];
-                }
-                return this.reserverData;
+            deliveryInfo: (value) => {
+                if (!value) return this.deliveryInfo;
+                this.deliveryInfo = DeliveryInfo.fromJSON(value)
+                return this.deliveryInfo;
             },
-            weekPrice: (value) => {
-                if (!value) return this.weekPrice;
-                for (const k of Object.keys(value)) {
-                    this.weekPrice[k] = value[k];
-                }
-                return this.weekPrice;
+            reserverInfo: (value) => {
+                if (!value) return this.reserverInfo;
+                this.reserverInfo = ReserverInfo.fromJSON(value)
+                return this.reserverInfo;
             },
-            childrenWeekPrice: (value) => {
-                if (!value) return this.childrenWeekPrice;
-                for (const k of Object.keys(value)) {
-                    this.childrenWeekPrice[k] = value[k];
+            printInfo: (value) => {
+                if (!value) return this.printInfo;
+                this.printInfo = PrintInfo.fromJSON(value)
+                // template 数据迁移
+                if(this.printModel){
+                    this.printInfo.update('printModel',this.printModel)
+                    this.printModel = undefined
                 }
-                return this.childrenWeekPrice;
+                return this.printInfo;
             }
         };
 
@@ -528,13 +367,13 @@ class AppState {
         }
     }
 
-    getTableTotalAmout(tableId) {
+    getTableTotalAmount(tableId) {
         const table = this.tables.getTableById(tableId)
         if (table == null) throw new Error('Not found the table')
         const tableOrdersAmount = parseFloat(table.getTableOrdersTotalAmount())
 
-        const adultPrice = this.getAdultCurrentPrice()
-        const childrenPrice = this.getChildrenCurrentPrice()
+        const adultPrice = this.getCurrentPrice(PriceInfo.type_adult)
+        const childrenPrice = this.getCurrentPrice(PriceInfo.type_child)
         const tablePeoplesAmount = parseFloat(table.getTablePeopleTotalAmount(adultPrice, childrenPrice))
 
         const adultQty = table.peopleType.adults
@@ -610,34 +449,7 @@ class AppState {
             }
         }
 
-        // resetExcludeDates(instance)
-
         return instance
-
-        function trans(instance){
-            if(instance.pickupData) {
-                if(instance.pickupData.beginEndInterval && instance.pickupData.timeInterval){
-                    instance.pickupData = {timeInterval: instance.pickupData.timeInterval, beginEndInterval: instance.pickupData.beginEndInterval}
-                    logger.info("新pickupData keys: "+Object.keys(instance.pickupData))
-                }
-            }
-        }
-
-        function resetExcludeDates(instance){
-
-            instance.pickupData.excludeDates = {
-                week:[],
-                month:[],
-                dates:[],
-            }
-
-            instance.reserverData.excludeDates = {
-                week:[],
-                month:[],
-                dates:[],
-            }
-
-        }
     }
 
     localIps = []
