@@ -118,7 +118,7 @@ class ShopInfo {
         for(const key of instance._dataKeys){
             if(key === 'adultPrice' || key === 'childPrice'){
                 instance[key] = PriceInfo.fromJSON(data[key])
-            }else{
+            }else if(data.hasOwnProperty(key)){
                 instance[key] = data[key]
             }
         }
