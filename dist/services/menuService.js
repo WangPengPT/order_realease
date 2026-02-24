@@ -197,8 +197,6 @@ class MenuService {
         const id = item.dishid;
         let data = appState.menu.find(data => data.id == id);
 
-        console.log("find dish:",data)
-
         if (data) {
             if (data.tags && data.tags != "") {
                 return data.tags;
