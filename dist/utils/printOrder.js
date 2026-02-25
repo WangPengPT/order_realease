@@ -1,5 +1,5 @@
 const {menuService} = require('../services/menuService');
-const { print_order_model, print_takeaway_model } = require('./printModels.js');
+const { print_order_model, print_takeaway_model, checkMenuIncludes } = require('./printModels.js');
 const { logger } = require('./logger.js')
 const dataTime = require('./dateTime.js')
 const net = require('net');
@@ -25,11 +25,12 @@ function print_order(order, printInfo) {
         let hasData = false;
         for (let i = 0; i < order.items.length; i++) {
             let item = order.items[i];
-            let type = menuService.getDishCategory(item);
-            if (printer.data.menu?.includes(type)) {
+            const type = menuService.getDishCategory(item);
+            if (checkMenuIncludes(printer.data.menu, type)) {
                 hasData = true;
                 break;
             }
+
         }
 
         if (hasData) {
@@ -65,6 +66,8 @@ function print_order(order, printInfo) {
 
     return result
 }
+
+
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
