@@ -1,0 +1,2 @@
+import{r as x,j as s}from"./vendor-react-BR0FzCHH.js";import{T as l}from"./TranslateButton-BiOVPiqH.js";const c=({text:t,className:r,renderContent:a})=>{const[o,n]=x.useState(null),e=o||t;return s.jsxs("div",{className:r,children:[a?a(e):s.jsx("p",{className:"text-xs sm:text-sm text-foreground break-words",children:e}),s.jsx(l,{text:t,onTranslation:n,className:"mt-2"})]})};export{c as T};
+//# sourceMappingURL=TranslatableText-DY9bhxWr.js.map
