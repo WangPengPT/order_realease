@@ -14,7 +14,9 @@ function isIP(str) {
 function print_order(order, printInfo) {
     let result = {success: false, data: 0}
     logger.info(`打印订单 订单号 - ${order.id}`)
-    console.log("收到的order数据",order);
+    // console.log("收到的order数据",order);
+    order.items = sortedOrderItems(order.items)
+    // console.log("Sorted Order", order)
     for (const key in printers) {
         const printer = printers[key];
 
@@ -65,6 +67,15 @@ function print_order(order, printInfo) {
     }
 
     return result
+}
+
+function sortedOrderItems(items){
+    return items.sort((a, b) =>
+        a.dishid.localeCompare(b.dishid, undefined, {
+            numeric: true,
+            sensitivity: 'base'
+        })
+    )
 }
 
 
