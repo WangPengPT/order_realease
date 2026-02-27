@@ -69,13 +69,18 @@ function print_order(order, printInfo) {
     return result
 }
 
-function sortedOrderItems(items){
-    return items.sort((a, b) =>
-        a.dishid.localeCompare(b.dishid, undefined, {
-            numeric: true,
-            sensitivity: 'base'
-        })
-    )
+// 按ID的从小到大顺序排序
+function sortedOrderItems(items) {
+    return items.sort((a, b) => {
+        const idA = a.dishid ?? ''
+        const idB = b.dishid ?? ''
+
+        return String(idA).localeCompare(
+            String(idB),
+            undefined,
+            { numeric: true, sensitivity: 'base' }
+        )
+    })
 }
 
 
