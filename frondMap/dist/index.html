@@ -15,6 +15,12 @@
     <script>
       window.__fcmTokenQueue=window.__fcmTokenQueue||[];
       window.onReceiveFCMToken=function(r){var t=null;try{if(r&&r.fcm_token&&typeof r.fcm_token==='string'&&r.fcm_token.length>10){t=r.fcm_token}else if(typeof r==='string'&&r.length>10){t=r}}catch(e){}if(t){window.__fcmTokenQueue.push(t)}return"ok"};
+      (function(){
+        var p = window.location.pathname || '';
+        if (p.indexOf('/auth') === 0) {
+          document.documentElement.classList.add('route-auth');
+        }
+      })();
     </script>
     
     <!-- Preconnect to critical origins for faster requests -->
@@ -58,7 +64,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #005c53 0%, #003d37 100%);
+        background: linear-gradient(135deg, hsl(170 100% 18%) 0%, hsl(170 100% 12%) 100%);
         z-index: 9999;
         transition: opacity 0.3s ease-out;
       }
@@ -75,17 +81,46 @@
       #initial-loader-spinner {
         width: 40px;
         height: 40px;
-        border: 3px solid rgba(255,255,255,0.2);
-        border-top-color: #ffffff;
+        border: 3px solid hsl(0 0% 100% / 0.2);
+        border-top-color: hsl(0 0% 100%);
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
       #initial-loader-text {
         margin-top: 16px;
-        color: rgba(255,255,255,0.9);
+        color: hsl(0 0% 100% / 0.9);
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         font-size: 14px;
         letter-spacing: 0.5px;
+      }
+      #initial-loader-skeleton {
+        display: none;
+        width: min(82vw, 320px);
+        gap: 12px;
+        margin-top: 8px;
+        flex-direction: column;
+      }
+      #initial-loader-skeleton span {
+        display: block;
+        height: 12px;
+        border-radius: 999px;
+        background: hsl(210 20% 92%);
+        animation: skeleton-pulse 1.2s ease-in-out infinite;
+      }
+      #initial-loader-skeleton span:last-child {
+        width: 70%;
+      }
+      .route-auth #initial-loader {
+        display: none;
+      }
+      .route-auth #initial-loader-logo,
+      .route-auth #initial-loader-spinner,
+      .route-auth #initial-loader-text,
+      .route-auth #initial-loader-skeleton {
+        display: none;
+      }
+      .route-auth.app-loading #root > *:not(#initial-loader) {
+        visibility: visible;
       }
       @keyframes spin {
         to { transform: rotate(360deg); }
@@ -94,19 +129,23 @@
         0%, 100% { transform: scale(1); opacity: 1; }
         50% { transform: scale(1.05); opacity: 0.9; }
       }
+      @keyframes skeleton-pulse {
+        0%, 100% { opacity: 0.55; }
+        50% { opacity: 1; }
+      }
       /* Prevent FOUC */
       .app-loading #root > *:not(#initial-loader) {
         visibility: hidden;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-CHiavqbX.js"></script>
+    <script type="module" crossorigin src="/assets/index-FQOIZHXN.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-i18n-AOdgFpXS.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-editor-B1vH4T8i.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-utils-BKD-ceTE.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-react-DymlXqZu.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-f9gSnySI.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-Bjp8UdeU.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-C7tN8aQw.js">
     <link rel="stylesheet" crossorigin href="/assets/vendor-react-CG6K1Se3.css">
-    <link rel="stylesheet" crossorigin href="/assets/index-CIKExJvV.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-Cg8ugfWc.css">
   </head>
 
   <body class="app-loading">
@@ -121,6 +160,10 @@
         />
         <div id="initial-loader-spinner"></div>
         <div id="initial-loader-text">Loading...</div>
+        <div id="initial-loader-skeleton" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </div>
       </div>
     </div>
     <script>
