@@ -32,7 +32,7 @@ app.use(express.urlencoded({extended: true}))
 
 // 创建 HTTP 服务器和 Socket.IO
 let server;
-const usedHttps = process.USE_HTTPS || false;
+const usedHttps = process.env.USE_HTTPS || false;
 if (usedHttps == "true") {
     let key_name = "order";
     if (process.env.HTTPS_HEAD) {
