@@ -20,6 +20,11 @@ class UserManager {
             const { id, pwd } = query;
             return this.login({id: id, password: pwd});
         })
+
+        httpAPI.get("/changePwd", (query)=> {
+            const { id, oldPwd, newPwd } = query;
+            return this.changePwd({id: id, oldPwd: oldPwd, newPwd: newPwd});
+        })
     }
 
     checkOP(user,cmd) {
@@ -32,13 +37,37 @@ class UserManager {
         return false;
     }
 
+
+
+    async changePwd(params, socket) {
+        let user = await db.get(db.userTable, params.id);
+
+        console.log("changePwd", " - ", params)
+
+
+        if (user && user.password == params.oldPwd) {
+            user.password = params.newPwd
+            await db.set(db.userTable, user);
+
+            return {
+                result: true,
+                user: user,
+            }
+        } else {
+            return {
+                result: false,
+                message: "error password"
+            }
+        }
+    }
+
     async login(params, socket) {
         let user = await db.get(db.userTable, params.id);
 
         console.log(user, " - ", params)
 
         if ((!user) && params.id == "admin") {
-            db.set(db.userTable, params);
+            await db.set(db.userTable, params);
             user = params;
         }
 

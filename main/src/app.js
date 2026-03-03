@@ -10,6 +10,8 @@ const serverManager = require('./controllers/server_manager')
 const orderManager = require('./controllers/order_manager')
 const reserveManager = require('./controllers/reserve_manager')
 const mapManager = require('./controllers/map_manager')
+const alertMessageManager = require("./controllers/alert_message_manager");
+const VIPUserManager = require('./controllers/vip_user')
 
 const redirectPage = require('./controllers/redirect_page')
 const payService = require('./service/pay_service')
@@ -21,7 +23,6 @@ const http = require("http");
 const tools = require('./utils/tools')
 const path = require("path");
 
-const VIPUserManager = require('./controllers/vip_user')
 
 const app = express();
 let port = 80;
@@ -89,6 +90,7 @@ async function initApp() {
     await orderManager.init();
     await reserveManager.init();
     await mapManager.init();
+    await alertMessageManager.init();
 
     await redirectPage.init(app)
     await payService.init(orderManager)

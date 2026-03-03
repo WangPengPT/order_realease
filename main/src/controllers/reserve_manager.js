@@ -31,7 +31,7 @@ class ReserveManager {
         httpAPI.get("/reserve_list", async (query) => {
             let {restaurant, count} = query;
             count = parseInt(count)
-            console.log(restaurant, count)
+            //console.log(restaurant, count)
             const data = await this.getByRestaurant(restaurant, count)
 
             return {
