@@ -169,15 +169,37 @@
           <span></span>
         </div>
       </div>
-    </div>
+    </div>
+    <script>
+      // Compatibility check - must use ES5 syntax only!
+      (function() {
+        try {
+          // Test modern JS features the app requires
+          eval('var _t=()=>1;var _o=null?.a;var _n=null??"ok";var _d={..._t};');
+        } catch(e) {
+          var root = document.getElementById('root');
+          if (root) {
+            root.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:20px;text-align:center;background:#f9fafb">' +
+              '<div style="max-width:360px">' +
+              '<div style="font-size:48px;margin-bottom:16px">⚠️</div>' +
+              '<h2 style="font-size:18px;color:#111;margin-bottom:8px">浏览器版本过低</h2>' +
+              '<p style="font-size:14px;color:#666;margin-bottom:4px">Browser version too old</p>' +
+              '<p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:20px">请更新 Android System WebView 或使用 Chrome 浏览器打开<br/>Please update Android System WebView or open in Chrome</p>' +
+              '<a href="https://play.google.com/store/apps/details?id=com.google.android.webview" style="display:inline-block;padding:10px 24px;background:#3b82f6;color:#fff;border-radius:8px;text-decoration:none;font-size:14px">更新 WebView</a>' +
+              '</div></div>';
+          }
+          // Prevent main script from running
+          if (window.stop) window.stop();
+          return;
+        }
+      })();
+    </script>
     <script>
       // Remove loading class once React mounts
       window.addEventListener('DOMContentLoaded', function() {
         var startTime = Date.now();
-        // Give React a moment to render, then fade out loader
         var checkReactMounted = setInterval(function() {
           var root = document.getElementById('root');
-          // Check if React has rendered content (more than just the loader)
           if (root && root.children.length > 1) {
             document.body.classList.remove('app-loading');
             var loader = document.getElementById('initial-loader');
@@ -191,24 +213,40 @@
             }
             clearInterval(checkReactMounted);
           }
-          // If taking too long (5 seconds), show error message
           if (Date.now() - startTime > 5000) {
-            var loader = document.getElementById('initial-loader');
             var loaderText = document.getElementById('initial-loader-text');
             if (loaderText) {
               loaderText.textContent = 'Loading slowly... Please wait or refresh';
             }
           }
         }, 50);
-        // Fallback: remove loader after 10 seconds regardless
+        // Fallback: if React never mounts after 12s, show error instead of white screen
         setTimeout(function() {
           clearInterval(checkReactMounted);
-          document.body.classList.remove('app-loading');
+          var root = document.getElementById('root');
           var loader = document.getElementById('initial-loader');
-          if (loader && loader.parentNode) {
-            loader.parentNode.removeChild(loader);
+          // Check if React actually mounted
+          if (root && root.children.length <= 1) {
+            // React never mounted - show fallback UI
+            if (loader && loader.parentNode) {
+              loader.parentNode.removeChild(loader);
+            }
+            document.body.classList.remove('app-loading');
+            root.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:20px;text-align:center;background:#f9fafb">' +
+              '<div style="max-width:360px">' +
+              '<div style="font-size:48px;margin-bottom:16px">😕</div>' +
+              '<h2 style="font-size:18px;color:#111;margin-bottom:8px">页面加载失败</h2>' +
+              '<p style="font-size:14px;color:#666;margin-bottom:16px">Page failed to load. Please try refreshing.</p>' +
+              '<button onclick="location.reload()" style="padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">刷新页面 / Refresh</button>' +
+              '</div></div>';
+          } else {
+            // React mounted fine, just clean up loader
+            document.body.classList.remove('app-loading');
+            if (loader && loader.parentNode) {
+              loader.parentNode.removeChild(loader);
+            }
           }
-        }, 10000);
+        }, 12000);
       });
       
       // Catch global errors during loading
@@ -219,6 +257,14 @@
           loader.parentNode.removeChild(loader);
         }
         document.body.classList.remove('app-loading');
+        // Show error UI instead of white screen
+        var root = document.getElementById('root');
+        if (root && root.children.length === 0) {
+          root.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;text-align:center;padding:20px"><div>' +
+            '<p style="font-size:18px;margin-bottom:12px">页面加载出错</p>' +
+            '<button onclick="location.reload()" style="padding:8px 24px;background:#3b82f6;color:white;border:none;border-radius:8px;font-size:16px">刷新页面</button>' +
+            '</div></div>';
+        }
         return false;
       };
     </script>
