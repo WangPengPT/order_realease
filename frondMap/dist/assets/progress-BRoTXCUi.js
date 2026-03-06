@@ -1,0 +1,2 @@
+import{r as t,j as r,dq as a,dr as d}from"./vendor-react-DXuhq334.js";import{f}from"./index-DHYjPvSL.js";const i=t.forwardRef(({className:s,value:l,...e},o)=>r.jsx(a,{ref:o,className:f("relative h-4 w-full overflow-hidden rounded-full bg-secondary",s),...e,children:r.jsx(d,{className:"h-full w-full flex-1 bg-primary transition-all",style:{transform:`translateX(-${100-(l||0)}%)`}})}));i.displayName=a.displayName;export{i as P};
+//# sourceMappingURL=progress-BRoTXCUi.js.map
