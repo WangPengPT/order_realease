@@ -439,7 +439,10 @@ class OrderManager {
     }
 
     getMinutesDiff(date1, date2) {
-        const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+        const time1 = date1 instanceof Date ? date1.getTime() : date1;
+        const time2 = date2 instanceof Date ? date2.getTime() : date2;
+
+        const timeDiff = Math.abs(time2 - time1);
         return Math.floor(timeDiff / (1000 * 60));
     }
 
@@ -452,7 +455,7 @@ class OrderManager {
             let timestamp = data.pickupDate + " " + data.pickupTime
             let dateObject = new Date(timestamp);
 
-            const diffMinutes = this.getMinutesDiff(dateObject,Date.now());
+            const diffMinutes = this.getMinutesDiff(dateObject,new Date());
             console.log(diffMinutes)
 
             if (diffMinutes >= 15)  {
