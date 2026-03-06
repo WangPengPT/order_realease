@@ -17,7 +17,7 @@ class AlertMessageManager {
     }
 
     async init() {
-        console.log("Alert Message Manager Init")
+        console.log("[Alert Message Manager] Init")
 
         socket.registerMessage("g_alert", this.alert.bind(this));
         socket.registerMessage("g_message", this.message.bind(this));
@@ -30,8 +30,7 @@ class AlertMessageManager {
         const restaurant = data.restaurant;
         let alert = data.alert;
 
-        console.log("restaurant", restaurant);
-        console.log("alert", alert);
+        console.log("[Alert Message Manager] Alert:", alert,", From:",restaurant);
 
         if(['401_1','401_2','401_3'].includes(alert.code)){
             alert = {...alert, identity: AlertMessageManager.manager}
@@ -46,8 +45,7 @@ class AlertMessageManager {
         const restaurant = data.restaurant;
         let msg = data.msg;
 
-        console.log("restaurant", restaurant);
-        console.log("msg", msg);
+        console.log("[Alert Message Manager] Message:", msg,", From:",restaurant);
 
         if(msg.identity){
             this.send_message_to(restaurant,msg);

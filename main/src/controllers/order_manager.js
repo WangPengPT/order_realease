@@ -146,7 +146,7 @@ class OrderManager {
         const mail = customer_info.email
 
         const orderTime = data.pickupDate + " " +  data.pickupTime
-        const pickupLocation = data.pickupLocation
+        const restaurantName = await this.getRestaurantName(data.restaurant)
         const totalPrice = data.total_price;
 
         let lines = "";
@@ -157,44 +157,205 @@ class OrderManager {
         }
 
         const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Order Confirmation</title>
-            <style>
-                .cancel-btn {
-                    display: inline-block;
-                    padding: 10px 20px;
-                    background-color: #ff4444;
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 4px;
-                    font-family: Arial, sans-serif;
-                }
-            </style>
-        </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <p>Dear <strong>${customerName}</strong>, your order is confirmed!</p>
-            
-            <div style="margin: 15px 0; padding-left: 10px; border-left: 3px solid #ff6b6b;">
-                <p><strong>order id:</strong> ${orderName}</p>
-                <p><strong>Pickup Time:</strong> ${orderTime}</p>
-                <p><strong>Pickup Location:</strong> ${pickupLocation}</p>
-                
-                <h4>Order Details:</h4>
-                <ul style="margin-top: 5px; padding-left: 20px;">
-                    ${lines}
-                </ul>                
-                <p><strong>Total:</strong> ${totalPrice}</p>
-            </div>
-        
-            <a href="https://v.xiaoxiong.pt/cancel-order.html?id=${orderId}" class="cancel-btn">cancel order</a>
-    
-            <p>Thank you for choosing us!</p>
-            <p style="color: #666; font-size: 0.9em;">© 2025 Your Restaurant Name</p>
-        </body>       
-        </html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Confirmation</title>
+  </head>
+  <body
+    style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;"
+  >
+    <table
+      role="presentation"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      width="100%"
+      style="max-width: 420px; margin: 0 auto; background-color: #ffffff;"
+    >
+      <!-- Header Section -->
+      <tr>
+        <td
+          style="padding: 40px 24px 24px 24px; text-align: center; background: linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.01) 100%);"
+        >
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 16px auto;">
+            <tr>
+              <td style="text-align: center; vertical-align: middle;">
+                <img src="https://cdn.shopify.com/s/files/1/0923/4042/0985/files/XIAOXIONG_LOGO.png?v=1766177011" alt="XIAOXIONG Logo" style="max-width: 200px; height: auto;" />
+              </td>
+            </tr>
+          </table>
+          <h1 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: #1a1a1a;">Order Confirmation</h1>
+          <p style="margin: 0; font-size: 14px; color: #6b7280;">Dear ${customerName}, your order is confirmed!</p>
+        </td>
+      </tr>
+
+      <!-- Details Section -->
+      <tr>
+        <td style="padding: 0;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+            <!-- Order ID -->
+            <tr>
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;">
+                        <span style="font-size: 20px;">🎫</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">Order ID</span>
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${orderName}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Customer -->
+            <tr>
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;">
+                        <span style="font-size: 20px;">👤</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">Customer</span>
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${customerName}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Pickup Time -->
+            <tr>
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;">
+                        <span style="font-size: 20px;">🕐</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">Pickup Time</span>
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${orderTime}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Pickup Restaurant -->
+            <tr>
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;">
+                        <span style="font-size: 20px;">📍</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">Pickup Restaurant</span>
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">${restaurantName}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Order Details -->
+            <tr>
+              <td style="padding: 10px 24px; border-bottom: 1px solid #e5e5e5;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: top; padding-top: 4px;">
+                      <div style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;">
+                        <span style="font-size: 20px;">🛒</span>
+                      </div>
+                    </td>
+                    <td colspan="2" style="padding-left: 16px; vertical-align: middle;">
+                      <span style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">Order Details</span>
+                      <div style="margin-top: 8px; font-size: 14px; color: #1a1a1a; line-height: 1.8;">
+                        ${lines}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Total -->
+            <tr>
+              <td style="padding: 10px 24px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 48px; vertical-align: middle;">
+                      <div style="width: 48px; height: 48px; background-color: #f5f5f5; border-radius: 12px; text-align: center; line-height: 48px;">
+                        <span style="font-size: 20px;">💰</span>
+                      </div>
+                    </td>
+                    <td style="padding-left: 16px; vertical-align: middle;">
+                      <span style="font-size: 12px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px;">Total</span>
+                    </td>
+                    <td style="text-align: right; vertical-align: middle;">
+                      <span style="font-size: 18px; font-weight: 700; color: #1a1a1a;">${totalPrice}</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Buttons Section -->
+      <tr>
+        <td style="padding: 24px;">
+          <p style="margin: 0 0 6px 0; font-size: 12px; color: #9ca3af; text-align: center;">
+            If you need to cancel, click the button below
+          </p>
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tr>
+              <td style="text-align: center;">
+                <a
+                  href="https://v.xiaoxiong.pt/cancel-order.html?id=${orderId}"
+                  style="display: block; padding: 16px 24px; background-color: #ffffff; border: 2px solid #e5e5e5; border-radius: 12px; text-align: center; text-decoration: none; font-size: 14px; font-weight: 600; color: #333333;"
+                >
+                  CANCEL ORDER
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="padding: 24px; text-align: center; background-color: #fafafa;">
+          <p style="margin: 0 0 8px 0; font-size: 14px; color: #666666;">Thank you for choosing us!</p>
+          <p style="margin: 0; font-size: 12px; color: #999999;">© 2025 XIAOXIONG®</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
         `;
 
         await mailAPI.send(mail, "new order", html );
@@ -583,6 +744,14 @@ class OrderManager {
             await this.orderUpdated(order)
         }
 
+    }
+
+    async getRestaurantName(restaurantID){
+        const dbData = await db.get(db.serverTable, restaurantID)
+        if (dbData && dbData.shopify_name) {
+            return dbData.shopify_name
+        }
+        return 'restaurant'
     }
 
     /**
