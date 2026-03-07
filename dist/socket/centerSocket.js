@@ -24,6 +24,7 @@ let restaurantInfo = {}
 let menuData
 let update_data = false;
 let menuService
+let alertMessageSocket
 
 
 class CenterSocket {
@@ -45,8 +46,9 @@ class CenterSocket {
         update_data = true;
     }
 
-    static init(menuServiceInstance) {
+    static init(menuServiceInstance, alertMessageSocketInstance) {
         menuService = menuServiceInstance
+        alertMessageSocket = alertMessageSocketInstance
 
         if (!process.env.SAVE_ADDR) {
             server_addr = "http://localhost"
@@ -134,6 +136,24 @@ class CenterSocket {
             const manualUpdate = new ManualUpdate(menuService)
             const update_times = await manualUpdate.run()
             logger.info("Finished manual update, times:"+update_times);
+        })
+
+        // 转发中心服务器 警报
+        socket.on('alert_'+name, async (alert) => {
+            const identity = alert.identity;
+            logger.info("Center Server sends alert to " + identity + ", alert: "+ JSON.stringify(alert));
+            const api = 'alert_to_' + identity;
+            await alertMessageSocket.add('alert', {...alert, identity:undefined}, api)
+            // appState.socket_io.emit("alert_to_"+identity,{...alert, identity:undefined})
+        })
+
+        // 转发中心服务器 消息
+        socket.on('message_'+name, async (msg) => {
+            const identity = msg.identity;
+            logger.info("Center Server sends message to " + identity + ", msg: "+ JSON.stringify(msg));
+            const api = 'message_to_' + identity;
+            await alertMessageSocket.add('message', {...msg, identity:undefined}, api)
+            // appState.socket_io.emit("message_to_"+identity,{...msg, identity:undefined})
         })
 
         this.connect_socket();
@@ -266,7 +286,7 @@ class CenterSocket {
     }
 
     static alert(alert){
-        const api = 'alert'
+        const api = 'g_alert'
         const value = {
             restaurant: this.getRestaurant(),
             alert: alert
@@ -276,7 +296,7 @@ class CenterSocket {
     }
 
     static message(msg){
-        const api = 'message'
+        const api = 'g_message'
         const value = {
             restaurant: this.getRestaurant(),
             message: msg,
