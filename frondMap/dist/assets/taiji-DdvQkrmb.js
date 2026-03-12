@@ -1,0 +1,2 @@
+const c="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%20width='100'%20height='100'%3e%3ccircle%20cx='50'%20cy='50'%20r='48'%20fill='currentColor'/%3e%3cpath%20d='M50%202%20A48%2048%200%200%201%2050%2098%20A24%2024%200%200%201%2050%2050%20A24%2024%200%200%200%2050%202'%20fill='white'/%3e%3ccircle%20cx='50'%20cy='26'%20r='7'%20fill='currentColor'/%3e%3ccircle%20cx='50'%20cy='74'%20r='7'%20fill='white'/%3e%3c/svg%3e";export{c as t};
+//# sourceMappingURL=taiji-DdvQkrmb.js.map
