@@ -1,0 +1,2 @@
+import{r as t,j as a,e7 as r,e8 as i}from"./vendor-react-BEYeT14g.js";import{o as n}from"./index-CDXfrulE.js";const f=t.forwardRef(({className:s,value:e,...l},o)=>a.jsx(r,{ref:o,className:n("relative h-4 w-full overflow-hidden rounded-full bg-secondary",s),...l,children:a.jsx(i,{className:"h-full w-full flex-1 bg-primary transition-all",style:{transform:`translateX(-${100-(e||0)}%)`}})}));f.displayName=r.displayName;export{f as P};
+//# sourceMappingURL=progress-B3ixa72u.js.map
