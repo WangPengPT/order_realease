@@ -12,6 +12,8 @@ class AlertMessageManager {
     static manager = 'manager'
     static client = 'client'
 
+    static without_code = 'without-code'
+
     constructor() {
 
     }
@@ -22,11 +24,11 @@ class AlertMessageManager {
         socket.registerMessage("g_alert", this.alert.bind(this));
         socket.registerMessage("g_message", this.message.bind(this));
 
+        socket.registerMessage('get_all_messages_alerts', this.get_all.bind(this))
+
     }
 
     alert(data){
-
-
         const restaurant = data.restaurant;
         let alert = data.alert;
 
@@ -39,6 +41,8 @@ class AlertMessageManager {
         if(alert.identity){
             this.send_alert_to(restaurant,alert)
         }
+
+        this.increment(restaurant, 'alert', alert)
     }
 
     message(data){
@@ -50,6 +54,8 @@ class AlertMessageManager {
         if(msg.identity){
             this.send_message_to(restaurant,msg);
         }
+
+        this.increment(restaurant, 'message', msg)
     }
 
     send_alert_to(restaurant, alert){
@@ -60,6 +66,48 @@ class AlertMessageManager {
     send_message_to(restaurant, msg){
         const destination = 'message_' + restaurant
         socket.broadcast(destination, msg)
+    }
+
+    async increment(restaurant, type, data){
+        await this.save_to_db(restaurant, type, data, 1)
+    }
+
+    async decrement(restaurant, type, data){
+        await this.save_to_db(restaurant, type, data, -1)
+    }
+
+    async save_to_db(restaurant, type, data, delta){
+        let restaurantData = await this.get_restaurant_data({restaurant: restaurant})
+        const id = (data.code ? data.code : AlertMessageManager.without_code) + '-' + data.message
+        const find = restaurantData[type].find((i) =>{i == id})
+        if(find){
+            find.number = Math.max(find.number+delta, 0)
+        }else{
+            restaurantData[type] = [...restaurantData[type], { id: id , value: data, number: Math.max(delta, 0)}]
+        }
+
+        await db.set(db.alertMessageTable, restaurantData)
+    }
+
+    async get_restaurant_data(data){
+        const restaurant = data.restaurant;
+        const result = await db.get(db.alertMessageTable, restaurant)
+        if(!result){
+            return {
+                id: restaurant,
+                alert:[],
+                message:[]
+            }
+        }
+        return result
+    }
+
+    async get_all(){
+        const result = await db.getAll(db.alertMessageTable)
+        if(!result){
+            return []
+        }
+        return result
     }
 
 }
