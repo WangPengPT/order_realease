@@ -26,34 +26,41 @@ class AlertMessageManager {
 
         socket.registerMessage('get_all_messages_alerts', this.get_all.bind(this))
         socket.registerMessage('delete_all_messages_alerts', this.delete_all.bind(this))
+        socket.registerMessage('messages_alerts', this.messages_alerts.bind(this))
 
     }
 
-    alert(data){
+    messages_alerts() {
+        
+    }
+
+    alert(data, to, identity=AlertMessageManager.manager){
         const restaurant = data.restaurant;
         let alert = data.alert;
 
         console.log("[Alert Message Manager] Alert:", alert,", From:",restaurant);
 
         if(['401_1','401_2','401_3'].includes(alert.code)){
-            alert = {...alert, identity: AlertMessageManager.manager}
+            alert = {...alert, identity: identity}
         }
 
         if(alert.identity){
-            this.send_alert_to(restaurant,alert)
+            this.send_alert_to((to? to:restaurant),alert)
         }
 
         this.increment(restaurant, 'alert', alert)
     }
 
-    message(data){
+    message(data, to, identity=AlertMessageManager.manager){
         const restaurant = data.restaurant;
         let msg = data.msg;
 
         console.log("[Alert Message Manager] Message:", msg,", From:",restaurant);
 
+        msg = {...msg, identity: identity};
+
         if(msg.identity){
-            this.send_message_to(restaurant,msg);
+            this.send_message_to((to? to:restaurant),msg);
         }
 
         this.increment(restaurant, 'message', msg)

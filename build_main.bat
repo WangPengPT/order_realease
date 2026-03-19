@@ -12,14 +12,15 @@ set DST_PATH=%script_dir%\main
 cd %SRC_PATH%
 xcopy .\mgserver %DST_PATH% /E /Y /I
 
-cd managerprime
-call npm install
-call npm run build
-ren .\dist\index.html manager.html
-xcopy .\dist %DST_PATH%\public /E /Y /I
-cd ..
+rem cd managerprime
+rem call npm install
+rem call npm run build
+rem ren .\dist\index.html manager.html
+rem xcopy .\dist %DST_PATH%\public /E /Y /I
+rem cd ..
 
-cd mg-manager
+cd ..
+cd centerservermanager
 call npm install
 call npm run build
 rem ren .\dist\index.html mg.html
