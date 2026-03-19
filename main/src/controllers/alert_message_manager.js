@@ -25,6 +25,7 @@ class AlertMessageManager {
         socket.registerMessage("g_message", this.message.bind(this));
 
         socket.registerMessage('get_all_messages_alerts', this.get_all.bind(this))
+        socket.registerMessage('delete_all_messages_alerts', this.delete_all.bind(this))
 
     }
 
@@ -78,8 +79,11 @@ class AlertMessageManager {
 
     async save_to_db(restaurant, type, data, delta){
         let restaurantData = await this.get_restaurant_data({restaurant: restaurant})
+        console.log("restaurantData:",restaurantData)
         const id = (data.code ? data.code : AlertMessageManager.without_code) + '-' + data.message
-        const find = restaurantData[type].find((i) =>{i == id})
+        console.log("id:", id)
+        const find = restaurantData[type].find((i) =>{return i.id == id })
+        console.log("find:", find)
         if(find){
             find.number = Math.max(find.number+delta, 0)
         }else{
@@ -108,6 +112,13 @@ class AlertMessageManager {
             return []
         }
         return result
+    }
+
+    async delete_all(){
+        const all = await this.get_all()
+        for(const data of all){
+            await db.del(db.alertMessageTable, data.id)
+        }
     }
 
 }
