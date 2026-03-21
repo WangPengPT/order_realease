@@ -1,21 +1,20 @@
 const db = require('../utils/db');
-const state = require('../utils/state');
 const socket = require('../utils/socket');
-const { execFile } = require('child_process');
-const path = require('path');
-const fs = require('fs');
-const redirectPage = require('./redirect_page')
-const httpAPI = require("../utils/http_api");
 
 class AlertMessageManager {
 
     static manager = 'manager'
     static client = 'client'
 
+    static types = {alert:'alert', message:'message'};
     static without_code = 'without-code'
 
     constructor() {
+        this.filterAlertCode = true
+        this.alert_codes = ['401_1','401_2','401_3']
 
+        this.filterMessageCode = true
+        this.message_codes = ['center_server','update_server']
     }
 
     async init() {
@@ -26,54 +25,95 @@ class AlertMessageManager {
 
         socket.registerMessage('get_all_messages_alerts', this.get_all.bind(this))
         socket.registerMessage('delete_all_messages_alerts', this.delete_all.bind(this))
+        socket.registerMessage('delete_message_alert', this.delete.bind(this))
         socket.registerMessage('messages_alerts', this.messages_alerts.bind(this))
 
     }
 
-    messages_alerts() {
-        
+    messages_alerts(data) {
+        console.log("[Alert Message Manager] messages_alerts:", data);
+        try{
+            this.verifyType(data.type)
+
+            const from = "center_server"
+            const send_data = {
+                code: data.code,
+                message:data.message,
+                message_pt:data.message_pt,
+                message_en: data.message_en,
+                message_cn: data.message_cn
+            }
+
+            for(const to of data.to){
+                this.send(data.type, from, to, send_data)
+            }
+
+            return {success:true}
+        }catch(error){
+            return {success: false, data: error.message}
+        }
     }
 
-    alert(data, to, identity=AlertMessageManager.manager){
-        const restaurant = data.restaurant;
-        let alert = data.alert;
+    alert(data){
+        const from = data.restaurant;
+        const to = data.restaurant;
+        let alert = data.alert
 
-        console.log("[Alert Message Manager] Alert:", alert,", From:",restaurant);
+        this.verifyAlertCode(alert.code)
 
-        if(['401_1','401_2','401_3'].includes(alert.code)){
-            alert = {...alert, identity: identity}
-        }
+        this.send(AlertMessageManager.types.alert, from, to, alert)
 
-        if(alert.identity){
-            this.send_alert_to((to? to:restaurant),alert)
-        }
+        return {success:true};
 
-        this.increment(restaurant, 'alert', alert)
     }
 
-    message(data, to, identity=AlertMessageManager.manager){
-        const restaurant = data.restaurant;
+    message(data){
+        const from = data.restaurant;
+        const to = data.restaurant;
         let msg = data.msg;
 
-        console.log("[Alert Message Manager] Message:", msg,", From:",restaurant);
+        this.verifyMessageCode(msg.code)
 
-        msg = {...msg, identity: identity};
+        return this.send(AlertMessageManager.types.message, from, to, msg)
 
-        if(msg.identity){
-            this.send_message_to((to? to:restaurant),msg);
+    }
+
+    send(type, from, to, data, identity=AlertMessageManager.manager){
+        try{
+            console.log("[Alert Message Manager] Send "+type.toUpperCase()+":", data,", From:",from,", To:", to);
+
+            this.verifyType(type)
+
+            const send_data = {from, identity, ...data}
+            const destination = type + "_" + to
+
+            socket.broadcast(destination, send_data)
+
+            this.increment(to, type, send_data)
+
+            return {success:true}
+        }catch (error){
+            console.log("[Alert Message Manager] send, Error:", error.message);
+            return {success: false, data: error.message}
         }
-
-        this.increment(restaurant, 'message', msg)
     }
 
-    send_alert_to(restaurant, alert){
-        const destination = 'alert_' + restaurant
-        socket.broadcast(destination, alert)
-    }
+    close(type, from, to, data, identity=AlertMessageManager.manager){
+        try {
+            console.log("[Alert Message Manager] Close "+type.toUpperCase()+":", data,", From:",from,", To:", to);
 
-    send_message_to(restaurant, msg){
-        const destination = 'message_' + restaurant
-        socket.broadcast(destination, msg)
+            this.verifyType(type)
+
+            const close_data = {from, identity, ...data}
+            const destination = type + "_close_" + to
+
+            socket.broadcast(destination, close_data)
+
+            return {success:true}
+        } catch(error){
+            console.log("[Alert Message Manager] close, Error:", error.message);
+            return {success: false, data: error.message}
+        }
     }
 
     async increment(restaurant, type, data){
@@ -86,11 +126,8 @@ class AlertMessageManager {
 
     async save_to_db(restaurant, type, data, delta){
         let restaurantData = await this.get_restaurant_data({restaurant: restaurant})
-        console.log("restaurantData:",restaurantData)
         const id = (data.code ? data.code : AlertMessageManager.without_code) + '-' + data.message
-        console.log("id:", id)
         const find = restaurantData[type].find((i) =>{return i.id == id })
-        console.log("find:", find)
         if(find){
             find.number = Math.max(find.number+delta, 0)
         }else{
@@ -121,10 +158,66 @@ class AlertMessageManager {
         return result
     }
 
+    async delete(data){
+        try{
+            console.log("[Alert Message Manager] Delete:", data)
+            this.verifyType(data.type)
+            const type = data.type;
+            const id = data.id;
+            const restaurant_data = await this.get_restaurant_data(data)
+            const oldData = restaurant_data[type];
+            const newData = []
+            for(const item of oldData){
+                if(item.id != id){
+                    newData.push(item)
+                }else{
+                    if(type==AlertMessageManager.types.message){
+                        this.close(type,item.value.from, data.restaurant, item.value)
+                    }
+                }
+            }
+            restaurant_data[type] = newData;
+
+            await db.set(db.alertMessageTable, restaurant_data)
+            return {success:true}
+        } catch(error){
+            return {success:false, data:error.message}
+        }
+    }
+
     async delete_all(){
-        const all = await this.get_all()
-        for(const data of all){
-            await db.del(db.alertMessageTable, data.id)
+        try{
+            console.log("[Alert Message Manager] Delete ALL")
+            const all = await this.get_all()
+            for(const data of all){
+                for(const message of data.message){
+                    this.close(AlertMessageManager.types.message, message.value.from, data.id, message.value)
+                }
+                await db.del(db.alertMessageTable, data.id)
+            }
+            return {success:true}
+        }catch (error){
+            return {success:false, data:error.message}
+        }
+    }
+
+    verifyType(type){
+        if(!Object.keys(AlertMessageManager.types).includes(type)){
+            throw new Error('Invalid type');
+        }
+    }
+
+    verifyAlertCode(code){
+        if(!this.filterAlertCode) return
+        if(!this.alert_codes.includes(code)){
+            throw new Error('Invalid Alert Code');
+        }
+    }
+
+    verifyMessageCode(code){
+        if(!this.filterMessageCode) return
+        if(!this.message_codes.includes(code)){
+            throw new Error('Invalid Message Code');
         }
     }
 
