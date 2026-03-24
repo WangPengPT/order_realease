@@ -25,6 +25,7 @@ class AlertMessageManager {
 
         socket.registerMessage('get_all_messages_alerts', this.get_all.bind(this))
         socket.registerMessage('delete_all_messages_alerts', this.delete_all.bind(this))
+        socket.registerMessage('delete_all_by_type', this.delete_all_by_type.bind(this))
         socket.registerMessage('delete_message_alert', this.delete.bind(this))
         socket.registerMessage('messages_alerts', this.messages_alerts.bind(this))
 
@@ -181,6 +182,33 @@ class AlertMessageManager {
             await db.set(db.alertMessageTable, restaurant_data)
             return {success:true}
         } catch(error){
+            console.log("[Alert Message Manager] Delete Error:",error.message)
+            return {success:false, data:error.message}
+        }
+    }
+
+    async delete_all_by_type(data){
+        try{
+            const type = data.type;
+            this.verifyType(type)
+            console.log("[Alert Message Manager] Delete by type:",type)
+
+            const all = await this.get_all()
+            for(const item of all){
+                const type_data = item[type]
+                if(type == AlertMessageManager.types.message){
+                    for(let type_item of type_data){
+                        this.close(type, type_item.value.from, item.id, type_item.value)
+                    }
+                }
+                item[type] = []
+
+                await db.set(db.alertMessageTable, item)
+            }
+
+            return {success:true}
+        }catch(error){
+            console.log("[Alert Message Manager] Delete by type Error:",error.message)
             return {success:false, data:error.message}
         }
     }
@@ -197,6 +225,7 @@ class AlertMessageManager {
             }
             return {success:true}
         }catch (error){
+            console.log("[Alert Message Manager] Delete ALL Error:",error.message)
             return {success:false, data:error.message}
         }
     }
