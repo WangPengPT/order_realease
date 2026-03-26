@@ -14,6 +14,7 @@ class FeedbackManager {
         socket.registerMessage("g_feedback", this.feedback.bind(this));
 
         socket.registerMessage("get_all_feedback", this.get_all.bind(this))
+        socket.registerMessage("resolved_feedback", this.resolved_feedback.bind(this))
     }
 
     feedback(data){
@@ -28,6 +29,22 @@ class FeedbackManager {
         const id = this.save_to_db(value);
 
         this.send_callback_email(data.feedback.email, id)
+    }
+
+    async resolved_feedback(data){
+        console.log("[Feedback Manager] Resolved Feedback:",data)
+        const id = data.id
+
+        const find = await this.get(id)
+        if(!find){
+            return {success: false, data:"Feedback does not exist, id: "+id}
+        }
+
+        find.value.resolved = data.resolved;
+
+        db.set(db.feedbackTable, find)
+
+        return {success: true}
     }
 
     save_to_db(data){
@@ -52,6 +69,10 @@ class FeedbackManager {
             return []
         }
         return all
+    }
+
+    async get(id){
+        return await db.get(db.feedbackTable, id)
     }
 
     send_callback_email(email, id){
