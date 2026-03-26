@@ -6,7 +6,7 @@ class AlertMessageManager {
     static manager = 'manager'
     static client = 'client'
 
-    static types = {alert:'alert', message:'message'};
+    static types = {alert:'alert', message:'message', feedback:'feedback'};
     static without_code = 'without-code'
 
     constructor() {
@@ -22,6 +22,7 @@ class AlertMessageManager {
 
         socket.registerMessage("g_alert", this.alert.bind(this));
         socket.registerMessage("g_message", this.message.bind(this));
+
 
         socket.registerMessage('get_all_messages_alerts', this.get_all.bind(this))
         socket.registerMessage('delete_all_messages_alerts', this.delete_all.bind(this))

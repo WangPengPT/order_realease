@@ -16,6 +16,7 @@ class DB {
     static restaurantTable = "restaurant"
     static reserveTable = "reserve"
     static alertMessageTable = "alert_message"
+    static feedbackTable = "feedback"
 
     static async init() {
         try {
