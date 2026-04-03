@@ -1,0 +1,2 @@
+import{s as i}from"./vendor-react-QaXa7sMX.js";import{s as e}from"./index-Bl4_7GEC.js";const c=()=>i({queryKey:["activity-restaurant-counts"],queryFn:async()=>{const{data:s,error:r}=await e.from("activity_restaurants").select("activity_id");if(r)throw r;const t={};return s.forEach(a=>{t[a.activity_id]=(t[a.activity_id]||0)+1}),t}});export{c as u};
+//# sourceMappingURL=useActivityRestaurantCounts-BErGadMR.js.map

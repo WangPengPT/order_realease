@@ -143,12 +143,12 @@
   <meta name="twitter:title" content="Xiaoxiong Market - Discover Amazing Restaurants">
   <meta property="og:description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers. Find your next culinary adventure with Xiaoxiong Market.">
   <meta name="twitter:description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers. Find your next culinary adventure with Xiaoxiong Market.">
-  <script type="module" crossorigin src="/assets/index-BxJXFnKM.js"></script>
+  <script type="module" crossorigin src="/assets/index-Bl4_7GEC.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/vendor-i18n-AOdgFpXS.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-editor-B1vH4T8i.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-utils-BSRsNkfu.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-react-p6YIdvKv.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-GtTrZ4Jj.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-react-QaXa7sMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-CTKycMkS.js">
   <link rel="stylesheet" crossorigin href="/assets/vendor-react-CG6K1Se3.css">
   <link rel="stylesheet" crossorigin href="/assets/index-CdYXDSMQ.css">
 </head>
@@ -197,21 +197,15 @@
     </script>
     <script>
       // Remove loading class once React mounts
-      window.addEventListener('DOMContentLoaded', function() {
+      (function() {
         var startTime = Date.now();
         var checkReactMounted = setInterval(function() {
           var root = document.getElementById('root');
-          if (root && root.children.length > 1) {
+          var loader = document.getElementById('initial-loader');
+          // React mounted = root has children AND the loader is gone (React replaced it)
+          var reactMounted = root && (!loader || !root.contains(loader)) && root.children.length >= 1;
+          if (reactMounted) {
             document.body.classList.remove('app-loading');
-            var loader = document.getElementById('initial-loader');
-            if (loader) {
-              loader.classList.add('fade-out');
-              setTimeout(function() {
-                if (loader.parentNode) {
-                  loader.parentNode.removeChild(loader);
-                }
-              }, 300);
-            }
             clearInterval(checkReactMounted);
           }
           if (Date.now() - startTime > 5000) {
@@ -220,15 +214,14 @@
               loaderText.textContent = 'Loading slowly... Please wait or refresh';
             }
           }
-        }, 50);
+        }, 100);
         // Fallback: if React never mounts after 12s, show error instead of white screen
         setTimeout(function() {
           clearInterval(checkReactMounted);
           var root = document.getElementById('root');
           var loader = document.getElementById('initial-loader');
-          // Check if React actually mounted
-          if (root && root.children.length <= 1) {
-            // React never mounted - show fallback UI
+          var reactMounted = root && (!loader || !root.contains(loader)) && root.children.length >= 1;
+          if (!reactMounted) {
             if (loader && loader.parentNode) {
               loader.parentNode.removeChild(loader);
             }
@@ -241,14 +234,13 @@
               '<button onclick="location.reload()" style="padding:10px 24px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">刷新页面 / Refresh</button>' +
               '</div></div>';
           } else {
-            // React mounted fine, just clean up loader
             document.body.classList.remove('app-loading');
             if (loader && loader.parentNode) {
               loader.parentNode.removeChild(loader);
             }
           }
         }, 12000);
-      });
+      })();
       
       // Catch global errors during loading
       window.onerror = function(msg, url, lineNo, columnNo, error) {
