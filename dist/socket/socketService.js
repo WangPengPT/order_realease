@@ -19,6 +19,7 @@ const {AlertMessageSocket} = require("./AlertMessageSocket");
 const VarietyShopsSocket = require("./varietyShopsSocket");
 const ReserveSocket = require("./reserveSocket");
 const DeliverySocket = require("./deliverySocket");
+const paymentController = require('../controllers/paymentController.js');
 
 class SocketServices {
     constructor(io,
@@ -198,6 +199,29 @@ class SocketServices {
             socket.on("submit_order", (orderData, callback) => {
                 try {
                     logger.info(`订单提交 来源ip: ${socket.handshake.address}`)
+
+                    // Payment lock: once checkout is active, block new orders for that table.
+                    const tableId = String(orderData?.table || '').replace('#', '').trim();
+                    const checkoutState = appState.checkoutPayments || {};
+                    const activeByTable = checkoutState.activeByTable || {};
+                    const records = checkoutState.records || {};
+                    const activeRequestId = tableId ? activeByTable[tableId] : undefined;
+                    if (activeRequestId) {
+                        const activePayment = records[activeRequestId];
+                        const internalStatus = String(activePayment?.internalStatus || '').toLowerCase();
+                        const finalStates = ['paid', 'failed', 'cancelled', 'expired'];
+                        if (!finalStates.includes(internalStatus)) {
+                            const msg = "CHECKOUT_IN_PROGRESS";
+                            logger.info(`订单提交失败: 桌号-${tableId} 正在支付中 requestId-${activeRequestId}`);
+                            socket.emit('error', msg);
+                            if (callback) callback({
+                                code: 423,
+                                success: false,
+                                data: msg
+                            });
+                            return;
+                        }
+                    }
 
                     // Check Blacklist IP
                     if (appState.checkBlacklistIP(socket)) {
@@ -545,6 +569,40 @@ class SocketServices {
             socket.on("get_menu", async () => {
                 await this.send_menu(socket)
             })
+
+            // ---- Checkout query websocket wrappers ----
+            socket.on("manager_get_checkout_payments", async (query = {}, callback) => {
+                await paymentController.handleManagerCheckoutSocketEvent('list', query, callback);
+            });
+
+            socket.on("manager_get_checkout_payment_stats", async (query = {}, callback) => {
+                await paymentController.handleManagerCheckoutSocketEvent('stats', query, callback);
+            });
+
+            socket.on("manager_get_checkout_payment_by_id", async (requestId, callback) => {
+                await paymentController.handleManagerCheckoutSocketEvent('by_id', requestId, callback);
+            });
+
+            // ---- Checkout websocket wrappers for HTTP APIs ----
+            socket.on("checkout_request", async (body, callback) => {
+                await paymentController.handleCheckoutSocketEvent('request', body, callback);
+            });
+
+            socket.on("checkout_status", async (query, callback) => {
+                await paymentController.handleCheckoutSocketEvent('status', query, callback);
+            });
+
+            socket.on("checkout_latest", async (query, callback) => {
+                await paymentController.handleCheckoutSocketEvent('latest', query, callback);
+            });
+
+            socket.on("checkout_active", async (query, callback) => {
+                await paymentController.handleCheckoutSocketEvent('active', query, callback);
+            });
+
+            socket.on("checkout_cancel", async (body, callback) => {
+                await paymentController.handleCheckoutSocketEvent('cancel', body, callback);
+            });
 
             await this.send_init_info(socket)
 

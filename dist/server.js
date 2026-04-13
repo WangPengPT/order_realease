@@ -20,6 +20,7 @@ const {menuService} = require("./services/menuService.js");
 const {DataAnalizeService} = require("./services/dataAnalizeService.js");
 const {AppState, appState} = require("./state.js");
 const DatasController = require("./controllers/DatasController.js");
+const paymentController = require('./controllers/paymentController.js');
 
 const holiday = require('./utils/holiday.js')
 
@@ -115,6 +116,18 @@ app.post('/api/import/menu', authMiddleware, memoryUpload.single('file'), datasC
 
 app.post('/api/import/users', authMiddleware, memoryUpload.single('file'), datasController.importUsers)
 
+// Universal checkout
+app.post('/api/checkout/request', paymentController.createCheckout);
+app.get('/api/checkout/status', paymentController.getCheckoutStatus);
+app.get('/api/checkout/latest', paymentController.getCheckoutByTable);
+app.get('/api/checkout/active', paymentController.getActiveCheckoutByTable);
+app.post('/api/checkout/cancel', paymentController.cancelActiveCheckoutByTable);
+app.post('/api/checkout/callback/ifthenpay', paymentController.checkoutCallback);
+app.get('/api/checkout/config/public', paymentController.getPublicCheckoutConfig);
+app.get('/api/checkout/payments', paymentController.listCheckoutPayments);
+app.get('/api/checkout/payments/stats', paymentController.getCheckoutPaymentStats);
+app.get('/api/checkout/payments/:requestId', paymentController.getCheckoutPaymentById);
+
 app.use(compression());
 app.use(express.static(path.join(__dirname, "public"), {
     setHeaders: (res, filePath) => {
@@ -139,6 +152,8 @@ async function main() {
         logger.info(`🟢 服务器已启动，监听端口 ${PORT}`);
     });
     runCleanInterval();
+    runCheckoutReconcileInterval();
+    await paymentController.reconcilePendingPayments();
     // runFandaysInterval();
     writeOrders();
     // writeMonthRates()
@@ -233,6 +248,20 @@ function runCleanInterval() {
 }
 
 let needWriteDailyOrders = true;
+
+function runCheckoutReconcileInterval() {
+    setTimeout(async () => {
+        try {
+            const result = await paymentController.reconcilePendingPayments();
+            if (result && result.checked > 0) {
+                logger.info(`[Checkout Reconcile] checked=${result.checked} updated=${result.updated}`);
+            }
+        } catch (error) {
+            logger.warn(`[Checkout Reconcile] failed: ${error.message}`);
+        }
+        runCheckoutReconcileInterval();
+    }, 1000 * 60 * 3);
+}
 
 function writeOrders() {
     setTimeout(async () => {
