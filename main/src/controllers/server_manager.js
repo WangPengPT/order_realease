@@ -282,7 +282,7 @@ class ServerManager {
     }
 
     async manual_update(id){
-        console.log("restaurant_id",id)
+        console.log("Center Manual Update, restaurant id: ",id)
         socket.broadcast("center_manual_update_"+id)
     }
 

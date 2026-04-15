@@ -53,6 +53,8 @@ class OrderManager {
             }
         })
 
+        socket.registerMessage("get_orders_by_date", this.get_orders_by_date.bind(this))
+
         socket.registerMessage("order_change_state", async (query) => {
             return await this.changePayState(query)
         });
@@ -755,6 +757,33 @@ class OrderManager {
             return dbData.shopify_name
         }
         return 'restaurant'
+    }
+
+    async get_orders_by_date(query) {
+        const sort = {
+            _id: -1,
+        }
+
+        const format = ts => {
+            const d = new Date(ts);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}/${m}/${day}`;
+        };
+
+        const date = format(query.date);
+        console.debug("date", date);
+
+        const datas = await db.find(db.orderTable, { pickup_date: date }, sort, 200);
+        console.log("datas",JSON.stringify(datas))
+
+        const ret = [];
+        for (let i = 0; i < datas.length; i++) {
+            ret.push(this.toData(datas[i]));
+        }
+
+        return ret;
     }
 
     /**
