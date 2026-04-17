@@ -125,7 +125,7 @@ class PayService {
 
 
 
-    httpAPI.pos("/mbwaypay", async (query) => {
+    httpAPI.pos("/mbwaypay/callback.php", async (query) => {
       let requestId = query.requestId;
       let orderId = query.orderId;
 
@@ -144,7 +144,7 @@ class PayService {
       }
     });
 
-    httpAPI.get("/mbwaypay", async (query) => {
+    httpAPI.get("/mbwaypay/callback.php", async (query) => {
       let {orderId,requestId} = query;
 
 
@@ -163,8 +163,188 @@ class PayService {
       }
     });
 
+    this.registerIfthenpayCallbackProxy();
+
+    this.serverRouteCache = new Map();
+    this.refreshServerRouteCache(true).catch((error) => {
+      console.error("[ifthenpay-proxy] init server route cache failed:", error);
+    });
+
     this.updateCheckStateData = []
     this.updateCheckState()
+  }
+
+  registerIfthenpayCallbackProxy() {
+    const app = httpAPI.app;
+    if (!app) {
+      console.error("[ifthenpay-proxy] express app not initialized");
+      return;
+    }
+
+    const handler = this.handleIfthenpayCallbackProxy.bind(this);
+    app.post("/api/checkout/ifthenpay/callback.php", handler);
+    app.get("/api/checkout/ifthenpay/callback.php", handler);
+
+  }
+
+  extractOrderId(payload = {}) {
+    const orderId = payload.orderId || payload.OrderId || payload.id || "";
+    return String(orderId).trim();
+  }
+
+  // Keep orderId parsing aligned with server/controllers/paymentController.js
+  normalizeRestaurantKey(value) {
+    return String(value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  }
+
+  getOrderRestaurantPrefix(orderId) {
+    const raw = String(orderId || "").trim();
+    const match = raw.match(/^(.*?)(\d{6})$/);
+    if (!match) return this.normalizeRestaurantKey(raw);
+    return this.normalizeRestaurantKey(match[1]);
+  }
+
+  async refreshServerRouteCache(force = false) {
+    if (!force && this.serverRouteCache.size > 0) {
+      return;
+    }
+
+    const servers = await db.getAll(db.serverTable);
+    const nextCache = new Map();
+    for (const server of servers) {
+      const id = String(server?.id || "").trim();
+      const url = String(server?.url || "").trim();
+      if (!id || !url) continue;
+
+      const prefix = this.normalizeRestaurantKey(server?.orderPrefix || "");
+      if (prefix) {
+        nextCache.set(prefix, { id, url });
+        continue;
+      }
+
+      const fallback = this.normalizeRestaurantKey(id);
+      if (fallback) {
+        nextCache.set(fallback, { id, url });
+      }
+    }
+
+    this.serverRouteCache = nextCache;
+  }
+
+  async getRestaurantRouteByOrderPrefix(orderPrefix) {
+    const route = this.serverRouteCache.get(orderPrefix);
+    return route || null;
+  }
+
+  updateServerRouteCacheEntry(server) {
+    const id = String(server?.id || "").trim();
+    const url = String(server?.url || "").trim();
+    if (!id || !url) return;
+
+    const prefix = this.normalizeRestaurantKey(server?.orderPrefix || "");
+    if (prefix) {
+      this.serverRouteCache.set(prefix, { id, url });
+      return;
+    }
+
+    const fallback = this.normalizeRestaurantKey(id);
+    if (fallback) {
+      this.serverRouteCache.set(fallback, { id, url });
+    }
+  }
+
+  removeServerRouteCacheEntry(serverId) {
+    const normalizedId = this.normalizeRestaurantKey(serverId);
+    if (!normalizedId) return;
+
+    for (const [prefix, route] of this.serverRouteCache.entries()) {
+      const routeId = this.normalizeRestaurantKey(route?.id || "");
+      if (routeId === normalizedId || prefix === normalizedId) {
+        this.serverRouteCache.delete(prefix);
+      }
+    }
+  }
+
+  buildCallbackPayload(req) {
+    return {
+      ...(req.query || {}),
+      ...(req.body || {})
+    };
+  }
+
+  buildCallbackForwardHeaders(req) {
+    const headers = {
+      "content-type": "application/json"
+    };
+
+    const token = req.headers["x-ifthenpay-token"];
+    const callbackToken = req.headers["x-callback-token"];
+    const queryToken = req.query?.key || req.body?.key;
+
+    const finalToken = token || queryToken;
+    if (finalToken) {
+      headers["x-ifthenpay-token"] = String(finalToken);
+    }
+    if (callbackToken) {
+      headers["x-callback-token"] = String(callbackToken);
+    }
+
+    return headers;
+  }
+
+  async handleIfthenpayCallbackProxy(req, res) {
+    try {
+      const payload = this.buildCallbackPayload(req);
+      const orderId = this.extractOrderId(payload);
+      if (!orderId) {
+        return res.status(400).json({
+          success: false,
+          error: "ORDER_ID_REQUIRED"
+        });
+      }
+
+      const orderPrefix = this.getOrderRestaurantPrefix(orderId);
+      if (!orderPrefix) {
+        return res.status(404).json({
+          success: false,
+          error: "RESTAURANT_NOT_FOUND_BY_ORDER_ID"
+        });
+      }
+
+      const match = await this.getRestaurantRouteByOrderPrefix(orderPrefix);
+      const restaurantUrl = String(match?.url || "").trim();
+      if (!restaurantUrl) {
+        return res.status(404).json({
+          success: false,
+          error: "RESTAURANT_NOT_FOUND_BY_ORDER_ID"
+        });
+      }
+
+      const targetUrl = `${restaurantUrl.replace(/\/+$/, "")}/api/checkout/callback/ifthenpay`;
+      const { statusCode, body } = await request(targetUrl, {
+        method: "POST",
+        headers: this.buildCallbackForwardHeaders(req),
+        body: JSON.stringify(payload)
+      });
+
+      const responseText = await body.text();
+      let responseData = {};
+      if (responseText) {
+        try {
+          responseData = JSON.parse(responseText);
+        } catch (_) {
+          responseData = { raw: responseText };
+        }
+      }
+
+      return res.status(statusCode).json(responseData);
+    } catch (error) {
+      console.error("[ifthenpay-proxy] callback forward failed:", error);
+      return res.status(500).json({
+        success: false,
+        error: error.message || "CALLBACK_FORWARD_FAILED"
+      });
+    }
   }
 
 

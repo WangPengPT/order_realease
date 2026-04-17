@@ -30,10 +30,16 @@ class OrderManager {
         });
 
         httpAPI.get("/order_list", async (query) => {
-            let {restaurant, count} = query;
+            let {restaurant, count, year, month} = query;
+            let data
+            year = parseInt(year)
+            month = parseInt(month)
+            if(month && month<10){
+                month = '0' + month
+            }
             count = parseInt(count)
-            console.log(restaurant, count)
-            const data = await this.getByRestaurant(restaurant, count)
+            console.log(`[OrderManager] Restaurant - ${restaurant} retrieve ${count? count:'all'} records ${year&&month? `for ${year}/${month}`:`` }.`)
+            data = await this.getByRestaurant(restaurant, count, year, month)
 
             return {
                 result: true,
@@ -491,9 +497,13 @@ class OrderManager {
         await this.orderUpdated(data)
     }
 
-    async getByRestaurant(restaurant,count) {
+    async getByRestaurant(restaurant,count, year, month) {
         const q = {
             restaurant: restaurant
+        }
+        // 如果有需要根据月份获取订单数据
+        if(year && month){
+            q.pickup_date = { "$regex": `^${year}/${month}` }
         }
 
         const sort = {

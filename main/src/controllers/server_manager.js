@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const redirectPage = require('./redirect_page')
 const httpAPI = require("../utils/http_api");
+const payService = require('../service/pay_service');
 
 
 const BASE_PORT = 7100
@@ -20,6 +21,57 @@ class ServerManager {
     constructor() {
         this.reserveManager_max_id = 0
         this.orderManager_max_id = 0
+    }
+
+    normalizeOrderPrefix(value) {
+        return String(value || "")
+            .trim()
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, "")
+            .slice(0, 5);
+    }
+
+    createRandomOrderPrefix() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let value = "";
+        for (let i = 0; i < 5; i++) {
+            const idx = Math.floor(Math.random() * chars.length);
+            value += chars[idx];
+        }
+        return value;
+    }
+
+    async ensureServerOrderPrefix(serverData) {
+        if (!serverData) return "";
+
+        const current = this.normalizeOrderPrefix(serverData.orderPrefix);
+        if (current.length === 5) {
+            serverData.orderPrefix = current;
+            return current;
+        }
+
+        const datas = await db.getAll(db.serverTable);
+        const used = new Set(
+            datas
+                .map((item) => this.normalizeOrderPrefix(item?.orderPrefix))
+                .filter((item) => item.length === 5)
+        );
+
+        let candidate = "";
+        for (let i = 0; i < 1000; i++) {
+            const next = this.createRandomOrderPrefix();
+            if (!used.has(next)) {
+                candidate = next;
+                break;
+            }
+        }
+
+        if (!candidate) {
+            throw new Error("Failed to generate unique orderPrefix");
+        }
+
+        serverData.orderPrefix = candidate;
+        return candidate;
     }
 
     async init() {
@@ -58,8 +110,11 @@ class ServerManager {
 
     async setServer(params) {
         // console.log("setServer", params);
+        params.orderPrefix = this.normalizeOrderPrefix(params.orderPrefix);
+        await this.ensureServerOrderPrefix(params);
 
         await db.set(db.serverTable, params);
+        payService.updateServerRouteCacheEntry(params);
 
         socket.broadcast("set_server_"+params.id, params);
 
@@ -80,6 +135,7 @@ class ServerManager {
         }
 
         await db.del(db.serverTable, params.id);
+        payService.removeServerRouteCacheEntry(params.id);
         
         // Remove from restaurants map if exists
         for (const [key, value] of Object.entries(this.restaurants)) {
@@ -151,11 +207,15 @@ class ServerManager {
                4: {enabled: false, name: 'bibimbap'},
                5: {enabled: false, name: 'XIAOXIONG® RAMEN'},
                6: {enabled: false, name: 'Menu Almoço'},
+               7: {enabled: false, name: 'Xiaoxiong® Hotpot'}
            }
         }
 
+        await this.ensureServerOrderPrefix(params);
+
         console.log("params", params);
         await db.set(db.serverTable, params);
+        payService.updateServerRouteCacheEntry(params);
 
         redirectPage.updateStore(params)
         this.setRestaurants(params)
@@ -234,27 +294,40 @@ class ServerManager {
         const result = { success: false, data: undefined, permissionsControl: undefined}
 
         try{
-            const server = await db.get(db.serverTable,data.id)
+            let server = await db.get(db.serverTable,data.id)
 
             if(server){
                 for(const key in data){
                     server[key] = data[key];
                 }
 
+                await this.ensureServerOrderPrefix(server);
+
                 await db.set(db.serverTable, server);
+                payService.updateServerRouteCacheEntry(server);
 
                 socket.restaurant_data = { id:data.id }
                 result.data = "Change to Statu Online"
 
             }else{
                 await this.addServer(data)
+                server = await db.get(db.serverTable, data.id)
                 result.data = "Create new Server"
 
             }
 
             state.setStatusOnline(data.id, true)
-
-            result.permissionsControl = server.permissionsControl
+            const permissionsControl = {
+                1: {enabled: false, name: 'Sushi Aleatória®'},
+                2: {enabled: false, name: 'Poke Bowl'},
+                3: {enabled: false, name: 'MY BOX'},
+                4: {enabled: false, name: 'bibimbap'},
+                5: {enabled: false, name: 'XIAOXIONG® RAMEN'},
+                6: {enabled: false, name: 'Menu Almoço'},
+                7: {enabled: false, name: 'Xiaoxiong® Hotpot'}
+            }
+            result.permissionsControl = {...permissionsControl, ...server.permissionsControl}
+            result.orderPrefix = server.orderPrefix
 
             result.success = true
             return result
