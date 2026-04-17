@@ -317,7 +317,7 @@ class ServerManager {
             }
 
             state.setStatusOnline(data.id, true)
-            const permissionsControl = {
+            const customDishesControl = {
                 1: {enabled: false, name: 'Sushi Aleatória®'},
                 2: {enabled: false, name: 'Poke Bowl'},
                 3: {enabled: false, name: 'MY BOX'},
@@ -326,7 +326,11 @@ class ServerManager {
                 6: {enabled: false, name: 'Menu Almoço'},
                 7: {enabled: false, name: 'Xiaoxiong® Hotpot'}
             }
-            result.permissionsControl = {...permissionsControl, ...server.permissionsControl}
+            result.permissionsControl = server.permissionsControl
+            result.permissionsControl.customDishesControl = {
+                ...customDishesControl,
+                ...server.customDishesControl
+            }
             result.orderPrefix = server.orderPrefix
 
             result.success = true
