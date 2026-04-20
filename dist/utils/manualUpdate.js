@@ -60,9 +60,12 @@ class ManualUpdate {
     }
 
     async addNewCustomDishTemplate(){
-        const xiaoxiongHotpot = templateData.values[5]
-        console.log(xiaoxiongHotpot.id, xiaoxiongHotpot.name)
-        // this.socketService.customDishService.addNew()
+        const template = templateData.values[5]
+        console.debug(template.id, template.name)
+        // const result = await this.socketService.customDish.customDishService.addNew(template)
+        const result = await this.socketService.customDish.customDishService.updateTemplateData(template)
+        console.debug("result",result)
+        return result
     }
 
 }
