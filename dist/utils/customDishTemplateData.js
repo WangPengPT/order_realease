@@ -475,6 +475,7 @@ const xiaoxiongHotpotTypes = [
     ], 1, 1),
 
     new CustomDishType(3, "meat", "🥩肉类", "🥩Meat", "🥩Carne", [
+        new CustomDish(311, "Shrimps", "🦐虾", "🦐Shrimps", "🦐Gambas"),
         new CustomDish(312, "Duck Blood", "🩸鸭血", "🩸Duck Blood", "🩸Sangue de Pato"),
         new CustomDish(313, "Sliced Lamb", "🐏羊肉卷", "🐏Sliced Lamb", "🐏Fatias de Cordeiro"),
         new CustomDish(314, "Beef Tongue", "👅牛舌", "👅Beef Tongue", "👅Lingua de Novilho"),
@@ -575,6 +576,14 @@ const xiaoxiongHotpot = new CustomDishTemplate(ids.hotpot, xiaoxiongHotpotTypes,
     },
     option_image_description: {
         // --- 🥩 Meat (肉类) ---
+        311: {
+            image: "/hotpot/311.png",
+            description: {
+                zh: "个大肥美，煮后肉质紧实，鲜甜弹牙。",
+                en: "Large and plump, with firm, sweet, and bouncy meat after cooking.",
+                pt: "Grandes e carnudos, com carne firme, doce e elástica após o cozimento."
+            }
+        },
         312: {
             image: "/hotpot/312.png",
             description: {
