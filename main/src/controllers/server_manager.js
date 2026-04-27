@@ -207,7 +207,8 @@ class ServerManager {
                4: {enabled: false, name: 'bibimbap'},
                5: {enabled: false, name: 'XIAOXIONG® RAMEN'},
                6: {enabled: false, name: 'Menu Almoço'},
-               7: {enabled: false, name: 'Xiaoxiong® Hotpot'}
+               7: {enabled: false, name: 'Xiaoxiong® Hotpot'},
+               8: {enabled: false, name: '小食代套餐'}
            }
         }
 
@@ -324,7 +325,8 @@ class ServerManager {
                 4: {enabled: false, name: 'bibimbap'},
                 5: {enabled: false, name: 'XIAOXIONG® RAMEN'},
                 6: {enabled: false, name: 'Menu Almoço'},
-                7: {enabled: false, name: 'Xiaoxiong® Hotpot'}
+                7: {enabled: false, name: 'Xiaoxiong® Hotpot'},
+                8: {enabled: false, name: '小食代套餐'}
             }
             result.permissionsControl = server.permissionsControl
             result.permissionsControl.customDishesControl = {
