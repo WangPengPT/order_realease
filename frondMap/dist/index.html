@@ -147,14 +147,14 @@
   <meta name="twitter:title" content="Xiaoxiong Market - Discover Amazing Restaurants">
   <meta property="og:description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers. Find your next culinary adventure with Xiaoxiong Market.">
   <meta name="twitter:description" content="Explore curated restaurants, join exciting dining events, and connect with food lovers. Find your next culinary adventure with Xiaoxiong Market.">
-  <script type="module" crossorigin src="/assets/index-BY-BKh2e.js"></script>
+  <script type="module" crossorigin src="/assets/index-BySeh-eW.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/vendor-i18n-AOdgFpXS.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-editor-B1vH4T8i.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-utils-BlVxKqjd.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-react-DAM4njGT.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-B0HocDMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-utils-CPmww8iS.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-react-D1Zcby_M.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-C7oYX5mF.js">
   <link rel="stylesheet" crossorigin href="/assets/vendor-react-CG6K1Se3.css">
-  <link rel="stylesheet" crossorigin href="/assets/index-BIYRHvmL.css">
+  <link rel="stylesheet" crossorigin href="/assets/index-C-6QWDro.css">
 </head>
 
   <body class="app-loading">
@@ -203,12 +203,14 @@
       // Remove loading class once React mounts
       (function() {
         var startTime = Date.now();
+        var reloadKey = 'preview-bootstrap-reload-count';
         var checkReactMounted = setInterval(function() {
           var root = document.getElementById('root');
           var loader = document.getElementById('initial-loader');
           // React mounted = root has children AND the loader is gone (React replaced it)
           var reactMounted = root && (!loader || !root.contains(loader)) && root.children.length >= 1;
           if (reactMounted) {
+            try { sessionStorage.removeItem(reloadKey); } catch(e) {}
             document.body.classList.remove('app-loading');
             clearInterval(checkReactMounted);
           }
@@ -219,7 +221,19 @@
             }
           }
         }, 100);
-        // Fallback: if React never mounts after 12s, show error instead of white screen
+        setTimeout(function() {
+          var root = document.getElementById('root');
+          var loader = document.getElementById('initial-loader');
+          var reactMounted = root && (!loader || !root.contains(loader)) && root.children.length >= 1;
+          var reloadCount = 0;
+          try { reloadCount = parseInt(sessionStorage.getItem(reloadKey) || '0', 10) || 0; } catch(e) {}
+          if (!reactMounted && reloadCount < 2) {
+            try { sessionStorage.setItem(reloadKey, String(reloadCount + 1)); } catch(e) {}
+            location.reload();
+          }
+        }, 18000);
+        // Fallback: if React never mounts after 45s, show error instead of white screen.
+        // The editor preview can load many Vite modules slowly, so 12s caused false failures.
         setTimeout(function() {
           clearInterval(checkReactMounted);
           var root = document.getElementById('root');
@@ -243,7 +257,7 @@
               loader.parentNode.removeChild(loader);
             }
           }
-        }, 12000);
+        }, 45000);
       })();
       
       // Catch global errors during loading

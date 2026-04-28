@@ -1,2 +1,0 @@
-import{s as t}from"./vendor-react-DAM4njGT.js";import{u as n,s as u}from"./index-BY-BKh2e.js";const m=()=>{const{user:e}=n();return t({queryKey:["user-linked-restaurants",e?.id],queryFn:async()=>{if(!e)return[];const{data:a,error:r}=await u.from("merchant_restaurants").select("restaurant_id, restaurants:restaurant_id(id, name, name_en, name_pt)").eq("user_id",e.id);if(r)throw r;return(a||[]).map(s=>s.restaurants).filter(Boolean)},enabled:!!e,staleTime:6e4})};export{m as u};
-//# sourceMappingURL=useUserRestaurants-DwRHaw7l.js.map
