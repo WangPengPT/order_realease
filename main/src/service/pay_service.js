@@ -164,6 +164,7 @@ class PayService {
     });
 
     this.registerIfthenpayCallbackProxy();
+    this.registerMonthlyPaymentsAggregateAPI();
 
     this.serverRouteCache = new Map();
     this.refreshServerRouteCache(true).catch((error) => {
@@ -172,6 +173,243 @@ class PayService {
 
     this.updateCheckStateData = []
     this.updateCheckState()
+  }
+
+  registerMonthlyPaymentsAggregateAPI() {
+    httpAPI.pos("/payments/monthly/all-servers", async (query) => {
+      return await this.getMonthlyPaymentsAcrossAllServers(query || {});
+    });
+  }
+
+  normalizeMonthInput(query = {}) {
+    const now = new Date();
+    const yearNum = Number(query.year) || now.getFullYear();
+    const monthNum = Number(query.month) || (now.getMonth() + 1);
+
+    return {
+      year: String(yearNum),
+      month: String(monthNum).padStart(2, "0")
+    };
+  }
+
+  parseBooleanInput(value, defaultValue = false) {
+    if (value === undefined || value === null) {
+      return defaultValue;
+    }
+    if (typeof value === "boolean") {
+      return value;
+    }
+
+    const normalized = String(value).trim().toLowerCase();
+    if (["1", "true", "yes", "y", "on"].includes(normalized)) {
+      return true;
+    }
+    if (["0", "false", "no", "n", "off"].includes(normalized)) {
+      return false;
+    }
+    return defaultValue;
+  }
+
+  parseAmount(value) {
+    if (typeof value === "number") {
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    const raw = String(value || "").trim();
+    if (!raw) return 0;
+
+    const normalized = raw.replace(",", ".").replace(/[^0-9.-]/g, "");
+    const amount = Number(normalized);
+    return Number.isFinite(amount) ? amount : 0;
+  }
+
+  buildServerPaymentSummary(serverId, orders = []) {
+    const summary = {
+      totalOrders: orders.length,
+      totalAmount: 0,
+      paidAmount: 0,
+      stateCount: {},
+      typeCount: {}
+    };
+
+    for (const order of orders) {
+      const payState = String(order?.pay_state || order?.financial_status || "unknown");
+      const payType = String(order?.pay_type || (order?.payment_gateway_names || [])[0] || "unknown");
+      const amount = this.parseAmount(order?.total_price);
+
+      summary.totalAmount += amount;
+      summary.stateCount[payState] = (summary.stateCount[payState] || 0) + 1;
+      summary.typeCount[payType] = (summary.typeCount[payType] || 0) + 1;
+
+      if (payState.toLowerCase() === "paid") {
+        summary.paidAmount += amount;
+      }
+    }
+
+    summary.totalAmount = Number(summary.totalAmount.toFixed(2));
+    summary.paidAmount = Number(summary.paidAmount.toFixed(2));
+
+    return {
+      serverId,
+      ...summary
+    };
+  }
+
+  attachServerInfoToOrders(orders = [], serverMeta = {}) {
+    const serverId = String(serverMeta.serverId || "");
+
+    return orders.map((order) => ({
+      ...order,
+      serverId
+    }));
+  }
+
+  mergeSummary(target, source) {
+    target.totalOrders += source.totalOrders || 0;
+    target.totalAmount += source.totalAmount || 0;
+    target.paidAmount += source.paidAmount || 0;
+
+    const stateCount = source.stateCount || {};
+    const typeCount = source.typeCount || {};
+
+    for (const key of Object.keys(stateCount)) {
+      target.stateCount[key] = (target.stateCount[key] || 0) + stateCount[key];
+    }
+
+    for (const key of Object.keys(typeCount)) {
+      target.typeCount[key] = (target.typeCount[key] || 0) + typeCount[key];
+    }
+  }
+
+  async fetchMonthlyOrdersFromServer(server, year, month, countLimit) {
+    const serverId = String(server?.id || "").trim();
+    const serverUrl = String(server?.url || "").trim();
+    if (!serverId || !serverUrl) {
+      return {
+        success: false,
+        serverId,
+        error: "INVALID_SERVER_CONFIG"
+      };
+    }
+
+    try {
+      const targetUrl = `${serverUrl.replace(/\/+$/, "")}/api/query_data`;
+      const payload = {
+        table: "order",
+        count: countLimit,
+        query: {
+          pickup_date: { "$regex": `^${year}/${month}` }
+        }
+      };
+
+      const { statusCode, body } = await request(targetUrl, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await body.text();
+      if (statusCode < 200 || statusCode >= 300) {
+        return {
+          success: false,
+          serverId,
+          statusCode,
+          error: text || `HTTP_${statusCode}`
+        };
+      }
+
+      let orders = [];
+      try {
+        const parsed = text ? JSON.parse(text) : [];
+        orders = Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return {
+          success: false,
+          serverId,
+          error: "INVALID_JSON_RESPONSE"
+        };
+      }
+
+      const summary = this.buildServerPaymentSummary(serverId, orders);
+      const serverName = server?.name || server?.shopify_name || serverId;
+      const ordersWithServer = this.attachServerInfoToOrders(orders, {
+        serverId,
+        serverName,
+        serverUrl
+      });
+      return {
+        success: true,
+        serverId,
+        serverName,
+        serverUrl,
+        summary,
+        orders: ordersWithServer
+      };
+    } catch (error) {
+      return {
+        success: false,
+        serverId,
+        error: error.message || "REQUEST_FAILED"
+      };
+    }
+  }
+
+  async getMonthlyPaymentsAcrossAllServers(query = {}) {
+    const { year, month } = this.normalizeMonthInput(query);
+    const includeOrders = this.parseBooleanInput(query.includeOrders, false);
+    const countLimit = Math.min(Math.max(Number(query.count) || 1000, 1), 1000);
+
+    const servers = await db.getAll(db.serverTable);
+    const tasks = servers.map((server) =>
+      this.fetchMonthlyOrdersFromServer(server, year, month, countLimit)
+    );
+    const results = await Promise.all(tasks);
+
+    const globalSummary = {
+      totalOrders: 0,
+      totalAmount: 0,
+      paidAmount: 0,
+      stateCount: {},
+      typeCount: {}
+    };
+
+    const successServers = [];
+    const failedServers = [];
+
+    for (const item of results) {
+      if (!item.success) {
+        failedServers.push(item);
+        continue;
+      }
+
+      this.mergeSummary(globalSummary, item.summary);
+      const serverData = {
+        serverId: item.serverId,
+        serverName: item.serverName,
+        serverUrl: item.serverUrl,
+        summary: item.summary
+      };
+      if (includeOrders) {
+        serverData.orders = item.orders;
+      }
+      successServers.push(serverData);
+    }
+
+    globalSummary.totalAmount = Number(globalSummary.totalAmount.toFixed(2));
+    globalSummary.paidAmount = Number(globalSummary.paidAmount.toFixed(2));
+
+    return {
+      success: failedServers.length === 0,
+      month: `${year}-${month}`,
+      serverCount: servers.length,
+      successCount: successServers.length,
+      failCount: failedServers.length,
+      globalSummary,
+      servers: successServers,
+      failedServers
+    };
   }
 
   registerIfthenpayCallbackProxy() {
