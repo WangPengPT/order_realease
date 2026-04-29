@@ -1,0 +1,2 @@
+import{v as i}from"./vendor-react-D1Zcby_M.js";import{s as e}from"./index-JPLxJ_bu.js";const c=()=>i({queryKey:["activity-restaurant-counts"],queryFn:async()=>{const{data:s,error:r}=await e.from("activity_restaurants").select("activity_id");if(r)throw r;const t={};return s.forEach(a=>{t[a.activity_id]=(t[a.activity_id]||0)+1}),t}});export{c as u};
+//# sourceMappingURL=useActivityRestaurantCounts-BiWe8QH2.js.map
