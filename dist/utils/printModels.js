@@ -117,11 +117,11 @@ function creat_order_customDish_print_data(notes){
             let option_first = true
             for(const option of note.options){
                 if(option_first){
-                    printNote += ' ' + option.id + '-' + option.name + (option.quantity? ` * ${option.quantity};`:';')
                     option_first = false
                 }else{
-                    printNote += '\n\t ' + option.id + '-' + option.name + (option.quantity? ` * ${option.quantity};`:';')
+                    printNote += '\n '
                 }
+                printNote += ' ' + option.id + '-' + option.name + (option.quantity? ` * ${option.quantity};`:';')
             }
         }
         printData += '\t' + printNote + '\n'
