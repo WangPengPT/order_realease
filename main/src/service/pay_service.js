@@ -223,19 +223,38 @@ class PayService {
     return Number.isFinite(amount) ? amount : 0;
   }
 
-  buildServerPaymentSummary(serverId, orders = []) {
+  buildMonthlyDateQueryForPayments(year, month) {
+    const monthPrefix = `^${year}[-/]${month}`;
+    const fields = [
+      "createdAt",
+      "updatedAt",
+      "date",
+      "paymentDate",
+      "created_at",
+      "updated_at"
+    ];
+
+    return {
+      $or: fields.map((field) => ({
+        [field]: { "$regex": monthPrefix }
+      }))
+    };
+  }
+
+  buildServerPaymentSummary(serverId, payments = []) {
     const summary = {
-      totalOrders: orders.length,
+      totalPayments: payments.length,
+      totalOrders: payments.length,
       totalAmount: 0,
       paidAmount: 0,
       stateCount: {},
       typeCount: {}
     };
 
-    for (const order of orders) {
-      const payState = String(order?.pay_state || order?.financial_status || "unknown");
-      const payType = String(order?.pay_type || (order?.payment_gateway_names || [])[0] || "unknown");
-      const amount = this.parseAmount(order?.total_price);
+    for (const payment of payments) {
+      const payState = String(payment?.internalStatus || payment?.status || payment?.pay_state || payment?.financial_status || "unknown");
+      const payType = String(payment?.method || payment?.type || payment?.pay_type || (payment?.payment_gateway_names || [])[0] || "unknown");
+      const amount = this.parseAmount(payment?.amount ?? payment?.total_price ?? payment?.price);
 
       summary.totalAmount += amount;
       summary.stateCount[payState] = (summary.stateCount[payState] || 0) + 1;
@@ -255,16 +274,17 @@ class PayService {
     };
   }
 
-  attachServerInfoToOrders(orders = [], serverMeta = {}) {
+  attachServerInfoToPayments(payments = [], serverMeta = {}) {
     const serverId = String(serverMeta.serverId || "");
 
-    return orders.map((order) => ({
-      ...order,
+    return payments.map((payment) => ({
+      ...payment,
       serverId
     }));
   }
 
   mergeSummary(target, source) {
+    target.totalPayments += source.totalPayments || 0;
     target.totalOrders += source.totalOrders || 0;
     target.totalAmount += source.totalAmount || 0;
     target.paidAmount += source.paidAmount || 0;
@@ -295,11 +315,9 @@ class PayService {
     try {
       const targetUrl = `${serverUrl.replace(/\/+$/, "")}/api/query_data`;
       const payload = {
-        table: "order",
+        table: "payment",
         count: countLimit,
-        query: {
-          pickup_date: { "$regex": `^${year}/${month}` }
-        }
+        query: this.buildMonthlyDateQueryForPayments(year, month)
       };
 
       const { statusCode, body } = await request(targetUrl, {
@@ -320,10 +338,10 @@ class PayService {
         };
       }
 
-      let orders = [];
+      let payments = [];
       try {
         const parsed = text ? JSON.parse(text) : [];
-        orders = Array.isArray(parsed) ? parsed : [];
+        payments = Array.isArray(parsed) ? parsed : [];
       } catch (_) {
         return {
           success: false,
@@ -332,9 +350,9 @@ class PayService {
         };
       }
 
-      const summary = this.buildServerPaymentSummary(serverId, orders);
+      const summary = this.buildServerPaymentSummary(serverId, payments);
       const serverName = server?.name || server?.shopify_name || serverId;
-      const ordersWithServer = this.attachServerInfoToOrders(orders, {
+      const paymentsWithServer = this.attachServerInfoToPayments(payments, {
         serverId,
         serverName,
         serverUrl
@@ -345,7 +363,7 @@ class PayService {
         serverName,
         serverUrl,
         summary,
-        orders: ordersWithServer
+        payments: paymentsWithServer
       };
     } catch (error) {
       return {
@@ -358,7 +376,6 @@ class PayService {
 
   async getMonthlyPaymentsAcrossAllServers(query = {}) {
     const { year, month } = this.normalizeMonthInput(query);
-    const includeOrders = this.parseBooleanInput(query.includeOrders, false);
     const countLimit = Math.min(Math.max(Number(query.count) || 1000, 1), 1000);
 
     const servers = await db.getAll(db.serverTable);
@@ -368,6 +385,7 @@ class PayService {
     const results = await Promise.all(tasks);
 
     const globalSummary = {
+      totalPayments: 0,
       totalOrders: 0,
       totalAmount: 0,
       paidAmount: 0,
@@ -375,40 +393,35 @@ class PayService {
       typeCount: {}
     };
 
-    const successServers = [];
-    const failedServers = [];
+    const successServerIds = [];
+    const mergedOrders = [];
+    let failCount = 0;
 
     for (const item of results) {
       if (!item.success) {
-        failedServers.push(item);
+        failCount += 1;
         continue;
       }
 
       this.mergeSummary(globalSummary, item.summary);
-      const serverData = {
-        serverId: item.serverId,
-        serverName: item.serverName,
-        serverUrl: item.serverUrl,
-        summary: item.summary
-      };
-      if (includeOrders) {
-        serverData.orders = item.orders;
+      successServerIds.push(item.serverId);
+      if (Array.isArray(item.payments) && item.payments.length > 0) {
+        mergedOrders.push(...item.payments);
       }
-      successServers.push(serverData);
     }
 
     globalSummary.totalAmount = Number(globalSummary.totalAmount.toFixed(2));
     globalSummary.paidAmount = Number(globalSummary.paidAmount.toFixed(2));
 
     return {
-      success: failedServers.length === 0,
+      success: failCount === 0,
       month: `${year}-${month}`,
       serverCount: servers.length,
-      successCount: successServers.length,
-      failCount: failedServers.length,
+      successCount: successServerIds.length,
+      failCount,
       globalSummary,
-      servers: successServers,
-      failedServers
+      successServerIds,
+      orders: mergedOrders
     };
   }
 
