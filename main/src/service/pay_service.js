@@ -223,21 +223,45 @@ class PayService {
     return Number.isFinite(amount) ? amount : 0;
   }
 
-  buildMonthlyDateQueryForPayments(year, month) {
-    const monthPrefix = `^${year}[-/]${month}`;
-    const fields = [
-      "createdAt",
-      "updatedAt",
-      "date",
-      "paymentDate",
-      "created_at",
-      "updated_at"
-    ];
-
+  /**
+   * Mongo filter for collection `checkout_payments` (orderDemo checkoutRepository).
+   * Rows use ISO strings on createdAt / updatedAt (e.g. 2026-05-12T10:00:00.000Z).
+   */
+  buildCheckoutPaymentsMonthQuery(year, month) {
+    const y = String(year || "").trim();
+    const m = String(month || "").trim();
+    if (!y || !m) {
+      return {};
+    }
+    const prefix = new RegExp(`^${y}-${m}`);
     return {
-      $or: fields.map((field) => ({
-        [field]: { "$regex": monthPrefix }
-      }))
+      $or: [{ createdAt: { $regex: prefix } }, { updatedAt: { $regex: prefix } }]
+    };
+  }
+
+  /**
+   * Normalize a checkout_payments document for summaries / responses.
+   * Aligns with server/controllers/paymentController paymentRecord + paymentToView.
+   */
+  normalizeFetchedCheckoutPayment(doc = {}) {
+    const requestId = String(doc.requestId || doc.id || "").trim();
+    const amount = this.parseAmount(doc.amount);
+    const subTotal = this.parseAmount(doc.subTotalAmount ?? doc.amount);
+    return {
+      ...doc,
+      id: requestId || doc.id,
+      requestId: requestId || doc.requestId,
+      amount,
+      subTotalAmount: subTotal,
+      internalStatus: String(doc.internalStatus || "pending"),
+      method: String(doc.method || "").toLowerCase(),
+      tableId: doc.tableId != null ? String(doc.tableId) : "",
+      orderId: doc.orderId != null ? String(doc.orderId) : "",
+      billId: doc.billId != null ? String(doc.billId) : "",
+      status: doc.status != null ? doc.status : null,
+      message: doc.message != null ? doc.message : null,
+      createdAt: doc.createdAt || null,
+      updatedAt: doc.updatedAt || null
     };
   }
 
@@ -276,10 +300,14 @@ class PayService {
 
   attachServerInfoToPayments(payments = [], serverMeta = {}) {
     const serverId = String(serverMeta.serverId || "");
+    const serverName = String(serverMeta.serverName || "");
+    const serverUrl = String(serverMeta.serverUrl || "");
 
     return payments.map((payment) => ({
       ...payment,
-      serverId
+      serverId,
+      serverName,
+      serverUrl
     }));
   }
 
@@ -313,46 +341,65 @@ class PayService {
     }
 
     try {
-      const targetUrl = `${serverUrl.replace(/\/+$/, "")}/api/query_data`;
-      const payload = {
-        table: "payment",
-        count: countLimit,
-        query: this.buildMonthlyDateQueryForPayments(year, month)
-      };
+      const y = Number(year);
+      const m = Number(month);
+      const startDate = new Date(y, m - 1, 1, 0, 0, 0, 0);
+      const endDate = new Date(y, m, 0, 23, 59, 59, 999);
 
-      const { statusCode, body } = await request(targetUrl, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
+      const baseUrl = serverUrl.replace(/\/+$/, "");
+      const pageSize = 200;
+      let page = 1;
+      let allPayments = [];
+      let fetched = 0;
 
-      const text = await body.text();
-      if (statusCode < 200 || statusCode >= 300) {
-        return {
-          success: false,
-          serverId,
-          statusCode,
-          error: text || `HTTP_${statusCode}`
-        };
+      while (fetched < countLimit) {
+        const params = new URLSearchParams({
+          startAt: startDate.toISOString(),
+          endAt: endDate.toISOString(),
+          pageSize: String(pageSize),
+          page: String(page),
+          sortBy: "createdAt",
+          sortOrder: "desc"
+        });
+
+        const targetUrl = `${baseUrl}/api/checkout/payments?${params.toString()}`;
+        const { statusCode, body } = await request(targetUrl, {
+          method: "GET",
+          headers: { "content-type": "application/json" }
+        });
+
+        const text = await body.text();
+        if (statusCode < 200 || statusCode >= 300) {
+          return {
+            success: false,
+            serverId,
+            statusCode,
+            error: text || `HTTP_${statusCode}`
+          };
+        }
+
+        let parsed;
+        try {
+          parsed = text ? JSON.parse(text) : {};
+        } catch (_) {
+          return { success: false, serverId, error: "INVALID_JSON_RESPONSE" };
+        }
+
+        const items = Array.isArray(parsed?.data?.items) ? parsed.data.items : [];
+        allPayments.push(...items);
+        fetched += items.length;
+
+        const total = Number(parsed?.data?.total || 0);
+        if (fetched >= total || items.length < pageSize || fetched >= countLimit) {
+          break;
+        }
+        page += 1;
       }
 
-      let payments = [];
-      try {
-        const parsed = text ? JSON.parse(text) : [];
-        payments = Array.isArray(parsed) ? parsed : [];
-      } catch (_) {
-        return {
-          success: false,
-          serverId,
-          error: "INVALID_JSON_RESPONSE"
-        };
-      }
-
-      const summary = this.buildServerPaymentSummary(serverId, payments);
+      const normalized = allPayments.map((row) => this.normalizeFetchedCheckoutPayment(row));
+      const summary = this.buildServerPaymentSummary(serverId, normalized);
       const serverName = server?.name || server?.shopify_name || serverId;
-      const paymentsWithServer = this.attachServerInfoToPayments(payments, {
+      const paymentsWithServer = this.attachServerInfoToPayments(normalized, {
         serverId,
         serverName,
         serverUrl

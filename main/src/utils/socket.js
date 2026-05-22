@@ -80,6 +80,19 @@ class Socket {
         io.emit(msg,data)
     }
 
+    /** Push to the socket that registered this restaurant (g_get_config sets restaurant_data.id). */
+    static emitToRestaurant(restaurantId, event, data) {
+        if (!io || !restaurantId) return false;
+        const rid = String(restaurantId).trim();
+        for (const [, sock] of io.sockets.sockets) {
+            if (sock.restaurant_data && String(sock.restaurant_data.id || "").trim() === rid) {
+                sock.emit(event, data);
+                return true;
+            }
+        }
+        return false;
+    }
+
     static async sendToRestaurant(restaurantId, msg, data) {
         // Find socket with restaurant_data.id == restaurantId
         // io.sockets.sockets is a Map

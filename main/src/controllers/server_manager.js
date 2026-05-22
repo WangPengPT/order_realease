@@ -27,8 +27,7 @@ class ServerManager {
         return String(value || "")
             .trim()
             .toUpperCase()
-            .replace(/[^A-Z0-9]/g, "")
-            .slice(0, 5);
+            .replace(/[^A-Z0-9]/g, "");
     }
 
     createRandomOrderPrefix() {
@@ -45,7 +44,7 @@ class ServerManager {
         if (!serverData) return "";
 
         const current = this.normalizeOrderPrefix(serverData.orderPrefix);
-        if (current.length === 5) {
+        if (current.length > 0) {
             serverData.orderPrefix = current;
             return current;
         }
@@ -54,7 +53,7 @@ class ServerManager {
         const used = new Set(
             datas
                 .map((item) => this.normalizeOrderPrefix(item?.orderPrefix))
-                .filter((item) => item.length === 5)
+                .filter((item) => item.length > 0)
         );
 
         let candidate = "";
@@ -116,7 +115,11 @@ class ServerManager {
         await db.set(db.serverTable, params);
         payService.updateServerRouteCacheEntry(params);
 
-        socket.broadcast("set_server_"+params.id, params);
+        const evt = `set_server_${params.id}`;
+        const pushed = socket.emitToRestaurant(params.id, evt, params);
+        if (!pushed) {
+            socket.broadcast(evt, params);
+        }
 
         redirectPage.updateStore(params)
         this.setRestaurants(params)
@@ -307,7 +310,6 @@ class ServerManager {
                 await db.set(db.serverTable, server);
                 payService.updateServerRouteCacheEntry(server);
 
-                socket.restaurant_data = { id:data.id }
                 result.data = "Change to Statu Online"
 
             }else{
@@ -315,6 +317,13 @@ class ServerManager {
                 server = await db.get(db.serverTable, data.id)
                 result.data = "Create new Server"
 
+            }
+
+            if (server) {
+                socket.restaurant_data = { id: data.id };
+                try {
+                    socket.emit(`set_server_${server.id}`, server);
+                } catch (_) {}
             }
 
             state.setStatusOnline(data.id, true)
