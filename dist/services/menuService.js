@@ -321,6 +321,11 @@ class MenuService {
         return ret;
     }
 
+    async getDiscountMenuItems() {
+        const menu = await this.menuRepository.getTakeaway();
+        return this.filterMenuByDiscount(menu);
+    }
+
     makeTab(menu, name) {
         const handleToMain = {}  // { handle: mainDish }
         const handleToSubs = {}  // { handle: [subDish, ...] }
