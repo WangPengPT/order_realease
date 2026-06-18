@@ -369,18 +369,35 @@ class OrderManager {
         await mailAPI.send(mail, "new order", html );
         await this.orderUpdated(org_data)
 
+        let paymentInfo = null
+
         if (org_data.pay_type == "MB WAY") {
             const info = {
-                phone: customer_info.phone, //"351#964880226"
+                phone: customer_info.phone,
                 email: customer_info.email,
                 description: "id: " + orderName,
             }
             await payService.newPayment(orderId, "mbway", totalPrice, info)
+        } else if (org_data.pay_type == "Multibanco") {
+            try {
+                const result = await payService.createMultibancoPayment(orderId, totalPrice)
+                paymentInfo = { type: 'multibanco', ...result }
+            } catch (e) {
+                console.error('[Multibanco] payment failed:', e.message)
+            }
+        } else if (org_data.pay_type == "Credit Card") {
+            try {
+                const result = await payService.createCreditCardPayment(orderId, totalPrice)
+                paymentInfo = { type: 'creditcard', ...result }
+            } catch (e) {
+                console.error('[CreditCard] payment failed:', e.message)
+            }
         }
 
         return {
             result: true,
-            data: org_data
+            data: org_data,
+            payment: paymentInfo
         }
     }
 

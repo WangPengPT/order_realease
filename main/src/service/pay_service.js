@@ -1,4 +1,5 @@
 const { request } = require('undici');
+const crypto = require('crypto');
 const db = require('../utils/db');
 
 const httpAPI = require("../utils/http_api");
@@ -114,6 +115,72 @@ class MBWayPayment {
   }
 }
 
+class MultibancoPayment {
+  constructor() {
+    this.key = process.env.IFTHENPAY_MB_KEY || 'LMC-992672'
+  }
+
+  async newPayment(orderId, price) {
+    if (!this.key) throw new Error('MB_KEY_NOT_CONFIGURED')
+    const amount = typeof price === 'number' ? price.toFixed(2) : String(price)
+
+    const { statusCode, body } = await request('https://api.ifthenpay.com/multibanco/reference/init', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mbKey: this.key,
+        orderId: String(orderId).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 25),
+        amount
+      })
+    })
+
+    const ret = await body.json()
+    if (statusCode === 200 && String(ret.Status) === '0') {
+      return { entity: ret.Entity, reference: ret.Reference, expiryDate: ret.ExpiryDate, amount }
+    }
+    throw new Error(ret.Message || 'MULTIBANCO_REQUEST_FAILED')
+  }
+}
+
+class CreditCardPayment {
+  constructor() {
+    this.key = process.env.IFTHENPAY_CCARD_KEY || 'CHN-481587'
+    this.baseUrl = process.env.MGSERVER_BASE_URL || 'https://v.xiaoxiong.pt'
+  }
+
+  verifyCallback(orderId, amount, requestId, sk) {
+    if (!this.key) return false
+    const expected = crypto.createHmac('sha256', this.key)
+      .update(`${orderId}${amount}${requestId}`, 'utf8')
+      .digest('hex')
+    return String(sk).toLowerCase() === expected.toLowerCase()
+  }
+
+  async newPayment(orderId, price) {
+    if (!this.key) throw new Error('CCARD_KEY_NOT_CONFIGURED')
+    const amount = typeof price === 'number' ? price.toFixed(2) : String(price)
+    const oid = String(orderId).slice(0, 15)
+
+    const { statusCode, body } = await request(`https://api.ifthenpay.com/creditcard/init/${this.key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId: oid,
+        amount,
+        successUrl: `${this.baseUrl}/api/xx_order_payment/success`,
+        errorUrl: `${this.baseUrl}/api/xx_order_payment/error`,
+        cancelUrl: `${this.baseUrl}/api/xx_order_payment/cancel`
+      })
+    })
+
+    const ret = await body.json()
+    if (statusCode === 200 && String(ret.Status) === '0') {
+      return { paymentUrl: ret.PaymentUrl, requestId: ret.RequestId, orderId: oid, amount }
+    }
+    throw new Error(ret.Message || 'CREDITCARD_REQUEST_FAILED')
+  }
+}
+
 class PayService {
 
   init(orderManager) {
@@ -122,8 +189,70 @@ class PayService {
 
     this.payments = {}
     this.payments["mbway"] = new MBWayPayment()
+    this.multibancoPayment = new MultibancoPayment()
+    this.creditCardPayment = new CreditCardPayment()
 
+    // Credit Card 回调路由（浏览器跳转，需要返回 HTML）
+    const app = httpAPI.app
+    app.get('/api/xx_order_payment/success', async (req, res) => {
+      const { id, amount, requestId, sk } = req.query
+      if (!id || !amount || !requestId || !sk) {
+        return res.status(400).send(this.paymentResultHtml('error', ''))
+      }
+      if (!this.creditCardPayment.verifyCallback(id, amount, requestId, sk)) {
+        return res.status(403).send(this.paymentResultHtml('error', ''))
+      }
+      await this.orderManager.changePayState({ id, value: ST_success })
+      res.send(this.paymentResultHtml('success', id))
+    })
 
+    app.get('/api/xx_order_payment/error', async (req, res) => {
+      const { id } = req.query
+      if (id) await this.orderManager.changePayState({ id, value: 'failed' })
+      res.send(this.paymentResultHtml('error', id || ''))
+    })
+
+    app.get('/api/xx_order_payment/cancel', async (req, res) => {
+      const { id } = req.query
+      if (id) await this.orderManager.changePayState({ id, value: 'cancelled' })
+      res.send(this.paymentResultHtml('cancel', id || ''))
+    })
+
+    // Credit Card 服务器回调（用户关闭浏览器也能收到）
+    app.get('/api/xx_order_cc_callback', async (req, res) => {
+      const { key, id, amount } = req.query
+
+      const antiPhishingKey = process.env.IFTHENPAY_CC_ANTI_PHISHING_KEY || 'xiaoxiong-cc-callback'
+      if (key !== antiPhishingKey) {
+        console.warn('[CreditCard] invalid anti-phishing key')
+        return res.status(403).json({ success: false })
+      }
+
+      if (!id) return res.status(400).json({ success: false })
+
+      await this.orderManager.changePayState({ id, value: ST_success })
+      console.log(`[CreditCard] callback paid: orderId=${id} amount=${amount}`)
+
+      res.json({ success: true })
+    })
+
+    // Multibanco callback
+    app.get('/api/xx_order_mb_callback', async (req, res) => {
+      const { key, orderId, amount, reference } = req.query
+
+      const antiPhishingKey = process.env.IFTHENPAY_MB_ANTI_PHISHING_KEY || 'xiaoxiong-mb-callback'
+      if (key !== antiPhishingKey) {
+        console.warn('[Multibanco] invalid anti-phishing key')
+        return res.status(403).json({ success: false })
+      }
+
+      if (!orderId) return res.status(400).json({ success: false })
+
+      await this.orderManager.changePayState({ id: orderId, value: ST_success })
+      console.log(`[Multibanco] paid: orderId=${orderId} ref=${reference} amount=${amount}`)
+
+      res.json({ success: true })
+    })
 
     httpAPI.pos("/mbwaypay/callback.php", async (query) => {
       let requestId = query.requestId;
@@ -767,6 +896,29 @@ class PayService {
       await this.orderManager.updatePayState(orgData.id,orgData.status)
       await this.writePayment(data);
     }
+  }
+
+  async createMultibancoPayment(orderId, price) {
+    const result = await this.multibancoPayment.newPayment(orderId, price)
+    await db.set("payment", { id: orderId, type: 'multibanco', status: ST_pending, ...result })
+    return result
+  }
+
+  async createCreditCardPayment(orderId, price) {
+    const result = await this.creditCardPayment.newPayment(orderId, price)
+    await db.set("payment", { id: orderId, type: 'creditcard', status: ST_pending, ...result })
+    return result
+  }
+
+  paymentResultHtml(status, orderId) {
+    const map = {
+      success: { icon: '✅', title: 'Payment Successful', color: '#22c55e', msg: 'Your order has been paid successfully.' },
+      error:   { icon: '❌', title: 'Payment Failed',     color: '#ef4444', msg: 'Your payment could not be processed. Please try again.' },
+      cancel:  { icon: '⚠️', title: 'Payment Cancelled',  color: '#f59e0b', msg: 'Your payment was cancelled.' }
+    }
+    const info = map[status] || map['error']
+    const baseUrl = process.env.MGSERVER_BASE_URL || 'https://v.xiaoxiong.pt'
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${info.title}</title></head><body style="font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f5f5f5"><div style="text-align:center;background:#fff;padding:40px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.1);max-width:360px;width:90%"><div style="font-size:64px">${info.icon}</div><h2 style="color:${info.color};margin:16px 0 8px">${info.title}</h2><p style="color:#666">${info.msg}</p>${orderId ? `<p style="color:#999;font-size:13px">Order: ${orderId}</p>` : ''}<a href="${baseUrl}" style="display:inline-block;margin-top:24px;padding:12px 24px;background:#000;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">Back to Menu</a></div></body></html>`
   }
 }
 
