@@ -29,15 +29,6 @@ class OrderManager {
             return await this.xxOrderCancel(orderId)
         });
 
-        httpAPI.get("/xx_order_pay_state", async (query) => {
-            const { orderId } = query;
-            if (!orderId) return { result: false, error: "orderId is required" };
-            const order = await db.get(db.orderTable, orderId);
-            if (!order) return { result: false, error: "Order not found" };
-            const pay_state = order.pay_state || "pending";
-            return { result: true, orderId, pay_state };
-        });
-
         httpAPI.get("/order_list", async (query) => {
             let {restaurant, count, year, month} = query;
             let data
