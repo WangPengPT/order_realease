@@ -203,19 +203,22 @@ class PayService {
         return res.status(403).send(this.paymentResultHtml('error', ''))
       }
       await this.orderManager.changePayState({ id, value: ST_success })
-      res.send(this.paymentResultHtml('success', id))
+      const order = await db.get(db.orderTable, id)
+      res.send(this.paymentResultHtml('success', id, order?.return_url))
     })
 
     app.get('/api/xx_order_payment/error', async (req, res) => {
       const { id } = req.query
       if (id) await this.orderManager.changePayState({ id, value: 'failed' })
-      res.send(this.paymentResultHtml('error', id || ''))
+      const order = id ? await db.get(db.orderTable, id) : null
+      res.send(this.paymentResultHtml('error', id || '', order?.return_url))
     })
 
     app.get('/api/xx_order_payment/cancel', async (req, res) => {
       const { id } = req.query
       if (id) await this.orderManager.changePayState({ id, value: 'cancelled' })
-      res.send(this.paymentResultHtml('cancel', id || ''))
+      const order = id ? await db.get(db.orderTable, id) : null
+      res.send(this.paymentResultHtml('cancel', id || '', order?.return_url))
     })
 
     // Credit Card 服务器回调（用户关闭浏览器也能收到）
@@ -910,15 +913,15 @@ class PayService {
     return result
   }
 
-  paymentResultHtml(status, orderId) {
+  paymentResultHtml(status, orderId, returnUrl) {
     const map = {
       success: { icon: '✅', title: 'Payment Successful', color: '#22c55e', msg: 'Your order has been paid successfully.' },
       error:   { icon: '❌', title: 'Payment Failed',     color: '#ef4444', msg: 'Your payment could not be processed. Please try again.' },
       cancel:  { icon: '⚠️', title: 'Payment Cancelled',  color: '#f59e0b', msg: 'Your payment was cancelled.' }
     }
     const info = map[status] || map['error']
-    const baseUrl = process.env.MGSERVER_BASE_URL || 'https://v.xiaoxiong.pt'
-    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${info.title}</title></head><body style="font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f5f5f5"><div style="text-align:center;background:#fff;padding:40px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.1);max-width:360px;width:90%"><div style="font-size:64px">${info.icon}</div><h2 style="color:${info.color};margin:16px 0 8px">${info.title}</h2><p style="color:#666">${info.msg}</p>${orderId ? `<p style="color:#999;font-size:13px">Order: ${orderId}</p>` : ''}<a href="${baseUrl}" style="display:inline-block;margin-top:24px;padding:12px 24px;background:#000;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">Back to Menu</a></div></body></html>`
+    const backUrl = returnUrl || process.env.MGSERVER_BASE_URL || 'https://v.xiaoxiong.pt'
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${info.title}</title></head><body style="font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f5f5f5"><div style="text-align:center;background:#fff;padding:40px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.1);max-width:360px;width:90%"><div style="font-size:64px">${info.icon}</div><h2 style="color:${info.color};margin:16px 0 8px">${info.title}</h2><p style="color:#666">${info.msg}</p>${orderId ? `<p style="color:#999;font-size:13px">Order: ${orderId}</p>` : ''}<a href="${backUrl}" style="display:inline-block;margin-top:24px;padding:12px 24px;background:#000;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">Back to Menu</a></div></body></html>`
   }
 }
 
