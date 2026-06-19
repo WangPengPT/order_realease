@@ -374,7 +374,6 @@ class MenuService {
         const menu = await this.menuRepository.getTakeaway()
         const tabs = await this.menuOrderingRepository.getTakeaway()
 
-
         let newTabs = tabs
 
 
